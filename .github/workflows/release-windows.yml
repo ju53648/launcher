@@ -65,9 +65,26 @@ jobs:
             throw "NSIS installer not found at: $signedAsset"
           }
 
-          $assetName = [System.IO.Path]::GetFileName($signedAsset)
-          $signature = (Get-Content -Raw $signatureFile.FullName).Trim()
+          $releaseAssetDir = Join-Path $PWD "distribution/release-assets"
+          New-Item -ItemType Directory -Force -Path $releaseAssetDir | Out-Null
+          Get-ChildItem -Path $releaseAssetDir -File -ErrorAction SilentlyContinue | Remove-Item -Force
+
+          # GitHub release downloads normalize spaces in asset names to dots. Publish an
+          # explicit dot-safe updater pair and point latest.json at that exact asset.
+          $assetName = ([System.IO.Path]::GetFileName($signedAsset) -replace " ", ".")
+          $signatureAssetName = "$assetName.sig"
+          $releaseInstallerPath = Join-Path $releaseAssetDir $assetName
+          $releaseSignaturePath = Join-Path $releaseAssetDir $signatureAssetName
+          Copy-Item -Path $signedAsset -Destination $releaseInstallerPath -Force
+          Copy-Item -Path $signatureFile.FullName -Destination $releaseSignaturePath -Force
+
+          $signature = (Get-Content -Raw $releaseSignaturePath).Trim()
           $latestPath = Join-Path $PWD "distribution/latest.json"
+          $updaterUrl = "https://github.com/${{ github.repository }}/releases/download/$version/$assetName"
+
+          Write-Host "Updater asset URL: $updaterUrl"
+          Write-Host "Signature source used: $releaseSignaturePath"
+          Write-Host "Signature SHA256: $((Get-FileHash $releaseSignaturePath -Algorithm SHA256).Hash)"
 
           $json = [ordered]@{
             version = $version
@@ -75,7 +92,7 @@ jobs:
             pub_date = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
             platforms = [ordered]@{
               "windows-x86_64" = [ordered]@{
-                url = "https://github.com/${{ github.repository }}/releases/download/$version/$assetName"
+                url = $updaterUrl
                 signature = $signature
               }
             }
@@ -87,10 +104,11 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            src-tauri/target/release/bundle/**/*.msi
-            src-tauri/target/release/bundle/**/*.exe
+            distribution/release-assets/*
+            src-tauri/target/release/bundle/msi/*.msi
+            src-tauri/target/release/bundle/msi/*.msi.sig
             src-tauri/target/release/bundle/**/*.zip
-            src-tauri/target/release/bundle/**/*.sig
+            src-tauri/target/release/bundle/**/*.zip.sig
             distribution/latest.json
           draft: false
           prerelease: false
