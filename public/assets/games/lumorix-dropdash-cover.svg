@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 960" role="img" aria-label="Lumorix DropDash cover">
+  <defs>
+    <linearGradient id="cover-bg" x1="0" y1="0" x2="720" y2="960" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#05070d"/>
+      <stop offset=".44" stop-color="#0b151b"/>
+      <stop offset="1" stop-color="#120810"/>
+    </linearGradient>
+    <filter id="cover-glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="12" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <rect width="720" height="960" fill="url(#cover-bg)"/>
+  <path d="M0 178h720M0 318h720M0 458h720M0 598h720M0 738h720" stroke="#76efff" stroke-opacity=".12" stroke-width="4"/>
+  <path d="M126 0 18 108l108 108 108-108zM650 120 548 222l102 102 102-102zM92 620 10 702l82 82 82-82zM570 702l-72 72 72 72 72-72z" fill="#ff4160" filter="url(#cover-glow)"/>
+  <circle cx="572" cy="458" r="38" fill="#f6ff80" filter="url(#cover-glow)"/>
+  <circle cx="194" cy="384" r="28" fill="#76efff" filter="url(#cover-glow)"/>
+  <rect x="282" y="492" width="156" height="156" rx="14" fill="#effcff" filter="url(#cover-glow)"/>
+  <rect x="328" y="538" width="64" height="64" rx="8" fill="#071018"/>
+  <text x="64" y="120" fill="#76efff" font-family="Segoe UI, Arial, sans-serif" font-size="30" font-weight="800" letter-spacing="0">LUMORIX TEST TITLE</text>
+  <text x="64" y="808" fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" font-size="76" font-weight="900" letter-spacing="0">DropDash</text>
+  <text x="64" y="858" fill="#c5d3dc" font-family="Segoe UI, Arial, sans-serif" font-size="30" font-weight="700" letter-spacing="0">Dodge. Collect. Restart.</text>
+</svg>

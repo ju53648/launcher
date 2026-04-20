@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="Lumorix DropDash icon">
+  <defs>
+    <linearGradient id="icon-bg" x1="20" y1="20" x2="236" y2="236" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#07101f"/>
+      <stop offset="0.52" stop-color="#0a1518"/>
+      <stop offset="1" stop-color="#100912"/>
+    </linearGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <rect width="256" height="256" rx="32" fill="url(#icon-bg)"/>
+  <path d="M44 52h168M32 94h192M44 136h168M32 178h192M44 220h168" stroke="#76efff" stroke-opacity=".16" stroke-width="3"/>
+  <path d="M66 28 34 60l32 32 32-32zM200 60l-28 28 28 28 28-28zM54 160l-24 24 24 24 24-24z" fill="#ff4160" filter="url(#glow)"/>
+  <rect x="94" y="126" width="68" height="68" rx="8" fill="#effcff" filter="url(#glow)"/>
+  <rect x="115" y="147" width="26" height="26" rx="4" fill="#081018"/>
+  <circle cx="176" cy="52" r="16" fill="#f6ff80" filter="url(#glow)"/>
+  <circle cx="200" cy="198" r="12" fill="#76efff" filter="url(#glow)"/>
+</svg>

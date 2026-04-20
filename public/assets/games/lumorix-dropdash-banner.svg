@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 480" role="img" aria-label="Lumorix DropDash banner">
+  <defs>
+    <linearGradient id="banner-bg" x1="0" y1="0" x2="1440" y2="480" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#05070d"/>
+      <stop offset=".48" stop-color="#0a1518"/>
+      <stop offset="1" stop-color="#110911"/>
+    </linearGradient>
+    <filter id="banner-glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="10" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <rect width="1440" height="480" fill="url(#banner-bg)"/>
+  <path d="M0 80h1440M0 180h1440M0 280h1440M0 380h1440" stroke="#76efff" stroke-opacity=".12" stroke-width="3"/>
+  <path d="M1120 24 1038 106l82 82 82-82zM1310 246l-66 66 66 66 66-66zM934 330l-50 50 50 50 50-50z" fill="#ff4160" filter="url(#banner-glow)"/>
+  <circle cx="1206" cy="250" r="25" fill="#f6ff80" filter="url(#banner-glow)"/>
+  <circle cx="1012" cy="228" r="18" fill="#76efff" filter="url(#banner-glow)"/>
+  <rect x="1090" y="318" width="92" height="92" rx="10" fill="#effcff" filter="url(#banner-glow)"/>
+  <rect x="1118" y="346" width="36" height="36" rx="5" fill="#071018"/>
+  <text x="72" y="154" fill="#76efff" font-family="Segoe UI, Arial, sans-serif" font-size="30" font-weight="800" letter-spacing="0">LUMORIX TEST TITLE</text>
+  <text x="72" y="258" fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" font-size="96" font-weight="900" letter-spacing="0">Lumorix DropDash</text>
+  <text x="78" y="318" fill="#c5d3dc" font-family="Segoe UI, Arial, sans-serif" font-size="32" font-weight="700" letter-spacing="0">A tiny arcade run for install, launch, and uninstall testing.</text>
+</svg>

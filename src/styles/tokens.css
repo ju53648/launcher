@@ -3,26 +3,42 @@
   font-family:
     Inter, "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, Arial, sans-serif;
 
-  --color-bg: #090a0c;
-  --color-bg-soft: #0f1114;
-  --color-surface: #151719;
-  --color-surface-2: #1b1f21;
-  --color-surface-3: #222729;
-  --color-line: #303538;
-  --color-line-strong: #41484b;
-  --color-text: #f4f1ea;
-  --color-muted: #a7aaa6;
-  --color-subtle: #767b78;
-  --color-accent: #2fd2a0;
-  --color-accent-strong: #46efbd;
-  --color-warn: #f1d35d;
-  --color-danger: #ff6269;
-  --color-danger-soft: #442126;
-  --color-good-soft: #15342b;
-  --color-warn-soft: #383019;
-  --shadow-panel: 0 24px 70px rgba(0, 0, 0, 0.38);
-  --shadow-tight: 0 14px 30px rgba(0, 0, 0, 0.32);
+  /* Surfaces */
+  --color-bg: #060708;
+  --color-bg-soft: #0b0d0f;
+  --color-surface: #111416;
+  --color-surface-2: #171b1d;
+  --color-surface-3: #1e2326;
+  --color-line: #222729;
+  --color-line-strong: #333b3f;
 
+  /* Text */
+  --color-text: #f2efe8;
+  --color-muted: #9ea3a0;
+  --color-subtle: #616866;
+
+  /* Accent — vivid teal */
+  --color-accent: #00dfa0;
+  --color-accent-strong: #2fffc0;
+  --color-accent-dim: rgba(0, 223, 160, 0.11);
+  --color-accent-glow: rgba(0, 223, 160, 0.20);
+
+  /* States */
+  --color-warn: #f5d560;
+  --color-danger: #ff5f66;
+  --color-danger-soft: #3a1b1e;
+  --color-good-soft: #0b2a1f;
+  --color-warn-soft: #2c2510;
+
+  /* Shadows */
+  --shadow-panel: 0 32px 80px rgba(0, 0, 0, 0.60), inset 0 1px 0 rgba(255,255,255,0.04);
+  --shadow-tight: 0 8px 32px rgba(0, 0, 0, 0.48);
+  --shadow-card: 0 4px 18px rgba(0, 0, 0, 0.42), inset 0 1px 0 rgba(255,255,255,0.03);
+  --shadow-card-hover: 0 0 0 1px rgba(0,223,160,0.28), 0 12px 48px rgba(0, 0, 0, 0.60), 0 0 36px rgba(0,223,160,0.12);
+  --glow-accent: 0 0 22px rgba(0, 223, 160, 0.30);
+  --glow-accent-strong: 0 0 0 1px rgba(0,223,160,0.55), 0 0 40px rgba(0,223,160,0.26);
+
+  /* Spacing */
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
@@ -31,6 +47,15 @@
   --space-6: 24px;
   --space-8: 32px;
   --space-10: 40px;
+
+  /* Radii */
   --radius-sm: 4px;
   --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 18px;
+
+  /* Transitions */
+  --transition-fast: 140ms ease;
+  --transition-smooth: 240ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --transition-slow: 380ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }

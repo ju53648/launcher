@@ -8,7 +8,7 @@ use crate::{
     storage::{CommandError, LauncherRuntime, Result},
 };
 
-const EMBEDDED_MANIFESTS: &[&str] = &[];
+const EMBEDDED_MANIFESTS: &[&str] = &[include_str!("../manifests/lumorix-dropdash.json")];
 
 #[derive(Debug, Clone)]
 pub struct ManifestCatalog {

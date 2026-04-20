@@ -3,10 +3,11 @@ import { Download, HardDrive, RefreshCw, ShieldCheck } from "lucide-react";
 import { formatBytes } from "../domain/format";
 import type { AppRoute } from "../components/AppShell";
 import { ProgressBar } from "../components/ProgressBar";
+import { LauncherUpdatePanel } from "../components/LauncherUpdatePanel";
 import { useLauncher } from "../store/LauncherStore";
 
 export function HomeView({ setRoute }: { setRoute: (route: AppRoute) => void }) {
-  const { snapshot, checkLauncherUpdates } = useLauncher();
+  const { snapshot, checkLauncherUpdates, busyAction, updateProgress } = useLauncher();
   if (!snapshot) return null;
 
   const featured = snapshot.games[0];
@@ -16,28 +17,40 @@ export function HomeView({ setRoute }: { setRoute: (route: AppRoute) => void }) 
 
   return (
     <div className="view-stack">
-      {featured && (
-        <section className="home-hero">
-          <img src={featured.manifest.bannerImage} alt="" />
-          <div className="home-hero__content">
-            <p className="eyebrow">Featured package</p>
-            <h2>{featured.manifest.name}</h2>
-            <p>{featured.manifest.description}</p>
-            <div className="hero-actions">
-              <button
-                className="button button--primary"
-                onClick={() => setRoute(`game:${featured.manifest.id}`)}
-                type="button"
-              >
-                Open details
-              </button>
-              <button className="button button--ghost" onClick={() => setRoute("library")} type="button">
-                View library
-              </button>
-            </div>
-          </div>
-        </section>
-      )}
+      <section className="home-hero">
+        {featured && <img src={featured.manifest.bannerImage} alt="" />}
+        <div className="home-hero__content">
+          <p className="eyebrow">Featured</p>
+          {featured ? (
+            <>
+              <h2>{featured.manifest.name}</h2>
+              <p>{featured.manifest.description}</p>
+              <div className="hero-actions">
+                <button
+                  className="button button--primary"
+                  onClick={() => setRoute(`game:${featured.manifest.id}`)}
+                  type="button"
+                >
+                  Open details
+                </button>
+                <button className="button button--ghost" onClick={() => setRoute("library")} type="button">
+                  View library
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <h2>Your games hub</h2>
+              <p>Add your library paths in Settings to start managing and launching games locally.</p>
+              <div className="hero-actions">
+                <button className="button button--primary" onClick={() => setRoute("settings")} type="button">
+                  Set up library
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      </section>
 
       <section className="dashboard-grid">
         <article className="metric-panel">
@@ -62,11 +75,18 @@ export function HomeView({ setRoute }: { setRoute: (route: AppRoute) => void }) 
           <RefreshCw size={22} />
           <span>Launcher</span>
           <strong>v{snapshot.appVersion}</strong>
-          <button className="text-button" onClick={checkLauncherUpdates} type="button">
-            Check updates
+          <button
+            className="text-button"
+            disabled={busyAction === "check-launcher-update" || busyAction === "install-launcher-update"}
+            onClick={checkLauncherUpdates}
+            type="button"
+          >
+            {busyAction === "check-launcher-update" ? "Checking..." : "Check updates"}
           </button>
         </article>
       </section>
+
+      <LauncherUpdatePanel progress={updateProgress} />
 
       {activeJobs.length > 0 && (
         <section className="queue-strip">

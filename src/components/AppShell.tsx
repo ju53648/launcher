@@ -78,18 +78,30 @@ export function AppShell({
       <main className="shell-main">
         <header className="topbar">
           <div>
-            <p className="eyebrow">Local-first desktop launcher</p>
+            <p className="eyebrow">{subtitleForRoute(route)}</p>
             <h1>{titleForRoute(route, snapshot)}</h1>
           </div>
           <div className="topbar__meta">
-            <Gamepad2 size={18} />
-            <span>{snapshot.games.length} games</span>
+            <Gamepad2 size={16} />
+            <span>{snapshot.games.length} {snapshot.games.length === 1 ? "game" : "games"}</span>
           </div>
         </header>
         {children}
       </main>
     </div>
   );
+}
+
+function subtitleForRoute(route: AppRoute): string {
+  if (route.startsWith("game:")) return "Game details";
+  switch (route) {
+    case "home":     return "Overview";
+    case "library":  return "Your collection";
+    case "downloads":return "Active installs";
+    case "settings": return "Preferences";
+    case "about":    return "Lumorix Launcher";
+    default:         return "Lumorix";
+  }
 }
 
 function titleForRoute(route: AppRoute, snapshot: LauncherSnapshot) {

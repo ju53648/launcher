@@ -10,6 +10,7 @@ import {
 
 import type { InstallJob, LauncherError, LauncherSnapshot } from "../domain/types";
 import {
+  checkLauncherUpdate,
   downloadAndInstallLauncherUpdate,
   type LauncherUpdateProgress
 } from "../services/appUpdater";
@@ -115,6 +116,11 @@ export function LauncherProvider({ children }: { children: ReactNode }) {
     return () => window.clearInterval(timer);
   }, [refresh, snapshot?.jobs]);
 
+  const publishUpdateProgress = useCallback((progress: LauncherUpdateProgress) => {
+    console.info("[updater]", progress.status, progress.message);
+    setUpdateProgress(progress);
+  }, []);
+
   const value = useMemo<LauncherContextValue>(
     () => ({
       snapshot,
@@ -163,17 +169,33 @@ export function LauncherProvider({ children }: { children: ReactNode }) {
       launchGame: (gameId) => runCommandAction("launch-game", () => launcherApi.launchGame(gameId)),
       openInstallFolder: (gameId) =>
         runCommandAction("open-folder", () => launcherApi.openInstallFolder(gameId)),
-      checkLauncherUpdates: () =>
-        runSnapshotAction("launcher-update-check", () => launcherApi.checkLauncherUpdates()),
+      checkLauncherUpdates: async () => {
+        setBusyAction("check-launcher-update");
+        setError(null);
+        try {
+          await checkLauncherUpdate(publishUpdateProgress);
+          await refresh();
+        } catch (caught) {
+          const normalized = normalizeError(caught);
+          publishUpdateProgress({
+            status: "error",
+            progress: 0,
+            message: normalized.message
+          });
+          setError(normalized);
+        } finally {
+          setBusyAction(null);
+        }
+      },
       installLauncherUpdate: async () => {
         setBusyAction("install-launcher-update");
         setError(null);
         try {
-          await downloadAndInstallLauncherUpdate(setUpdateProgress);
+          await downloadAndInstallLauncherUpdate(publishUpdateProgress);
           await refresh();
         } catch (caught) {
           const normalized = normalizeError(caught);
-          setUpdateProgress({
+          publishUpdateProgress({
             status: "error",
             progress: 0,
             message: normalized.message
@@ -189,7 +211,16 @@ export function LauncherProvider({ children }: { children: ReactNode }) {
       clearCompletedJobs: () =>
         runSnapshotAction("clear-completed-jobs", () => launcherApi.clearCompletedJobs())
     }),
-    [busyAction, error, loading, refresh, runSnapshotAction, snapshot, updateProgress]
+    [
+      busyAction,
+      error,
+      loading,
+      publishUpdateProgress,
+      refresh,
+      runSnapshotAction,
+      snapshot,
+      updateProgress
+    ]
   );
 
   async function runJobAction(label: string, action: () => Promise<InstallJob>) {

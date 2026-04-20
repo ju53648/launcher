@@ -1,6 +1,7 @@
 import { FolderPlus, RefreshCw, Save, ShieldCheck, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 
+import { LauncherUpdatePanel } from "../components/LauncherUpdatePanel";
 import { StatusBadge } from "../components/StatusBadge";
 import { formatDate } from "../domain/format";
 import { chooseDirectory } from "../services/tauri";
@@ -16,7 +17,9 @@ export function SettingsView() {
     updatePreferences,
     checkLauncherUpdates,
     installLauncherUpdate,
-    checkGameUpdates
+    checkGameUpdates,
+    busyAction,
+    updateProgress
   } = useLauncher();
   const [newLibraryName, setNewLibraryName] = useState("Games");
   const [newLibraryPath, setNewLibraryPath] = useState("");
@@ -180,19 +183,30 @@ export function SettingsView() {
         </div>
 
         <div className="action-row">
-          <button className="button button--secondary" onClick={checkLauncherUpdates} type="button">
+          <button
+            className="button button--secondary"
+            disabled={busyAction === "check-launcher-update" || busyAction === "install-launcher-update"}
+            onClick={checkLauncherUpdates}
+            type="button"
+          >
             <RefreshCw size={16} />
-            Check launcher
+            {busyAction === "check-launcher-update" ? "Checking launcher..." : "Check launcher"}
           </button>
-          <button className="button button--primary" onClick={installLauncherUpdate} type="button">
+          <button
+            className="button button--primary"
+            disabled={busyAction === "check-launcher-update" || busyAction === "install-launcher-update"}
+            onClick={installLauncherUpdate}
+            type="button"
+          >
             <RefreshCw size={16} />
-            Update launcher
+            {busyAction === "install-launcher-update" ? "Updating launcher..." : "Update launcher"}
           </button>
           <button className="button button--secondary" onClick={checkGameUpdates} type="button">
             <RefreshCw size={16} />
             Check games
           </button>
         </div>
+        <LauncherUpdatePanel progress={updateProgress} />
       </section>
 
       <section className="settings-section">

@@ -1,6 +1,6 @@
 import { Download, ExternalLink, ShieldCheck } from "lucide-react";
 
-import { ProgressBar } from "../components/ProgressBar";
+import { LauncherUpdatePanel } from "../components/LauncherUpdatePanel";
 import { StatusBadge } from "../components/StatusBadge";
 import { formatDate } from "../domain/format";
 import { useLauncher } from "../store/LauncherStore";
@@ -24,17 +24,22 @@ export function AboutView() {
           updates and clean library ownership.
         </p>
         <div className="action-row">
-          <button className="button button--secondary" onClick={checkLauncherUpdates} type="button">
-            Check for updates
+          <button
+            className="button button--secondary"
+            disabled={busyAction === "check-launcher-update" || busyAction === "install-launcher-update"}
+            onClick={checkLauncherUpdates}
+            type="button"
+          >
+            {busyAction === "check-launcher-update" ? "Checking..." : "Check for updates"}
           </button>
           <button
             className="button button--primary"
-            disabled={busyAction === "install-launcher-update"}
+            disabled={busyAction === "check-launcher-update" || busyAction === "install-launcher-update"}
             onClick={installLauncherUpdate}
             type="button"
           >
             <Download size={16} />
-            Download and install
+            {busyAction === "install-launcher-update" ? "Updating..." : "Download and install"}
           </button>
         </div>
       </section>
@@ -70,15 +75,7 @@ export function AboutView() {
           </a>
         )}
         {snapshot.launcherUpdate.error && <p className="field-error">{snapshot.launcherUpdate.error}</p>}
-        {updateProgress.status !== "idle" && (
-          <div className="install-panel">
-            <div>
-              <p className="eyebrow">In-app updater</p>
-              <h2>{updateProgress.message}</h2>
-            </div>
-            <ProgressBar value={updateProgress.progress} />
-          </div>
-        )}
+        <LauncherUpdatePanel progress={updateProgress} />
       </section>
 
       <section className="settings-section">
