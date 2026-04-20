@@ -4,13 +4,13 @@ import type { AppRoute } from "../components/AppShell";
 import { EmptyState } from "../components/EmptyState";
 import { GameCard } from "../components/GameCard";
 import { InstallDialog } from "../components/InstallDialog";
-import type { GameStatus, GameView } from "../domain/types";
+import type { GameView } from "../domain/types";
 import { useLauncher } from "../store/LauncherStore";
 
-const filters: Array<{ value: "all" | GameStatus; label: string }> = [
+const filters: Array<{ value: "all" | "installed" | "added" | "updateAvailable"; label: string }> = [
   { value: "all", label: "All" },
   { value: "installed", label: "Installed" },
-  { value: "notInstalled", label: "Not installed" },
+  { value: "added", label: "Ready to install" },
   { value: "updateAvailable", label: "Updates" }
 ];
 
@@ -21,7 +21,8 @@ export function LibraryView({ setRoute }: { setRoute: (route: AppRoute) => void 
 
   const games = useMemo(() => {
     if (!snapshot) return [];
-    return snapshot.games.filter((game) => filter === "all" || game.status === filter);
+    const libraryGames = snapshot.games.filter((game) => game.ownershipStatus !== "notAdded");
+    return libraryGames.filter((game) => filter === "all" || game.ownershipStatus === filter);
   }, [filter, snapshot]);
 
   if (!snapshot) return null;
@@ -43,8 +44,17 @@ export function LibraryView({ setRoute }: { setRoute: (route: AppRoute) => void 
 
       {games.length === 0 ? (
         <EmptyState
-          title="No games here yet"
-          body="Add or enable manifests and Lumorix will list installable games here."
+          title={filter === "all" ? "Your library is empty" : "No games match this filter"}
+          body={
+            filter === "all"
+              ? "Add games from the Shop to build your collection. Installed games will also appear here automatically."
+              : "Try another library filter, or add more games from the Shop."
+          }
+          action={
+            <button className="button button--primary" onClick={() => setRoute("shop")} type="button">
+              Open Shop
+            </button>
+          }
         />
       ) : (
         <section className="library-grid">

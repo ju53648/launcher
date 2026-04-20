@@ -33,7 +33,7 @@ export function GameCard({
             <h3>{manifest.name}</h3>
             <p>{manifest.developer}</p>
           </div>
-          <StatusBadge status={game.status} />
+          <StatusBadge status={game.ownershipStatus} type="ownership" />
         </div>
 
         <p className="game-card__description">{manifest.description}</p>

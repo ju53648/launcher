@@ -1,10 +1,23 @@
-import type { CommandOk, GameManifest, InstallJob, LauncherSnapshot, LibraryFolder } from "../domain/types";
+import type {
+  CommandOk,
+  GameLibraryEntry,
+  GameManifest,
+  InstallJob,
+  LauncherSnapshot,
+  LibraryFolder
+} from "../domain/types";
 
 const now = () => new Date().toISOString();
 
 const games: GameManifest[] = [];
+let libraryEntries: GameLibraryEntry[] = loadLibraryEntries();
 
 let snapshot: LauncherSnapshot = loadSnapshot();
+
+function loadLibraryEntries(): GameLibraryEntry[] {
+  const saved = localStorage.getItem("lumorix.mock.libraryEntries");
+  return saved ? JSON.parse(saved) as GameLibraryEntry[] : [];
+}
 
 function loadSnapshot(): LauncherSnapshot {
   const saved = localStorage.getItem("lumorix.mock.snapshot");
@@ -65,8 +78,10 @@ function loadSnapshot(): LauncherSnapshot {
 }
 
 function save() {
+  localStorage.setItem("lumorix.mock.libraryEntries", JSON.stringify(libraryEntries));
   snapshot.games = games.map((manifest) => {
     const installed = snapshot.games.find((game) => game.manifest.id === manifest.id)?.installed ?? null;
+    const libraryEntry = libraryEntries.find((entry) => entry.gameId === manifest.id) ?? null;
     const activeJob =
       snapshot.jobs.find(
         (job) =>
@@ -79,9 +94,29 @@ function save() {
           ? "installed"
           : "updateAvailable"
         : "notInstalled";
-    return { manifest, installed, activeJob, status, availableUpdate: null };
+    const ownershipStatus = installed
+      ? installed.installedVersion === manifest.version
+        ? "installed"
+        : "updateAvailable"
+      : libraryEntry
+        ? "added"
+        : "notAdded";
+    return {
+      manifest,
+      installed,
+      libraryEntry,
+      activeJob,
+      status,
+      ownershipStatus,
+      availableUpdate: null
+    };
   });
   localStorage.setItem("lumorix.mock.snapshot", JSON.stringify(snapshot));
+}
+
+function addLibraryEntry(gameId: string) {
+  if (libraryEntries.some((entry) => entry.gameId === gameId)) return;
+  libraryEntries = [...libraryEntries, { gameId, addedAt: now() }];
 }
 
 function makeLibrary(path: string): LibraryFolder {
@@ -175,6 +210,15 @@ export const mockApi = {
     save();
     return snapshot;
   },
+  async addGameToLibrary(gameId: string) {
+    const manifest = games.find((game) => game.id === gameId);
+    if (!manifest) {
+      throw { message: "Game manifest is not available" };
+    }
+    addLibraryEntry(gameId);
+    save();
+    return snapshot;
+  },
   async updatePreferences(
     checkLauncherUpdatesOnStart: boolean,
     checkGameUpdatesOnStart: boolean,
@@ -198,6 +242,7 @@ export const mockApi = {
       throw { message: "Game manifest is not available" };
     }
     const selectedLibraryId = libraryId ?? snapshot.config.defaultLibraryId!;
+    addLibraryEntry(gameId);
     const job: InstallJob = {
       id: crypto.randomUUID(),
       gameId,

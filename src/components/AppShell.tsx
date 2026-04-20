@@ -4,13 +4,14 @@ import {
   Home,
   Info,
   Library,
+  ShoppingBag,
   Settings,
   ShieldCheck
 } from "lucide-react";
 
 import type { LauncherSnapshot } from "../domain/types";
 
-export type AppRoute = "home" | "library" | "downloads" | "settings" | "about" | `game:${string}`;
+export type AppRoute = "home" | "shop" | "library" | "downloads" | "settings" | "about" | `game:${string}`;
 
 const navItems: Array<{
   route: AppRoute;
@@ -18,6 +19,7 @@ const navItems: Array<{
   icon: typeof Home;
 }> = [
   { route: "home", label: "Home", icon: Home },
+  { route: "shop", label: "Shop", icon: ShoppingBag },
   { route: "library", label: "Library", icon: Library },
   { route: "downloads", label: "Downloads", icon: Download },
   { route: "settings", label: "Settings", icon: Settings },
@@ -51,7 +53,7 @@ export function AppShell({
         <nav className="sidebar__nav" aria-label="Primary navigation">
           {navItems.map((item) => {
             const Icon = item.icon;
-            const active = route === item.route || (item.route === "library" && route.startsWith("game:"));
+            const active = isNavItemActive(route, item.route, snapshot);
             return (
               <button
                 key={item.route}
@@ -83,7 +85,7 @@ export function AppShell({
           </div>
           <div className="topbar__meta">
             <Gamepad2 size={16} />
-            <span>{snapshot.games.length} {snapshot.games.length === 1 ? "game" : "games"}</span>
+            <span>{metaForRoute(route, snapshot)}</span>
           </div>
         </header>
         {children}
@@ -92,10 +94,33 @@ export function AppShell({
   );
 }
 
+function isNavItemActive(route: AppRoute, itemRoute: AppRoute, snapshot: LauncherSnapshot): boolean {
+  if (route === itemRoute) return true;
+  if (!route.startsWith("game:")) return false;
+  const id = route.slice("game:".length);
+  const game = snapshot.games.find((entry) => entry.manifest.id === id);
+  if (game?.ownershipStatus === "notAdded") {
+    return itemRoute === "shop";
+  }
+  return itemRoute === "library";
+}
+
+function metaForRoute(route: AppRoute, snapshot: LauncherSnapshot): string {
+  const libraryCount = snapshot.games.filter((game) => game.ownershipStatus !== "notAdded").length;
+  if (route === "shop") {
+    return `${snapshot.games.length} ${snapshot.games.length === 1 ? "game" : "games"} available`;
+  }
+  if (route === "library" || route.startsWith("game:")) {
+    return `${libraryCount} in library`;
+  }
+  return `${snapshot.games.length} catalog ${snapshot.games.length === 1 ? "title" : "titles"}`;
+}
+
 function subtitleForRoute(route: AppRoute): string {
   if (route.startsWith("game:")) return "Game details";
   switch (route) {
     case "home":     return "Overview";
+    case "shop":     return "Discovery";
     case "library":  return "Your collection";
     case "downloads":return "Active installs";
     case "settings": return "Preferences";
@@ -113,6 +138,8 @@ function titleForRoute(route: AppRoute, snapshot: LauncherSnapshot) {
   switch (route) {
     case "home":
       return "Command Center";
+    case "shop":
+      return "Shop";
     case "library":
       return "Game Library";
     case "downloads":

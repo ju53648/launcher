@@ -13,9 +13,10 @@ use crate::{
     libraries::probe_libraries,
     manifest::load_all_manifests,
     models::{
-        GameStatus, GameUpdateInfo, GameView, InstallBehavior, InstallJob, InstalledGame,
-        InstalledGamesDb, InstalledStatus, LauncherConfig, LauncherSnapshot, LauncherUpdateState,
-        ManifestSourceConfig, ManifestSourceType, PrivacyConfig,
+        GameLibraryEntry, GameOwnershipStatus, GameStatus, GameUpdateInfo, GameView,
+        InstallBehavior, InstallJob, InstalledGame, InstalledGamesDb, InstalledStatus,
+        LauncherConfig, LauncherSnapshot, LauncherUpdateState, ManifestSourceConfig,
+        ManifestSourceType, PrivacyConfig,
     },
     paths,
 };
@@ -145,7 +146,10 @@ impl LauncherRuntime {
 
     pub fn load_installed_db(&self) -> Result<InstalledGamesDb> {
         if !self.installed_db_path.exists() {
-            let db = InstalledGamesDb { games: vec![] };
+            let db = InstalledGamesDb {
+                games: vec![],
+                library_entries: vec![],
+            };
             self.save_installed_db(&db)?;
             self.append_log("INFO", "Created default installed games database");
             return Ok(db);
@@ -161,7 +165,10 @@ impl LauncherRuntime {
                     ),
                 );
                 backup_invalid_json(&self.installed_db_path);
-                let db = InstalledGamesDb { games: vec![] };
+                let db = InstalledGamesDb {
+                    games: vec![],
+                    library_entries: vec![],
+                };
                 self.save_installed_db(&db)?;
                 Ok(db)
             }
@@ -174,6 +181,7 @@ impl LauncherRuntime {
 
     pub fn update_installed_game(&self, game: InstalledGame) -> Result<()> {
         let mut db = self.load_installed_db()?;
+        add_library_entry_if_missing(&mut db, &game.game_id);
         if let Some(existing) = db.games.iter_mut().find(|entry| entry.game_id == game.game_id) {
             *existing = game;
         } else {
@@ -185,6 +193,12 @@ impl LauncherRuntime {
     pub fn remove_installed_game(&self, game_id: &str) -> Result<()> {
         let mut db = self.load_installed_db()?;
         db.games.retain(|game| game.game_id != game_id);
+        self.save_installed_db(&db)
+    }
+
+    pub fn add_game_to_library(&self, game_id: &str) -> Result<()> {
+        let mut db = self.load_installed_db()?;
+        add_library_entry_if_missing(&mut db, game_id);
         self.save_installed_db(&db)
     }
 
@@ -205,7 +219,19 @@ impl LauncherRuntime {
         let manifest_catalog = load_all_manifests(self);
         let manifest_errors = manifest_catalog.errors;
         let manifests = manifest_catalog.manifests;
-        let installed_db = self.load_installed_db()?;
+        let mut installed_db = self.load_installed_db()?;
+        let mut db_migrated = false;
+        let installed_game_ids: Vec<String> = installed_db
+            .games
+            .iter()
+            .map(|game| game.game_id.clone())
+            .collect();
+        for game_id in installed_game_ids {
+            db_migrated |= add_library_entry_if_missing(&mut installed_db, &game_id);
+        }
+        if db_migrated {
+            self.save_installed_db(&installed_db)?;
+        }
         let jobs = self
             .jobs
             .lock()
@@ -224,6 +250,11 @@ impl LauncherRuntime {
                     .games
                     .iter()
                     .find(|game| game.game_id == manifest.id)
+                    .cloned();
+                let library_entry = installed_db
+                    .library_entries
+                    .iter()
+                    .find(|entry| entry.game_id == manifest.id)
                     .cloned();
                 let active_job = jobs
                     .iter()
@@ -262,11 +293,27 @@ impl LauncherRuntime {
                 } else {
                     GameStatus::NotInstalled
                 };
+                let ownership_status = if installed
+                    .as_ref()
+                    .is_some_and(|game| game.status == InstalledStatus::Broken)
+                {
+                    GameOwnershipStatus::Error
+                } else if available_update.is_some() {
+                    GameOwnershipStatus::UpdateAvailable
+                } else if installed.is_some() {
+                    GameOwnershipStatus::Installed
+                } else if library_entry.is_some() {
+                    GameOwnershipStatus::Added
+                } else {
+                    GameOwnershipStatus::NotAdded
+                };
 
                 GameView {
                     manifest,
                     status,
+                    ownership_status,
                     installed,
+                    library_entry,
                     active_job,
                     available_update,
                 }
@@ -288,6 +335,22 @@ impl LauncherRuntime {
             launcher_update: update_state,
         })
     }
+}
+
+fn add_library_entry_if_missing(db: &mut InstalledGamesDb, game_id: &str) -> bool {
+    if db
+        .library_entries
+        .iter()
+        .any(|entry| entry.game_id == game_id)
+    {
+        return false;
+    }
+
+    db.library_entries.push(GameLibraryEntry {
+        game_id: game_id.into(),
+        added_at: Utc::now(),
+    });
+    true
 }
 
 fn default_config() -> LauncherConfig {

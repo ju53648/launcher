@@ -11,6 +11,7 @@ use crate::{
         create_library, ensure_library_is_removable, ensure_unique_library_path,
         normalize_default_library, normalize_library_name,
     },
+    manifest::find_manifest,
     models::{CommandOk, InstallJob, LauncherSnapshot},
     paths::recommended_library_path,
     process::{launch_game as spawn_game_process, open_install_folder as open_folder},
@@ -151,6 +152,17 @@ pub fn update_preferences(
 }
 
 #[tauri::command]
+pub fn add_game_to_library(
+    state: State<'_, LauncherRuntime>,
+    game_id: String,
+) -> Result<LauncherSnapshot> {
+    find_manifest(&state, &game_id)?;
+    state.add_game_to_library(&game_id)?;
+    state.append_log("INFO", &format!("Added game to library: {game_id}"));
+    state.build_snapshot()
+}
+
+#[tauri::command]
 pub fn start_install_game(
     state: State<'_, LauncherRuntime>,
     game_id: String,
@@ -160,6 +172,7 @@ pub fn start_install_game(
     let selected_library_id = library_id
         .or(config.default_library_id.clone())
         .ok_or_else(|| CommandError::Validation("No library is configured".into()))?;
+    state.add_game_to_library(&game_id)?;
     start_install_job(&state, game_id, selected_library_id, InstallMode::Install)
 }
 

@@ -1,4 +1,4 @@
-import type { GameStatus, InstallPhase, LibraryStatus } from "./types";
+import type { GameOwnershipStatus, GameStatus, InstallPhase, LibraryStatus } from "./types";
 
 export function formatBytes(bytes: number): string {
   if (!Number.isFinite(bytes) || bytes <= 0) return "0 B";
@@ -21,6 +21,17 @@ export function gameStatusLabel(status: GameStatus): string {
   const labels: Record<GameStatus, string> = {
     notInstalled: "Not installed",
     installing: "Installing",
+    installed: "Installed",
+    updateAvailable: "Update available",
+    error: "Needs repair"
+  };
+  return labels[status];
+}
+
+export function ownershipStatusLabel(status: GameOwnershipStatus): string {
+  const labels: Record<GameOwnershipStatus, string> = {
+    notAdded: "Not in library",
+    added: "In library",
     installed: "Installed",
     updateAvailable: "Update available",
     error: "Needs repair"

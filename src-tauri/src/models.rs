@@ -94,6 +94,15 @@ pub enum InstalledStatus {
 #[serde(rename_all = "camelCase")]
 pub struct InstalledGamesDb {
     pub games: Vec<InstalledGame>,
+    #[serde(default)]
+    pub library_entries: Vec<GameLibraryEntry>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct GameLibraryEntry {
+    pub game_id: String,
+    pub added_at: DateTime<Utc>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -194,7 +203,9 @@ pub struct LauncherSnapshot {
 pub struct GameView {
     pub manifest: GameManifest,
     pub status: GameStatus,
+    pub ownership_status: GameOwnershipStatus,
     pub installed: Option<InstalledGame>,
+    pub library_entry: Option<GameLibraryEntry>,
     pub active_job: Option<InstallJob>,
     pub available_update: Option<GameUpdateInfo>,
 }
@@ -204,6 +215,16 @@ pub struct GameView {
 pub enum GameStatus {
     NotInstalled,
     Installing,
+    Installed,
+    UpdateAvailable,
+    Error,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub enum GameOwnershipStatus {
+    NotAdded,
+    Added,
     Installed,
     UpdateAvailable,
     Error,

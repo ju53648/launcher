@@ -29,6 +29,7 @@ interface LauncherContextValue {
   renameLibrary: (libraryId: string, name: string) => Promise<void>;
   removeLibrary: (libraryId: string) => Promise<void>;
   setDefaultLibrary: (libraryId: string) => Promise<void>;
+  addGameToLibrary: (gameId: string) => Promise<void>;
   updatePreferences: (
     checkLauncherUpdatesOnStart: boolean,
     checkGameUpdatesOnStart: boolean,
@@ -142,6 +143,8 @@ export function LauncherProvider({ children }: { children: ReactNode }) {
         runSnapshotAction("remove-library", () => launcherApi.removeLibrary(libraryId)),
       setDefaultLibrary: (libraryId) =>
         runSnapshotAction("set-default-library", () => launcherApi.setDefaultLibrary(libraryId)),
+      addGameToLibrary: (gameId) =>
+        runSnapshotAction("add-game-to-library", () => launcherApi.addGameToLibrary(gameId)),
       updatePreferences: (
         checkLauncherUpdatesOnStart,
         checkGameUpdatesOnStart,

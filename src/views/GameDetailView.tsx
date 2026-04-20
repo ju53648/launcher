@@ -1,4 +1,4 @@
-import { Download, FolderOpen, Play, RefreshCw, Trash2, Wrench } from "lucide-react";
+import { Download, FolderOpen, Play, Plus, RefreshCw, Trash2, Wrench } from "lucide-react";
 import { useState } from "react";
 
 import { InstallDialog } from "../components/InstallDialog";
@@ -11,6 +11,7 @@ import { useLauncher } from "../store/LauncherStore";
 export function GameDetailView({ game }: { game: GameView }) {
   const {
     snapshot,
+    addGameToLibrary,
     installGame,
     launchGame,
     updateGame,
@@ -39,12 +40,18 @@ export function GameDetailView({ game }: { game: GameView }) {
               </div>
             </div>
           </div>
-          <StatusBadge status={game.status} />
+          <StatusBadge status={game.ownershipStatus} type="ownership" />
         </div>
       </section>
 
       <section className="detail-actions">
-        {game.status === "notInstalled" && (
+        {game.ownershipStatus === "notAdded" && (
+          <button className="button button--primary" onClick={() => addGameToLibrary(game.manifest.id)} type="button">
+            <Plus size={16} />
+            Add to Library
+          </button>
+        )}
+        {game.ownershipStatus !== "notAdded" && game.status === "notInstalled" && (
           <button className="button button--primary" onClick={() => setInstallOpen(true)} type="button">
             <Download size={16} />
             Install
@@ -138,7 +145,11 @@ export function GameDetailView({ game }: { game: GameView }) {
               </div>
             </dl>
           ) : (
-            <p className="muted">Not installed yet.</p>
+            <p className="muted">
+              {game.ownershipStatus === "notAdded"
+                ? "Add this game to your Library before installing."
+                : "Not installed yet."}
+            </p>
           )}
         </article>
       </section>

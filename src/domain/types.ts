@@ -7,6 +7,13 @@ export type GameStatus =
   | "updateAvailable"
   | "error";
 
+export type GameOwnershipStatus =
+  | "notAdded"
+  | "added"
+  | "installed"
+  | "updateAvailable"
+  | "error";
+
 export type JobStatus = "queued" | "running" | "completed" | "cancelled" | "failed";
 
 export type InstallPhase =
@@ -136,6 +143,11 @@ export interface InstalledGame {
   lastError: string | null;
 }
 
+export interface GameLibraryEntry {
+  gameId: string;
+  addedAt: string;
+}
+
 export interface GameUpdateInfo {
   currentVersion: string;
   availableVersion: string;
@@ -171,7 +183,9 @@ export interface LauncherUpdateState {
 export interface GameView {
   manifest: GameManifest;
   status: GameStatus;
+  ownershipStatus: GameOwnershipStatus;
   installed: InstalledGame | null;
+  libraryEntry: GameLibraryEntry | null;
   activeJob: InstallJob | null;
   availableUpdate: GameUpdateInfo | null;
 }

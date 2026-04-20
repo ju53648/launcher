@@ -10,6 +10,7 @@ import { HomeView } from "./views/HomeView";
 import { LibraryView } from "./views/LibraryView";
 import { OnboardingView } from "./views/OnboardingView";
 import { SettingsView } from "./views/SettingsView";
+import { ShopView } from "./views/ShopView";
 import { useLauncher } from "./store/LauncherStore";
 import type { LauncherSnapshot } from "./domain/types";
 
@@ -94,6 +95,8 @@ function renderRoute(route: AppRoute, setRoute: (route: AppRoute) => void, snaps
   switch (route) {
     case "home":
       return <HomeView setRoute={setRoute} />;
+    case "shop":
+      return <ShopView setRoute={setRoute} />;
     case "library":
       return <LibraryView setRoute={setRoute} />;
     case "downloads":
