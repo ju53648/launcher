@@ -1,0 +1,1 @@
+{"default":{"identifier":"default","description":"Core desktop permissions for the Lumorix Launcher window.","local":true,"windows":["main"],"permissions":["core:default","dialog:default","opener:default","process:default","updater:default"]}}

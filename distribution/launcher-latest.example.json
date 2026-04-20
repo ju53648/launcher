@@ -1,0 +1,11 @@
+{
+  "version": "v0.1.1",
+  "notes": "Signed launcher release with updater artifacts.",
+  "pub_date": "2026-04-20T10:00:00Z",
+  "platforms": {
+    "windows-x86_64": {
+      "url": "https://github.com/lumorix/launcher/releases/download/v0.1.1/Lumorix_Launcher_0.1.1_x64-setup.nsis.zip",
+      "signature": "REPLACE_WITH_TAURI_UPDATER_SIGNATURE"
+    }
+  }
+}

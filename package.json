@@ -1,0 +1,37 @@
+{
+  "name": "lumorix-launcher",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Local-first Windows desktop game launcher built with Tauri, Rust, React and TypeScript.",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1 --port 1420",
+    "tauri:dev": "tauri dev",
+    "build": "tsc && vite build",
+    "tauri:build": "tauri build",
+    "clean:project": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/clean-project.ps1",
+    "clean:local-state": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/clean-local-state.ps1",
+    "audit:local": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/audit-local-lumorix.ps1",
+    "preview": "vite preview --host 127.0.0.1 --port 4173",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "2.10.1",
+    "@tauri-apps/plugin-dialog": "2.7.0",
+    "@tauri-apps/plugin-opener": "2.5.3",
+    "@tauri-apps/plugin-process": "2.3.1",
+    "@tauri-apps/plugin-updater": "2.10.1",
+    "lucide-react": "1.8.0",
+    "react": "19.2.5",
+    "react-dom": "19.2.5"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "2.10.1",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "6.0.1",
+    "esbuild": "^0.28.0",
+    "typescript": "6.0.3",
+    "vite": "8.0.9"
+  }
+}

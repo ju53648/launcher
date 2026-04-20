@@ -1,0 +1,97 @@
+name: release-windows
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest
+
+    env:
+      TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+      TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+      LUMORIX_SIGN_CERT_SHA1: ${{ secrets.LUMORIX_SIGN_CERT_SHA1 }}
+      LUMORIX_SIGN_TIMESTAMP_URL: ${{ secrets.LUMORIX_SIGN_TIMESTAMP_URL }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-pc-windows-msvc
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build signed Tauri bundles and updater artifacts
+        run: npm run tauri:build
+
+      - name: Prepare latest.json for GitHub Releases updater
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+
+          $version = "${{ github.ref_name }}"
+          $bundleDir = Join-Path $PWD "src-tauri/target/release/bundle"
+          if (-not (Test-Path $bundleDir)) {
+            throw "Bundle directory not found: $bundleDir"
+          }
+
+          # Use the NSIS exe as the updater artifact (silent install, supports delta updates)
+          $signatureFile = Get-ChildItem -Path $bundleDir -Recurse -Filter "*.exe.sig" |
+            Select-Object -First 1
+
+          if (-not $signatureFile) {
+            throw "No NSIS updater signature file (*.exe.sig) found in bundle directory."
+          }
+
+          # Strip the trailing .sig to get the installer path
+          $signedAsset = $signatureFile.FullName -replace '\.sig$', ''
+          if (-not (Test-Path $signedAsset)) {
+            throw "NSIS installer not found at: $signedAsset"
+          }
+
+          $assetName = [System.IO.Path]::GetFileName($signedAsset)
+          $signature = (Get-Content -Raw $signatureFile.FullName).Trim()
+          $latestPath = Join-Path $PWD "distribution/latest.json"
+
+          $json = [ordered]@{
+            version = $version
+            notes = "Release $version"
+            pub_date = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
+            platforms = [ordered]@{
+              "windows-x86_64" = [ordered]@{
+                url = "https://github.com/${{ github.repository }}/releases/download/$version/$assetName"
+                signature = $signature
+              }
+            }
+          } | ConvertTo-Json -Depth 8
+
+          Set-Content -Path $latestPath -Value $json -Encoding UTF8
+
+      - name: Upload release assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            src-tauri/target/release/bundle/**/*.msi
+            src-tauri/target/release/bundle/**/*.exe
+            src-tauri/target/release/bundle/**/*.zip
+            src-tauri/target/release/bundle/**/*.sig
+            distribution/latest.json
+          draft: false
+          prerelease: false
+          generate_release_notes: true
