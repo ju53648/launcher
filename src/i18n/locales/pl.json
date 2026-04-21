@@ -9,7 +9,8 @@
     "languages": {
       "en": "English",
       "de": "Deutsch",
-      "pl": "Polski"
+      "pl": "Polski",
+      "shakespeare": "Angielski szekspirowski"
     },
     "messages": {
       "noAccountNoAdsLocalFirst": "Bez konta. Bez reklam. Lokalnie.",
@@ -32,6 +33,7 @@
       "useRecommended": "Uzyj zalecanej lokalizacji",
       "addLibrary": "Dodaj biblioteke",
       "addToLibrary": "Dodaj do biblioteki",
+      "removeFromLibrary": "Usun z biblioteki",
       "addingToLibrary": "Dodawanie...",
       "viewDownload": "Pokaz pobieranie",
       "viewDownloads": "Pokaz pobrania",
@@ -51,6 +53,7 @@
       "checkLibraryItems": "Sprawdz elementy biblioteki",
       "enterLumorix": "Uruchom Lumorix",
       "openShop": "Otworz sklep",
+      "clearFilters": "Wyczysc filtry",
       "installingShort": "Instalowanie...",
       "checkingShort": "Sprawdzanie...",
       "updatingShort": "Aktualizowanie..."
@@ -326,8 +329,8 @@
       "all": "Wszystkie"
     },
     "emptyState": {
-      "emptyTitle": "Sklep jest pusty",
-      "emptyBody": "Wlacz zrodlo manifestow albo dodaj manifesty katalogu, aby udostepnic tutaj tresci.",
+      "emptyTitle": "Brak dostepnych elementow",
+      "emptyBody": "Wkrotce pojawia sie tutaj nowe tresci Lumorix.",
       "filteredTitle": "Zaden element nie pasuje do tych filtrow",
       "filteredBody": "Sprobuj innego wyszukiwania, wyczysc filtr lub wybierz inna kategorie."
     },
@@ -342,23 +345,68 @@
   },
   "library": {
     "filters": {
-      "all": "Wszystkie",
-      "installed": "Zainstalowane",
-      "added": "Gotowe do instalacji",
-      "updateAvailable": "Aktualizacje",
-      "error": "Wymaga naprawy"
+      "searchPlaceholder": "Szukaj w bibliotece po nazwie, tworcach, tagu lub kategorii",
+      "installState": "Stan instalacji",
+      "installAll": "Wszystkie elementy",
+      "installInstalled": "Tylko zainstalowane",
+      "installNotInstalled": "Niezainstalowane",
+      "updates": "Aktualizacje",
+      "updatesAll": "Wszystkie stany aktualizacji",
+      "updatesOnly": "Dostepna aktualizacja",
+      "category": "Kategoria",
+      "allCategories": "Wszystkie kategorie",
+      "tag": "Tag",
+      "allTags": "Wszystkie tagi"
+    },
+    "sort": {
+      "label": "Sortuj wedlug",
+      "name": "Nazwa (A-Z)",
+      "lastPlayed": "Ostatnio uruchamiane",
+      "installed": "Stan instalacji",
+      "recentlyAdded": "Ostatnio dodane"
+    },
+    "toolbar": {
+      "eyebrow": "Biblioteka",
+      "title": "Twoja lokalna platforma",
+      "body": "Sortuj, filtruj, uruchamiaj, aktualizuj, odinstalowuj i porzadkuj biblioteke bez tracenia kontroli nad tym, co nalezy do ciebie.",
+      "results": "Pokazano {{count}} elementow",
+      "stats": {
+        "total": "W bibliotece",
+        "installed": "Zainstalowane",
+        "updates": "Aktualizacje",
+        "ready": "Gotowe do instalacji"
+      }
+    },
+    "card": {
+      "lastPlayed": "Ostatnio uruchamiane",
+      "recentlyAdded": "Dodano",
+      "removeHint": "Zainstalowane wpisy mozna usunac z biblioteki dopiero po odinstalowaniu lokalnych plikow.",
+      "transferHint": "Poczekaj, az aktywny transfer sie zakonczy, zanim odinstalujesz lub usuniesz ten element."
+    },
+    "removeDialog": {
+      "eyebrow": "Usun wpis",
+      "title": "Usunac {{name}} z biblioteki?",
+      "body": "To usuwa tylko wpis z biblioteki i szybkie akcje, ale nie kasuje zainstalowanych plikow.",
+      "keepInstalledFiles": "Zainstalowane pliki pozostaja nietkniete. Usuwany jest tylko wpis biblioteki.",
+      "addedAt": "Dodano do biblioteki: {{date}}"
+    },
+    "uninstallDialog": {
+      "title": "Odinstalowac {{name}}?",
+      "body": "To usuwa zainstalowane pliki z dysku, ale pozostawia element w bibliotece do ponownej instalacji pozniej.",
+      "removeFiles": "Zainstalowane pliki w wybranym folderze biblioteki zostana usuniete.",
+      "keepLibraryEntry": "Wpis biblioteki pozostanie dostepny, aby pozniej ponownie zainstalowac, zaktualizowac lub usunac element."
     },
     "emptyState": {
       "emptyTitle": "Twoja biblioteka jest pusta",
-      "emptyBody": "Dodaj cos ze Sklepu, aby zaczac budowac kolekcje Lumorix. Po dodaniu element pozostanie tutaj do instalacji, uruchamiania, aktualizacji i naprawy.",
+      "emptyBody": "Twoja biblioteka jest pusta. Odkryj tresci w Sklepie.",
       "filteredTitle": "Brak elementow dla tego filtra",
-      "filteredBody": "Sprobuj innego filtra albo wroc do Sklepu, aby dodac wiecej tresci."
+      "filteredBody": "Zaden element biblioteki nie pasuje do obecnego wyszukiwania lub filtrow. Wyczysc je albo wroc do Sklepu."
     }
   },
   "downloads": {
     "emptyState": {
-      "title": "Pobrania sa teraz spokojne",
-      "body": "Instalacje, aktualizacje, naprawy i przenosiny pojawia sie tutaj wraz z postepem na zywo i historia."
+      "title": "Brak aktywnych pobran",
+      "body": "Instalacje, aktualizacje, naprawy i przenosiny pojawia sie tutaj po rozpoczeciu."
     },
     "summary": {
       "active": "Aktywne",
@@ -380,6 +428,8 @@
     "sections": {
       "activeEyebrow": "Aktywne teraz",
       "activeTitle": "Prace w toku",
+      "queuedEyebrow": "Nastepne",
+      "queuedTitle": "Oczekuje w kolejce",
       "historyEyebrow": "Najnowsza historia",
       "historyTitle": "Zakonczone zadania"
     },
@@ -389,7 +439,7 @@
   },
   "about": {
     "hero": {
-      "body": "Lokalna podstawa launchera Windows przygotowana z mysla o prywatnych instalacjach, swiadomych aktualizacjach i pelnej lokalnej kontroli nad grami, narzedziami i projektami Lumorix."
+      "body": "Lokalny launcher Windows do prywatnych instalacji, swiadomych aktualizacji i pelnej lokalnej kontroli nad grami, narzedziami i projektami Lumorix."
     },
     "updateState": {
       "eyebrow": "Stan aktualizacji launchera",
@@ -420,7 +470,8 @@
       "description": "Wybierz jezyk launchera. Mozesz go zmienic w dowolnym momencie.",
       "helper": "Zmiany sa stosowane natychmiast i zapisywane lokalnie na tym urzadzeniu.",
       "active": "Aktywny",
-      "switchNow": "Zmien teraz"
+      "switchNow": "Zmien teraz",
+      "novelty": "Tryb zabawny"
     },
     "storage": {
       "eyebrow": "Magazyn",
@@ -517,7 +568,6 @@
       "exploration": "Eksploracja",
       "utility": "Narzedzie",
       "narrative": "Narracja",
-      "prototype": "Prototyp",
       "offline": "Offline",
       "local_first": "Lokalnie najpierw"
     }

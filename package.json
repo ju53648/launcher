@@ -1,6 +1,6 @@
 {
   "name": "lumorix-launcher",
-  "version": "0.3.3",
+  "version": "0.4.1",
   "private": true,
   "type": "module",
   "description": "Local-first Windows desktop game launcher built with Tauri, Rust, React and TypeScript.",

@@ -9,7 +9,8 @@
     "languages": {
       "en": "English",
       "de": "Deutsch",
-      "pl": "Polski"
+      "pl": "Polski",
+      "shakespeare": "Shakespearean English"
     },
     "messages": {
       "noAccountNoAdsLocalFirst": "No account. No ads. Local-first.",
@@ -32,6 +33,7 @@
       "useRecommended": "Use recommended",
       "addLibrary": "Add library",
       "addToLibrary": "Add to Library",
+      "removeFromLibrary": "Remove from Library",
       "addingToLibrary": "Adding...",
       "viewDownload": "View Download",
       "viewDownloads": "View Downloads",
@@ -51,6 +53,7 @@
       "checkLibraryItems": "Check library items",
       "enterLumorix": "Enter Lumorix",
       "openShop": "Open Shop",
+      "clearFilters": "Clear filters",
       "installingShort": "Installing...",
       "checkingShort": "Checking...",
       "updatingShort": "Updating..."
@@ -308,8 +311,8 @@
       "all": "All"
     },
     "emptyState": {
-      "emptyTitle": "The Shop is empty",
-      "emptyBody": "Enable a manifest source or add catalog manifests to make content available here.",
+      "emptyTitle": "No items available right now",
+      "emptyBody": "Check back soon for new Lumorix content.",
       "filteredTitle": "No items match these filters",
       "filteredBody": "Try another search, clear a filter, or explore a different category."
     },
@@ -324,23 +327,68 @@
   },
   "library": {
     "filters": {
-      "all": "All",
-      "installed": "Installed",
-      "added": "Ready to install",
-      "updateAvailable": "Updates",
-      "error": "Needs repair"
+      "searchPlaceholder": "Search your library by name, developer, tag, or category",
+      "installState": "Install state",
+      "installAll": "All items",
+      "installInstalled": "Installed only",
+      "installNotInstalled": "Not installed",
+      "updates": "Updates",
+      "updatesAll": "All update states",
+      "updatesOnly": "Update available",
+      "category": "Category",
+      "allCategories": "All categories",
+      "tag": "Tag",
+      "allTags": "All tags"
+    },
+    "sort": {
+      "label": "Sort by",
+      "name": "Name (A-Z)",
+      "lastPlayed": "Last played",
+      "installed": "Installed status",
+      "recentlyAdded": "Recently added"
+    },
+    "toolbar": {
+      "eyebrow": "Library",
+      "title": "Own your local platform",
+      "body": "Sort, filter, launch, update, uninstall, and clean up your Library without losing track of what belongs to you.",
+      "results": "{{count}} items shown",
+      "stats": {
+        "total": "In Library",
+        "installed": "Installed",
+        "updates": "Updates",
+        "ready": "Ready to install"
+      }
+    },
+    "card": {
+      "lastPlayed": "Last played",
+      "recentlyAdded": "Added",
+      "removeHint": "Installed entries stay removable only after uninstalling their local files first.",
+      "transferHint": "Wait for the active transfer to finish before uninstalling or removing this item."
+    },
+    "removeDialog": {
+      "eyebrow": "Remove entry",
+      "title": "Remove {{name}} from your Library?",
+      "body": "This removes the Library entry and its quick actions, but does not delete installed files.",
+      "keepInstalledFiles": "Installed files are left untouched. Only the Library entry is removed.",
+      "addedAt": "Added to Library: {{date}}"
+    },
+    "uninstallDialog": {
+      "title": "Uninstall {{name}}?",
+      "body": "This removes the installed files from disk but keeps the item in your Library for reinstalling later.",
+      "removeFiles": "Installed files in the selected Library folder will be deleted.",
+      "keepLibraryEntry": "The Library entry stays available so you can reinstall, update, or remove it later."
     },
     "emptyState": {
       "emptyTitle": "Your Library is empty",
-      "emptyBody": "Add something from the Shop to start building your Lumorix collection. Once added, it stays here for install, launch, update, and repair actions.",
+      "emptyBody": "Your library is empty. Discover content in the Shop.",
       "filteredTitle": "No items match this filter",
-      "filteredBody": "Try another filter or head back to the Shop to add more content."
+      "filteredBody": "No Library items match the current search or filters. Clear them or head back to the Shop for more content."
     }
   },
   "downloads": {
     "emptyState": {
-      "title": "Downloads are quiet",
-      "body": "Installs, updates, repairs, and moves will appear here with live progress and history."
+      "title": "No active downloads",
+      "body": "Installs, updates, repairs, and moves will appear here when they start."
     },
     "summary": {
       "active": "Active",
@@ -360,6 +408,8 @@
     "sections": {
       "activeEyebrow": "Active now",
       "activeTitle": "Work in progress",
+      "queuedEyebrow": "Up next",
+      "queuedTitle": "Waiting in queue",
       "historyEyebrow": "Recent history",
       "historyTitle": "Finished jobs"
     },
@@ -369,7 +419,7 @@
   },
   "about": {
     "hero": {
-      "body": "A local-first Windows launcher foundation built for private installs, explicit updates, and clean local ownership across Lumorix games, tools, and projects."
+      "body": "A local-first Windows launcher for private installs, explicit updates, and clear local ownership across Lumorix games, tools, and projects."
     },
     "updateState": {
       "eyebrow": "Launcher update state",
@@ -400,7 +450,8 @@
       "description": "Choose the launcher language. You can change it at any time.",
       "helper": "Changes apply immediately and are stored on this device.",
       "active": "Active",
-      "switchNow": "Switch now"
+      "switchNow": "Switch now",
+      "novelty": "Novelty mode"
     },
     "storage": {
       "eyebrow": "Storage",
@@ -493,7 +544,6 @@
       "exploration": "Exploration",
       "utility": "Utility",
       "narrative": "Narrative",
-      "prototype": "Prototype",
       "offline": "Offline",
       "local_first": "Local-first"
     }

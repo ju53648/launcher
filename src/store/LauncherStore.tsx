@@ -10,12 +10,16 @@ import {
 } from "react";
 
 import { localizeSnapshotContent } from "../i18n/content";
-import { coerceLocale, useI18n } from "../i18n";
+import {
+  coerceLocale,
+  toCanonicalLocale,
+  useI18n,
+  type SupportedLocale
+} from "../i18n";
 import { normalizeLauncherSnapshot } from "../domain/normalize";
 import type {
   InstallJob,
   LauncherError,
-  LauncherLanguage,
   LauncherSnapshot
 } from "../domain/types";
 import {
@@ -39,6 +43,7 @@ interface LauncherContextValue {
   removeLibrary: (libraryId: string) => Promise<void>;
   setDefaultLibrary: (libraryId: string) => Promise<void>;
   addItemToLibrary: (itemId: string) => Promise<void>;
+  removeItemFromLibrary: (itemId: string) => Promise<void>;
   updatePreferences: (
     checkLauncherUpdatesOnStart: boolean,
     checkGameUpdatesOnStart: boolean,
@@ -57,7 +62,7 @@ interface LauncherContextValue {
   checkItemUpdates: () => Promise<void>;
   cancelJob: (jobId: string) => Promise<void>;
   clearCompletedJobs: () => Promise<void>;
-  setLanguagePreference: (language: LauncherLanguage) => Promise<void>;
+  setLanguagePreference: (language: SupportedLocale) => Promise<void>;
 }
 
 const LauncherContext = createContext<LauncherContextValue | undefined>(undefined);
@@ -110,13 +115,18 @@ export function LauncherProvider({ children }: { children: ReactNode }) {
       try {
         const next = await launcherApi.bootstrap();
         const configuredLanguage = coerceLocale(next.config.language);
+        const effectiveLocale =
+          initialLocale.current === "shakespeare" && configuredLanguage === "en"
+            ? "shakespeare"
+            : configuredLanguage;
 
         if (next.config.language) {
-          setLocale(configuredLanguage);
+          setLocale(effectiveLocale);
           if (!cancelled) publishSnapshot(next);
         } else {
+          const initialLanguage = toCanonicalLocale(initialLocale.current);
           try {
-            const persisted = await launcherApi.setLanguage(initialLocale.current);
+            const persisted = await launcherApi.setLanguage(initialLanguage);
             if (!cancelled) publishSnapshot(persisted);
           } catch (persistError) {
             console.warn("[launcher] failed to persist initial language", persistError);
@@ -125,7 +135,7 @@ export function LauncherProvider({ children }: { children: ReactNode }) {
                 ...next,
                 config: {
                   ...next.config,
-                  language: initialLocale.current
+                  language: initialLanguage
                 }
               });
             }
@@ -174,16 +184,16 @@ export function LauncherProvider({ children }: { children: ReactNode }) {
       refresh,
       setLanguagePreference: async (language) => {
         const previousLocale = locale;
-      setLocale(language);
-      setBusyAction("set-language");
-      setError(null);
-      try {
-        const next = await launcherApi.setLanguage(language);
-        publishSnapshot(next);
-      } catch (caught) {
-        setLocale(previousLocale);
-        setError(normalizeError(caught));
-      } finally {
+        setLocale(language);
+        setBusyAction("set-language");
+        setError(null);
+        try {
+          const next = await launcherApi.setLanguage(toCanonicalLocale(language));
+          publishSnapshot(next);
+        } catch (caught) {
+          setLocale(previousLocale);
+          setError(normalizeError(caught));
+        } finally {
           setBusyAction(null);
         }
       },
@@ -201,6 +211,8 @@ export function LauncherProvider({ children }: { children: ReactNode }) {
         runSnapshotAction("set-default-library", () => launcherApi.setDefaultLibrary(libraryId)),
       addItemToLibrary: (itemId) =>
         runSnapshotAction("add-item-to-library", () => launcherApi.addItemToLibrary(itemId)),
+      removeItemFromLibrary: (itemId) =>
+        runSnapshotAction("remove-item-from-library", () => launcherApi.removeItemFromLibrary(itemId)),
       updatePreferences: (
         checkLauncherUpdatesOnStart,
         checkGameUpdatesOnStart,

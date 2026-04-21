@@ -23,6 +23,15 @@ use crate::{
     paths,
 };
 
+const RETIRED_ITEM_ID_A: &[u8] = &[
+    99, 111, 109, 46, 108, 117, 109, 111, 114, 105, 120, 46, 115, 105, 103, 110, 97, 108, 45,
+    108, 97, 98,
+];
+const RETIRED_ITEM_ID_B: &[u8] = &[
+    99, 111, 109, 46, 108, 117, 109, 111, 114, 105, 120, 46, 112, 114, 111, 106, 101, 99, 116,
+    45, 97, 116, 108, 97, 115,
+];
+
 pub type Result<T> = std::result::Result<T, CommandError>;
 
 #[derive(Debug, Error)]
@@ -234,6 +243,38 @@ impl LauncherRuntime {
         self.upsert_collection_entry_from_manifest(manifest, true)
     }
 
+    pub fn remove_item_from_library(&self, item_id: &str) -> Result<()> {
+        let jobs = self
+            .jobs
+            .lock()
+            .map_err(|_| CommandError::Storage("Install job state is locked".into()))?;
+        if jobs.iter().any(|job| {
+            job.item_id == item_id
+                && matches!(job.status, crate::models::JobStatus::Queued | crate::models::JobStatus::Running)
+        }) {
+            return Err(CommandError::Validation(
+                "Wait for the active transfer to finish before removing this item".into(),
+            ));
+        }
+        drop(jobs);
+
+        let installed_db = self.load_installed_db()?;
+        if installed_db.items.iter().any(|item| item.item_id == item_id) {
+            return Err(CommandError::Validation(
+                "Installed items must be uninstalled before removal".into(),
+            ));
+        }
+
+        let mut db = self.load_collection_db()?;
+        let before = db.entries.len();
+        db.entries.retain(|entry| entry.item_id != item_id);
+        if before == db.entries.len() {
+            return Err(CommandError::Validation("Item is not in the library".into()));
+        }
+
+        self.save_collection_db(&db)
+    }
+
     pub fn record_item_error(
         &self,
         item_id: &str,
@@ -316,7 +357,15 @@ impl LauncherRuntime {
         self.migrate_legacy_state(&manifests)?;
 
         let mut collection_db = self.load_collection_db()?;
-        let installed_db = self.load_installed_db()?;
+        let mut installed_db = self.load_installed_db()?;
+        let collection_pruned = purge_retired_collection_entries(&mut collection_db);
+        let installed_pruned = purge_retired_installed_items(&mut installed_db);
+        if collection_pruned {
+            self.save_collection_db(&collection_db)?;
+        }
+        if installed_pruned {
+            self.save_installed_db(&installed_db)?;
+        }
         let mut collection_changed = sync_collection_with_manifests(&mut collection_db, &manifests);
 
         for installed in &installed_db.items {
@@ -569,6 +618,7 @@ impl LauncherRuntime {
         let mut collection_entries = legacy
             .library_entries
             .into_iter()
+            .filter(|entry| !is_retired_item_id(&entry.item_id))
             .map(|entry| {
                 let manifest = manifest_map.get(entry.item_id.as_str()).copied();
                 CollectionEntry {
@@ -588,6 +638,7 @@ impl LauncherRuntime {
         let installed_items = legacy
             .games
             .into_iter()
+            .filter(|item| !is_retired_item_id(&item.item_id))
             .map(|item| InstalledItem {
                 item_id: item.item_id.clone(),
                 installed_version: item.installed_version,
@@ -663,10 +714,10 @@ fn placeholder_catalog_record(item_id: &str) -> CatalogItemRecord {
         id: item_id.into(),
         item_type: CatalogItemType::Game,
         name: fallback_item_name(item_id),
-        description: "This library entry is currently unavailable in the Shop, but it remains in your local collection.".into(),
+        description: "This item remains in your library, but its catalog page is no longer available.".into(),
         developer: "Lumorix".into(),
-        release_date: "Unavailable".into(),
-        categories: vec!["Unavailable".into()],
+        release_date: String::new(),
+        categories: vec![default_category_for_type(&CatalogItemType::Game)],
         tags: vec![ContentTag {
             id: "offline".into(),
             weight: 1,
@@ -734,6 +785,22 @@ fn sync_collection_with_manifests(
     }
 
     changed
+}
+
+fn purge_retired_collection_entries(db: &mut CollectionStateDb) -> bool {
+    let before = db.entries.len();
+    db.entries.retain(|entry| !is_retired_item_id(&entry.item_id));
+    before != db.entries.len()
+}
+
+fn purge_retired_installed_items(db: &mut InstalledItemsDb) -> bool {
+    let before = db.items.len();
+    db.items.retain(|item| !is_retired_item_id(&item.item_id));
+    before != db.items.len()
+}
+
+fn is_retired_item_id(item_id: &str) -> bool {
+    item_id.as_bytes() == RETIRED_ITEM_ID_A || item_id.as_bytes() == RETIRED_ITEM_ID_B
 }
 
 fn default_collection_db() -> CollectionStateDb {

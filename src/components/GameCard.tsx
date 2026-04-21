@@ -1,6 +1,6 @@
-import { Download, Play, Wrench } from "lucide-react";
+import { Download, Play, Trash2, Wrench } from "lucide-react";
 
-import { formatBytes, itemTypeLabel, jobProgressLabel } from "../domain/format";
+import { formatBytes, formatDate, itemTypeLabel, jobProgressLabel } from "../domain/format";
 import { getTagLabel, sortTagsByWeight } from "../domain/tags";
 import type { ContentView } from "../domain/types";
 import { useI18n } from "../i18n";
@@ -13,7 +13,9 @@ export function GameCard({
   onInstall,
   onLaunch,
   onUpdate,
-  onRepair
+  onRepair,
+  onUninstall,
+  onRemove
 }: {
   item: ContentView;
   onOpen: () => void;
@@ -21,9 +23,17 @@ export function GameCard({
   onLaunch: () => void;
   onUpdate: () => void;
   onRepair: () => void;
+  onUninstall: () => void;
+  onRemove: () => void;
 }) {
   const { locale, t } = useI18n();
   const manifest = item.manifest;
+  const isInstalled = Boolean(item.installed);
+  const hasActiveJob = Boolean(item.activeJob);
+  const canRemove = Boolean(item.collectionEntry) && !isInstalled && !hasActiveJob;
+  const canUninstall = isInstalled && !hasActiveJob;
+  const lastPlayedAt = item.collectionEntry?.lastUsedAt ?? item.installed?.lastLaunchedAt ?? null;
+  const addedAt = item.collectionEntry?.addedAt ?? null;
 
   return (
     <article className="game-card">
@@ -47,7 +57,10 @@ export function GameCard({
               {item.catalog.developer} / {itemTypeLabel(item.catalog.itemType, t)}
             </p>
           </div>
-          <StatusBadge status={item.collectionStatus} type="collection" />
+          <div className="game-card__badges">
+            <StatusBadge status={item.collectionStatus} type="collection" />
+            <StatusBadge status={item.installState} type="install" />
+          </div>
         </div>
 
         <p className="game-card__description">{item.catalog.description}</p>
@@ -69,47 +82,90 @@ export function GameCard({
             <ProgressBar value={item.activeJob.progress} compact />
           </div>
         ) : (
-          <div className="game-card__meta">
-            <span>{manifest ? `v${manifest.version}` : t("shop.card.unavailable")}</span>
-            <span>
-              {formatBytes(
-                manifest?.installSizeBytes ?? item.installed?.sizeOnDiskBytes ?? 0,
-                locale
-              )}
-            </span>
+          <div className="game-card__facts">
+            <div className="game-card__meta">
+              <span>{t("common.labels.version")}</span>
+              <strong>{manifest ? `v${manifest.version}` : t("shop.card.unavailable")}</strong>
+            </div>
+            <div className="game-card__meta">
+              <span>{t("common.labels.installSize")}</span>
+              <strong>
+                {formatBytes(
+                  manifest?.installSizeBytes ?? item.installed?.sizeOnDiskBytes ?? 0,
+                  locale
+                )}
+              </strong>
+            </div>
+            <div className="game-card__meta">
+              <span>{t("library.card.lastPlayed")}</span>
+              <strong>{formatDate(lastPlayedAt, locale, t)}</strong>
+            </div>
+            <div className="game-card__meta">
+              <span>{t("library.card.recentlyAdded")}</span>
+              <strong>{formatDate(addedAt, locale, t)}</strong>
+            </div>
           </div>
         )}
 
         {item.lastError && <p className="field-error">{item.lastError}</p>}
+        {hasActiveJob ? (
+          <p className="game-card__hint">{t("library.card.transferHint")}</p>
+        ) : isInstalled ? (
+          <p className="game-card__hint">{t("library.card.removeHint")}</p>
+        ) : null}
 
         <div className="game-card__actions">
-          {item.installState === "installed" && (
-            <button className="button button--primary" onClick={onLaunch} type="button">
-              <Play size={16} />
-              {t("common.actions.launch")}
+          <div className="game-card__primary-actions">
+            {isInstalled && (
+              <button className="button button--primary" onClick={onLaunch} type="button">
+                <Play size={16} />
+                {t("common.actions.launch")}
+              </button>
+            )}
+            {item.installState === "notInstalled" && manifest && (
+              <button className="button button--primary" onClick={onInstall} type="button">
+                <Download size={16} />
+                {t("common.actions.install")}
+              </button>
+            )}
+            {item.installState === "updateAvailable" && (
+              <button className="button button--primary" onClick={onUpdate} type="button">
+                <Download size={16} />
+                {t("common.actions.update")}
+              </button>
+            )}
+            {item.installState === "error" && (
+              <button className="button button--primary" onClick={onRepair} type="button">
+                <Wrench size={16} />
+                {t("common.actions.repair")}
+              </button>
+            )}
+          </div>
+          <div className="game-card__secondary-actions">
+            {isInstalled && (
+              <button
+                className="button button--secondary"
+                disabled={!canUninstall}
+                onClick={onUninstall}
+                type="button"
+              >
+                <Trash2 size={16} />
+                {t("common.actions.uninstall")}
+              </button>
+            )}
+            <button
+              className="button button--ghost"
+              disabled={!canRemove}
+              onClick={onRemove}
+              type="button"
+            >
+              <Trash2 size={16} />
+              {t("common.actions.removeFromLibrary")}
             </button>
-          )}
-          {item.installState === "notInstalled" && manifest && (
-            <button className="button button--primary" onClick={onInstall} type="button">
-              <Download size={16} />
-              {t("common.actions.install")}
+            <button className="button button--ghost" onClick={onOpen} type="button">
+              {t("common.actions.details")}
             </button>
-          )}
-          {item.installState === "updateAvailable" && (
-            <button className="button button--primary" onClick={onUpdate} type="button">
-              <Download size={16} />
-              {t("common.actions.update")}
-            </button>
-          )}
-          {item.installState === "error" && (
-            <button className="button button--primary" onClick={onRepair} type="button">
-              <Wrench size={16} />
-              {t("common.actions.repair")}
-            </button>
-          )}
-          <button className="button button--ghost" onClick={onOpen} type="button">
-            {t("common.actions.details")}
-          </button>
+          </div>
         </div>
       </div>
     </article>

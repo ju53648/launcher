@@ -26,7 +26,6 @@ export const TAG_DEFINITIONS: Record<string, TagDefinition> = {
   exploration: { id: "exploration", category: "systems" },
   utility: { id: "utility", category: "systems" },
   narrative: { id: "narrative", category: "systems" },
-  prototype: { id: "prototype", category: "systems" },
   offline: { id: "offline", category: "systems" },
   local_first: { id: "local_first", category: "systems" }
 };

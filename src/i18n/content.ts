@@ -5,6 +5,8 @@ import type { ReleaseInfo } from "../releaseInfo";
 import type { ContentView, LauncherSnapshot } from "../domain/types";
 import type { SupportedLocale } from "./index";
 
+type CanonicalContentLocale = "en" | "de" | "pl";
+
 type LocalizedContent = {
   items: Record<
     string,
@@ -20,7 +22,7 @@ type LocalizedContent = {
   };
 };
 
-const contentDictionaries: Record<SupportedLocale, LocalizedContent> = {
+const contentDictionaries: Record<CanonicalContentLocale, LocalizedContent> = {
   en: en as LocalizedContent,
   de: de as LocalizedContent,
   pl: pl as LocalizedContent
@@ -39,7 +41,8 @@ export function localizeSnapshotContent(
 }
 
 export function localizeContentView(item: ContentView, locale: SupportedLocale): ContentView {
-  const localized = contentDictionaries[locale].items[item.catalog.id];
+  const canonicalLocale: CanonicalContentLocale = locale === "shakespeare" ? "en" : locale;
+  const localized = contentDictionaries[canonicalLocale].items[item.catalog.id];
   if (!localized) return item;
 
   return {
@@ -83,7 +86,8 @@ export function localizeContentView(item: ContentView, locale: SupportedLocale):
 }
 
 export function localizeReleaseInfo(releaseInfo: ReleaseInfo, locale: SupportedLocale): ReleaseInfo {
-  const localized = contentDictionaries[locale].releaseInfo;
+  const canonicalLocale: CanonicalContentLocale = locale === "shakespeare" ? "en" : locale;
+  const localized = contentDictionaries[canonicalLocale].releaseInfo;
   return {
     ...releaseInfo,
     title: localized?.title ?? releaseInfo.title,

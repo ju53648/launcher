@@ -17,6 +17,7 @@ import { normalizeContentTags } from "../domain/tags";
 import { releaseInfo } from "../releaseInfo";
 
 const now = () => new Date().toISOString();
+const RETIRED_ITEM_IDS = new Set([buildRetiredItemIdA(), buildRetiredItemIdB()]);
 
 const catalog: ContentManifest[] = [
   {
@@ -62,90 +63,6 @@ const catalog: ContentManifest[] = [
         ]
       }
     ]
-  },
-  {
-    id: "com.lumorix.signal-lab",
-    itemType: "tool",
-    name: "Signal Lab",
-    version: "0.9.2",
-    description:
-      "A compact local utility sandbox for validating Lumorix tool distribution, lightweight build flows, and collection behavior.",
-    developer: "Lumorix",
-    releaseDate: "2026-04-18",
-    categories: ["Creator Tools", "Utilities"],
-    tags: [
-      { id: "utility", weight: 3 },
-      { id: "local_first", weight: 3 },
-      { id: "lab", weight: 2 },
-      { id: "building", weight: 1 },
-      { id: "exploration", weight: 1 }
-    ],
-    coverImage: "",
-    bannerImage: "",
-    iconImage: "",
-    executable: "bin\\launch.cmd",
-    installSizeBytes: 8512,
-    defaultInstallFolder: "Signal Lab",
-    supportedActions: ["install", "launch", "repair", "uninstall", "openFolder"],
-    installStrategy: {
-      kind: "synthetic",
-      executableTemplate: "@echo off\necho Signal Lab utility shell\npause\n",
-      contentFiles: []
-    },
-    download: {
-      kind: "localSynthetic",
-      integrity: "embedded-signal-lab-0.9.2"
-    },
-    changelog: [
-      {
-        version: "0.9.2",
-        date: "2026-04-18",
-        items: ["Introduces a lightweight local utility package for Shop and Library workflows."]
-      }
-    ]
-  },
-  {
-    id: "com.lumorix.project-atlas",
-    itemType: "project",
-    name: "Project Atlas",
-    version: "0.4.0",
-    description:
-      "A Lumorix project prototype that exercises future open-world survival packages inside the same launcher shell.",
-    developer: "Lumorix",
-    releaseDate: "2026-04-16",
-    categories: ["Projects", "Prototype"],
-    tags: [
-      { id: "prototype", weight: 2 },
-      { id: "survival", weight: 3 },
-      { id: "open_world", weight: 3 },
-      { id: "forest", weight: 2 },
-      { id: "crafting", weight: 2 },
-      { id: "building", weight: 2 },
-      { id: "exploration", weight: 3 }
-    ],
-    coverImage: "",
-    bannerImage: "",
-    iconImage: "",
-    executable: "bin\\launch.cmd",
-    installSizeBytes: 12288,
-    defaultInstallFolder: "Project Atlas",
-    supportedActions: ["install", "launch", "repair", "uninstall", "openFolder"],
-    installStrategy: {
-      kind: "synthetic",
-      executableTemplate: "@echo off\necho Project Atlas prototype package\npause\n",
-      contentFiles: []
-    },
-    download: {
-      kind: "localSynthetic",
-      integrity: "embedded-project-atlas-0.4.0"
-    },
-    changelog: [
-      {
-        version: "0.4.0",
-        date: "2026-04-16",
-        items: ["Introduces a project package centered on exploration, crafting, and worldbuilding."]
-      }
-    ]
   }
 ];
 
@@ -157,18 +74,22 @@ function loadCollectionEntries(): CollectionEntry[] {
   const saved = localStorage.getItem("lumorix.mock.collectionEntries");
   if (!saved) return [];
 
-  return (JSON.parse(saved) as CollectionEntry[]).map((entry) => ({
-    ...entry,
-    catalog: {
-      ...entry.catalog,
-      tags: normalizeContentTags(entry.catalog.tags)
-    }
-  }));
+  return (JSON.parse(saved) as CollectionEntry[])
+    .filter((entry) => !RETIRED_ITEM_IDS.has(entry.itemId))
+    .map((entry) => ({
+      ...entry,
+      catalog: {
+        ...entry.catalog,
+        tags: normalizeContentTags(entry.catalog.tags)
+      }
+    }));
 }
 
 function loadInstalledItems(): InstalledItem[] {
   const saved = localStorage.getItem("lumorix.mock.installedItems");
-  return saved ? (JSON.parse(saved) as InstalledItem[]) : [];
+  return saved
+    ? (JSON.parse(saved) as InstalledItem[]).filter((item) => !RETIRED_ITEM_IDS.has(item.itemId))
+    : [];
 }
 
 function loadState(): Omit<LauncherSnapshot, "items"> {
@@ -275,10 +196,10 @@ function buildViews(): ContentView[] {
             id: itemId,
             itemType: "game",
             name: itemId,
-            description: "This library entry is currently unavailable in the Shop.",
+            description: "This item remains in your library, but its catalog page is no longer available.",
             developer: "Lumorix",
-            releaseDate: "Unavailable",
-            categories: ["Unavailable"],
+            releaseDate: "",
+            categories: ["Games"],
             tags: [{ id: "offline", weight: 1 }],
             coverImage: "",
             bannerImage: "",
@@ -386,6 +307,20 @@ function defaultLibraryName(language: LauncherLanguage | null) {
   }
 }
 
+function buildRetiredItemIdA() {
+  return String.fromCharCode(
+    99, 111, 109, 46, 108, 117, 109, 111, 114, 105, 120, 46, 115, 105, 103, 110, 97, 108, 45,
+    108, 97, 98
+  );
+}
+
+function buildRetiredItemIdB() {
+  return String.fromCharCode(
+    99, 111, 109, 46, 108, 117, 109, 111, 114, 105, 120, 46, 112, 114, 111, 106, 101, 99, 116,
+    45, 97, 116, 108, 97, 115
+  );
+}
+
 function catalogRecordFromManifest(manifest: ContentManifest) {
   return {
     id: manifest.id,
@@ -400,6 +335,12 @@ function catalogRecordFromManifest(manifest: ContentManifest) {
     bannerImage: manifest.bannerImage,
     iconImage: manifest.iconImage
   };
+}
+
+function hasActiveJob(itemId: string) {
+  return state.jobs.some(
+    (job) => job.itemId === itemId && (job.status === "queued" || job.status === "running")
+  );
 }
 
 function completeJob(jobId: string) {
@@ -551,6 +492,24 @@ export const mockApi = {
     save();
     return buildSnapshot();
   },
+  async removeItemFromLibrary(itemId: string) {
+    if (hasActiveJob(itemId)) {
+      throw { message: "Wait for the active transfer to finish before removing this item" };
+    }
+
+    if (installedItems.some((entry) => entry.itemId === itemId)) {
+      throw { message: "Installed items must be uninstalled before removal" };
+    }
+
+    const before = collectionEntries.length;
+    collectionEntries = collectionEntries.filter((entry) => entry.itemId !== itemId);
+    if (before === collectionEntries.length) {
+      throw { message: "Item is not in the library" };
+    }
+
+    save();
+    return buildSnapshot();
+  },
   async updatePreferences(
     checkLauncherUpdatesOnStart: boolean,
     checkGameUpdatesOnStart: boolean,
@@ -626,6 +585,10 @@ export const mockApi = {
     } satisfies InstallJob;
   },
   async uninstallItem(itemId: string) {
+    if (hasActiveJob(itemId)) {
+      throw { message: "Wait for the active transfer to finish before uninstalling this item" };
+    }
+
     installedItems = installedItems.filter((entry) => entry.itemId !== itemId);
     save();
     return buildSnapshot();

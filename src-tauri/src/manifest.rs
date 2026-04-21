@@ -10,8 +10,6 @@ use crate::{
 
 const EMBEDDED_MANIFESTS: &[&str] = &[
     include_str!("../manifests/lumorix-dropdash.json"),
-    include_str!("../manifests/signal-lab.json"),
-    include_str!("../manifests/project-atlas.json"),
 ];
 
 #[derive(Debug, Clone)]

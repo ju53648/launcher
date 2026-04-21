@@ -1,6 +1,7 @@
 import { Download, FolderOpen, Play, Plus, RefreshCw, Trash2, Wrench } from "lucide-react";
 import { useState } from "react";
 
+import { ConfirmDialog } from "../components/ConfirmDialog";
 import { InstallDialog } from "../components/InstallDialog";
 import { ProgressBar } from "../components/ProgressBar";
 import { RecommendationSection } from "../components/RecommendationSection";
@@ -29,14 +30,18 @@ export function GameDetailView({
     updateItem,
     repairItem,
     uninstallItem,
+    removeItemFromLibrary,
     openInstallFolder
   } = useLauncher();
   const [installOpen, setInstallOpen] = useState(false);
+  const [removeOpen, setRemoveOpen] = useState(false);
+  const [uninstallOpen, setUninstallOpen] = useState(false);
 
   if (!snapshot) return null;
 
   const manifest = item.manifest;
   const similarItems = getSimilarItems(snapshot, item.catalog.id, 3);
+  const hasActiveJob = Boolean(item.activeJob);
 
   return (
     <div className="view-stack">
@@ -70,7 +75,10 @@ export function GameDetailView({
               </div>
             </div>
           </div>
-          <StatusBadge status={item.collectionStatus} type="collection" />
+          <div className="detail-hero__badges">
+            <StatusBadge status={item.collectionStatus} type="collection" />
+            <StatusBadge status={item.installState} type="install" />
+          </div>
         </div>
       </section>
 
@@ -119,12 +127,29 @@ export function GameDetailView({
               <FolderOpen size={16} />
               {t("common.actions.showFiles")}
             </button>
-            <button className="button button--danger" onClick={() => uninstallItem(item.catalog.id)} type="button">
+            <button
+              className="button button--danger"
+              disabled={hasActiveJob}
+              onClick={() => setUninstallOpen(true)}
+              type="button"
+            >
               <Trash2 size={16} />
               {t("common.actions.uninstall")}
             </button>
           </>
         )}
+        {item.collectionStatus !== "notAdded" && (
+          <button
+            className="button button--ghost"
+            disabled={Boolean(item.installed) || hasActiveJob}
+            onClick={() => setRemoveOpen(true)}
+            type="button"
+          >
+            <Trash2 size={16} />
+            {t("common.actions.removeFromLibrary")}
+          </button>
+        )}
+        {hasActiveJob && <p className="detail-actions__hint">{t("library.card.transferHint")}</p>}
       </section>
 
       {item.activeJob && (
@@ -250,6 +275,41 @@ export function GameDetailView({
           onClose={() => setInstallOpen(false)}
           onInstall={async (libraryId) => {
             await installItem(item.catalog.id, libraryId);
+          }}
+        />
+      )}
+
+      {removeOpen && (
+        <ConfirmDialog
+          title={t("library.removeDialog.title", { name: item.catalog.name })}
+          body={t("library.removeDialog.body", { name: item.catalog.name })}
+          confirmLabel={t("common.actions.removeFromLibrary")}
+          details={[
+            t("library.removeDialog.keepInstalledFiles"),
+            t("library.removeDialog.addedAt", {
+              date: formatDate(item.collectionEntry?.addedAt ?? null, locale, t)
+            })
+          ]}
+          onClose={() => setRemoveOpen(false)}
+          onConfirm={async () => {
+            await removeItemFromLibrary(item.catalog.id);
+            setRoute("library");
+          }}
+        />
+      )}
+
+      {uninstallOpen && (
+        <ConfirmDialog
+          title={t("library.uninstallDialog.title", { name: item.catalog.name })}
+          body={t("library.uninstallDialog.body", { name: item.catalog.name })}
+          confirmLabel={t("common.actions.uninstall")}
+          details={[
+            t("library.uninstallDialog.removeFiles"),
+            t("library.uninstallDialog.keepLibraryEntry")
+          ]}
+          onClose={() => setUninstallOpen(false)}
+          onConfirm={async () => {
+            await uninstallItem(item.catalog.id);
           }}
         />
       )}

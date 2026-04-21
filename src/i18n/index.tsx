@@ -12,9 +12,12 @@ import de from "./locales/de.json";
 import en from "./locales/en.json";
 import pl from "./locales/pl.json";
 
-export const SUPPORTED_LOCALES = ["en", "de", "pl"] as const;
+const BASE_LOCALES = ["en", "de", "pl"] as const;
+export const SUPPORTED_LOCALES = [...BASE_LOCALES, "shakespeare"] as const;
+export const LOCALE_STORAGE_KEY = "lumorix.locale.preference";
 
 export type SupportedLocale = (typeof SUPPORTED_LOCALES)[number];
+type CanonicalLocale = (typeof BASE_LOCALES)[number];
 export type TranslationParams = Record<string, string | number | null | undefined>;
 type TranslationLeaf = string | PluralTranslation;
 type TranslationTree = {
@@ -24,13 +27,49 @@ type PluralTranslation = Partial<Record<Intl.LDMLPluralRule, string>> & {
   other: string;
 };
 
-const dictionaries: Record<SupportedLocale, TranslationTree> = {
+const dictionaries: Record<CanonicalLocale, TranslationTree> = {
   en: en as TranslationTree,
   de: de as TranslationTree,
   pl: pl as TranslationTree
 };
 
 const pluralKeys = new Set(["zero", "one", "two", "few", "many", "other"]);
+const shakespearePhraseMappings: Array<[string, string]> = [
+  ["Add to Library", "Addeth to Library"],
+  ["No items found", "No items wert found"],
+  ["No items available right now", "No wares be available right now"],
+  ["Update available", "Update awaiteth"],
+  ["Check for updates", "Seek for updates"],
+  ["Check updates", "Seek updates"],
+  ["Check launcher", "Seek launcher tidings"],
+  ["Install update", "Install update forthwith"],
+  ["Open Shop", "Open Shoppe"],
+  ["View Downloads", "View Downloads ledger"],
+  ["View Library", "View Library ledger"],
+  ["No active downloads", "No active downloads at present"],
+  ["No update available", "No update awaiteth"],
+  ["Search", "Seek"],
+  ["Install", "Installeth"],
+  ["Update", "Updateth"],
+  ["Play", "Playeth"],
+  ["Launch", "Playeth"],
+  ["Shop", "Shoppe"],
+  ["Downloads", "Downloades"],
+  ["Settings", "Settings of Court"],
+  ["Remove", "Banish"],
+  ["Library", "Library of Tomes"]
+];
+
+const shakespeareWordMappings: Array<[RegExp, string]> = [
+  [/\byour\b/gi, "thy"],
+  [/\byou\b/gi, "thou"],
+  [/\bare\b/gi, "art"],
+  [/\bdo not\b/gi, "dost not"],
+  [/\bdoes not\b/gi, "doth not"],
+  [/\bplease\b/gi, "prithee"],
+  [/\bhello\b/gi, "well met"],
+  [/\bhere\b/gi, "hither"]
+];
 
 interface I18nContextValue {
   locale: SupportedLocale;
@@ -41,10 +80,18 @@ interface I18nContextValue {
 const I18nContext = createContext<I18nContextValue | undefined>(undefined);
 
 export function I18nProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocale] = useState<SupportedLocale>(detectPreferredLocale());
+  const [locale, setLocale] = useState<SupportedLocale>(() => loadStoredLocale() ?? detectPreferredLocale());
 
   useEffect(() => {
     document.documentElement.lang = locale;
+  }, [locale]);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(LOCALE_STORAGE_KEY, locale);
+    } catch {
+      // Ignore storage failures and keep locale in-memory.
+    }
   }, [locale]);
 
   const t = useCallback(
@@ -85,12 +132,23 @@ export function coerceLocale(locale: string | null | undefined): SupportedLocale
   return SUPPORTED_LOCALES.includes(locale as SupportedLocale) ? (locale as SupportedLocale) : "en";
 }
 
+export function toCanonicalLocale(locale: SupportedLocale): CanonicalLocale {
+  return locale === "shakespeare" ? "en" : locale;
+}
+
 export function translate(
   locale: SupportedLocale,
   key: string,
   params?: TranslationParams
 ): string {
-  const localized = resolveMessage(dictionaries[locale], locale, key, params);
+  if (locale === "shakespeare") {
+    const source = resolveMessage(dictionaries.en, "en", key, params);
+    if (source) return toShakespeare(source);
+    return humanizeMissingKey(key);
+  }
+
+  const canonicalLocale = toCanonicalLocale(locale);
+  const localized = resolveMessage(dictionaries[canonicalLocale], canonicalLocale, key, params);
   if (localized) return localized;
 
   const fallback = resolveMessage(dictionaries.en, "en", key, params);
@@ -162,4 +220,46 @@ function humanizeMissingKey(key: string) {
     .replace(/([a-z])([A-Z])/g, "$1 $2")
     .replace(/[-_]/g, " ")
     .replace(/^\w/, (character) => character.toUpperCase());
+}
+
+function loadStoredLocale(): SupportedLocale | null {
+  try {
+    return coerceLocale(window.localStorage.getItem(LOCALE_STORAGE_KEY));
+  } catch {
+    return null;
+  }
+}
+
+function toShakespeare(input: string): string {
+  let transformed = input;
+
+  for (const [source, replacement] of shakespearePhraseMappings) {
+    transformed = replaceWithCase(transformed, new RegExp(escapeRegExp(source), "gi"), replacement);
+  }
+
+  for (const [pattern, replacement] of shakespeareWordMappings) {
+    transformed = replaceWithCase(transformed, pattern, replacement);
+  }
+
+  return transformed;
+}
+
+function replaceWithCase(input: string, pattern: RegExp, replacement: string): string {
+  return input.replace(pattern, (match) => matchCase(match, replacement));
+}
+
+function matchCase(source: string, replacement: string): string {
+  if (source.toUpperCase() === source) {
+    return replacement.toUpperCase();
+  }
+
+  if (/^[A-Z]/.test(source)) {
+    return replacement.charAt(0).toUpperCase() + replacement.slice(1);
+  }
+
+  return replacement;
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }

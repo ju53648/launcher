@@ -79,6 +79,25 @@ export function DownloadsView() {
         </section>
       )}
 
+      {queuedJobs.length > 0 && (
+        <section className="downloads-section">
+          <div>
+            <p className="eyebrow">{t("downloads.sections.queuedEyebrow")}</p>
+            <h2>{t("downloads.sections.queuedTitle")}</h2>
+          </div>
+          <div className="downloads-list">
+            {queuedJobs.map((job) => (
+              <DownloadRow
+                key={job.id}
+                job={job}
+                locale={locale}
+                onCancel={() => cancelJob(job.id)}
+              />
+            ))}
+          </div>
+        </section>
+      )}
+
       {finishedJobs.length > 0 && (
         <section className="downloads-section">
           <div>

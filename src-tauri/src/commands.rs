@@ -175,6 +175,16 @@ pub fn add_item_to_library(
 }
 
 #[tauri::command]
+pub fn remove_item_from_library(
+    state: State<'_, LauncherRuntime>,
+    item_id: String,
+) -> Result<LauncherSnapshot> {
+    state.remove_item_from_library(&item_id)?;
+    state.append_log("INFO", &format!("Removed item from library: {item_id}"));
+    state.build_snapshot()
+}
+
+#[tauri::command]
 pub fn start_install_item(
     state: State<'_, LauncherRuntime>,
     item_id: String,

@@ -55,6 +55,8 @@ export const tauriApi = {
     callCommand<LauncherSnapshot>("set_default_library", { libraryId }),
   addItemToLibrary: (itemId: string) =>
     callCommand<LauncherSnapshot>("add_item_to_library", { itemId }),
+  removeItemFromLibrary: (itemId: string) =>
+    callCommand<LauncherSnapshot>("remove_item_from_library", { itemId }),
   updatePreferences: (
     checkLauncherUpdatesOnStart: boolean,
     checkGameUpdatesOnStart: boolean,

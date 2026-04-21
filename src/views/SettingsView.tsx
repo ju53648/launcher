@@ -57,7 +57,8 @@ export function SettingsView() {
   const prefs = draftPreferences ?? preferences;
   const languageOptions = SUPPORTED_LOCALES.map((value) => ({
     value,
-    label: t(`common.languages.${value}`)
+    label: t(`common.languages.${value}`),
+    isNovelty: value === "shakespeare"
   }));
 
   return (
@@ -93,7 +94,10 @@ export function SettingsView() {
                     </span>
                   )}
                 </div>
-                <small>{active ? t("settings.language.active") : t("settings.language.switchNow")}</small>
+                <small>
+                  {active ? t("settings.language.active") : t("settings.language.switchNow")}
+                  {option.isNovelty ? ` • ${t("settings.language.novelty")}` : ""}
+                </small>
               </button>
             );
           })}

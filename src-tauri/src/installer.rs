@@ -159,6 +159,19 @@ pub fn verify_item(runtime: &LauncherRuntime, item_id: &str) -> Result<Installed
 }
 
 pub fn uninstall_item(runtime: &LauncherRuntime, item_id: &str) -> Result<()> {
+    let jobs = runtime
+        .jobs
+        .lock()
+        .map_err(|_| CommandError::Storage("Install job state is locked".into()))?;
+    if jobs.iter().any(|job| {
+        job.item_id == item_id && matches!(job.status, JobStatus::Queued | JobStatus::Running)
+    }) {
+        return Err(CommandError::Install(
+            "Wait for the active transfer to finish before uninstalling this item".into(),
+        ));
+    }
+    drop(jobs);
+
     let db = runtime.load_installed_db()?;
     let installed = db
         .items

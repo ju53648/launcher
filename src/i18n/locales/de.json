@@ -9,7 +9,8 @@
     "languages": {
       "en": "English",
       "de": "Deutsch",
-      "pl": "Polski"
+      "pl": "Polski",
+      "shakespeare": "Shakespeare-Englisch"
     },
     "messages": {
       "noAccountNoAdsLocalFirst": "Kein Konto. Keine Werbung. Lokal zuerst.",
@@ -32,6 +33,7 @@
       "useRecommended": "Empfohlenen Pfad verwenden",
       "addLibrary": "Bibliothek hinzufugen",
       "addToLibrary": "Zur Bibliothek hinzufugen",
+      "removeFromLibrary": "Aus der Bibliothek entfernen",
       "addingToLibrary": "Wird hinzugefugt...",
       "viewDownload": "Download anzeigen",
       "viewDownloads": "Downloads anzeigen",
@@ -51,6 +53,7 @@
       "checkLibraryItems": "Bibliothekseintrage prufen",
       "enterLumorix": "Lumorix starten",
       "openShop": "Shop offnen",
+      "clearFilters": "Filter zurucksetzen",
       "installingShort": "Wird installiert...",
       "checkingShort": "Wird gepruft...",
       "updatingShort": "Wird aktualisiert..."
@@ -308,8 +311,8 @@
       "all": "Alle"
     },
     "emptyState": {
-      "emptyTitle": "Der Shop ist leer",
-      "emptyBody": "Aktiviere eine Manifest-Quelle oder fige Katalog-Manifeste hinzu, damit hier Inhalte verfugbar sind.",
+      "emptyTitle": "Derzeit sind keine Eintrage verfugbar",
+      "emptyBody": "Schau bald wieder vorbei, um neue Lumorix-Inhalte zu entdecken.",
       "filteredTitle": "Keine Eintrage passen zu diesen Filtern",
       "filteredBody": "Probiere eine andere Suche, losche einen Filter oder wechsle die Kategorie."
     },
@@ -324,23 +327,68 @@
   },
   "library": {
     "filters": {
-      "all": "Alle",
-      "installed": "Installiert",
-      "added": "Bereit zur Installation",
-      "updateAvailable": "Updates",
-      "error": "Reparatur erforderlich"
+      "searchPlaceholder": "Bibliothek nach Name, Entwickler, Tag oder Kategorie durchsuchen",
+      "installState": "Installationsstatus",
+      "installAll": "Alle Eintrage",
+      "installInstalled": "Nur installiert",
+      "installNotInstalled": "Nicht installiert",
+      "updates": "Updates",
+      "updatesAll": "Alle Update-Zustande",
+      "updatesOnly": "Update verfugbar",
+      "category": "Kategorie",
+      "allCategories": "Alle Kategorien",
+      "tag": "Tag",
+      "allTags": "Alle Tags"
+    },
+    "sort": {
+      "label": "Sortieren nach",
+      "name": "Name (A-Z)",
+      "lastPlayed": "Zuletzt gespielt",
+      "installed": "Installationsstatus",
+      "recentlyAdded": "Zuletzt hinzugefugt"
+    },
+    "toolbar": {
+      "eyebrow": "Bibliothek",
+      "title": "Deine lokale Plattform",
+      "body": "Sortiere, filtere, starte, aktualisiere, deinstalliere und bereinige deine Bibliothek, ohne den Uberblick uber deinen Besitz zu verlieren.",
+      "results": "{{count}} Eintrage angezeigt",
+      "stats": {
+        "total": "In Bibliothek",
+        "installed": "Installiert",
+        "updates": "Updates",
+        "ready": "Bereit zur Installation"
+      }
+    },
+    "card": {
+      "lastPlayed": "Zuletzt gespielt",
+      "recentlyAdded": "Hinzugefugt",
+      "removeHint": "Installierte Eintrage konnen erst nach der Deinstallation ihrer lokalen Dateien entfernt werden.",
+      "transferHint": "Warte, bis der aktive Transfer abgeschlossen ist, bevor du diesen Eintrag deinstallierst oder entfernst."
+    },
+    "removeDialog": {
+      "eyebrow": "Eintrag entfernen",
+      "title": "{{name}} aus der Bibliothek entfernen?",
+      "body": "Dadurch wird nur der Bibliothekseintrag entfernt. Installierte Dateien bleiben erhalten.",
+      "keepInstalledFiles": "Installierte Dateien bleiben unberuhrt. Es wird nur der Bibliothekseintrag entfernt.",
+      "addedAt": "Zur Bibliothek hinzugefugt: {{date}}"
+    },
+    "uninstallDialog": {
+      "title": "{{name}} deinstallieren?",
+      "body": "Dadurch werden die installierten Dateien vom Datentrager entfernt, aber der Eintrag bleibt fur eine spatere Neuinstallation in deiner Bibliothek.",
+      "removeFiles": "Installierte Dateien im ausgewahlten Bibliotheksordner werden geloscht.",
+      "keepLibraryEntry": "Der Bibliothekseintrag bleibt erhalten, damit du spater neu installieren, aktualisieren oder entfernen kannst."
     },
     "emptyState": {
       "emptyTitle": "Deine Bibliothek ist leer",
-      "emptyBody": "Fuge etwas aus dem Shop hinzu, um deine Lumorix-Sammlung aufzubauen. Danach bleibt es hier fur Installation, Start, Update und Reparatur verfugbar.",
+      "emptyBody": "Deine Bibliothek ist leer. Entdecke Inhalte im Shop.",
       "filteredTitle": "Keine Eintrage fur diesen Filter",
-      "filteredBody": "Probiere einen anderen Filter oder gehe zuruck in den Shop, um weitere Inhalte hinzuzufugen."
+      "filteredBody": "Keine Bibliothekseintrage passen zur aktuellen Suche oder den Filtern. Setze sie zuruck oder gehe zum Shop zuruck."
     }
   },
   "downloads": {
     "emptyState": {
-      "title": "Downloads sind gerade ruhig",
-      "body": "Installationen, Updates, Reparaturen und Verschiebungen erscheinen hier mit Live-Fortschritt und Verlauf."
+      "title": "Keine aktiven Downloads",
+      "body": "Installationen, Updates, Reparaturen und Verschiebungen erscheinen hier, sobald sie starten."
     },
     "summary": {
       "active": "Aktiv",
@@ -360,6 +408,8 @@
     "sections": {
       "activeEyebrow": "Jetzt aktiv",
       "activeTitle": "Laufende Vorgange",
+      "queuedEyebrow": "Als Naechstes",
+      "queuedTitle": "Wartet in der Warteschlange",
       "historyEyebrow": "Letzter Verlauf",
       "historyTitle": "Abgeschlossene Jobs"
     },
@@ -369,7 +419,7 @@
   },
   "about": {
     "hero": {
-      "body": "Eine lokale Windows-Launcher-Grundlage fur private Installationen, explizite Updates und klare lokale Kontrolle uber Lumorix-Spiele, Tools und Projekte."
+      "body": "Ein lokaler Windows-Launcher fur private Installationen, explizite Updates und klare lokale Kontrolle uber Lumorix-Spiele, Tools und Projekte."
     },
     "updateState": {
       "eyebrow": "Launcher-Update-Status",
@@ -400,7 +450,8 @@
       "description": "Wahle die Sprache des Launchers. Du kannst sie jederzeit andern.",
       "helper": "Anderungen werden sofort ubernommen und auf diesem Gerat gespeichert.",
       "active": "Aktiv",
-      "switchNow": "Jetzt wechseln"
+      "switchNow": "Jetzt wechseln",
+      "novelty": "Spassmodus"
     },
     "storage": {
       "eyebrow": "Speicher",
@@ -497,7 +548,6 @@
       "exploration": "Erkundung",
       "utility": "Dienstprogramm",
       "narrative": "Erzahlung",
-      "prototype": "Prototyp",
       "offline": "Offline",
       "local_first": "Lokal zuerst"
     }
