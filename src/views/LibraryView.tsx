@@ -6,7 +6,7 @@ import { ConfirmDialog } from "../components/ConfirmDialog";
 import { EmptyState } from "../components/EmptyState";
 import { GameCard } from "../components/GameCard";
 import { InstallDialog } from "../components/InstallDialog";
-import { formatDate } from "../domain/format";
+import { formatDate, resolveIntlLocale } from "../domain/format";
 import { getLibraryItems } from "../domain/selectors";
 import { getTagLabel, sortTagsByWeight } from "../domain/tags";
 import type { ContentView } from "../domain/types";
@@ -56,7 +56,10 @@ export function LibraryView({ setRoute }: { setRoute: (route: AppRoute) => void 
     window.localStorage.setItem(LIBRARY_PREFERENCES_KEY, JSON.stringify(preferences));
   }, [preferences]);
 
-  const collator = useMemo(() => new Intl.Collator(locale, { sensitivity: "base" }), [locale]);
+  const collator = useMemo(
+    () => new Intl.Collator(resolveIntlLocale(locale), { sensitivity: "base" }),
+    [locale]
+  );
 
   const libraryItems = useMemo(() => (snapshot ? getLibraryItems(snapshot) : []), [snapshot]);
 

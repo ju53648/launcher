@@ -10,13 +10,22 @@ import type {
 
 export type Translate = (key: string, params?: Record<string, string | number | null | undefined>) => string;
 
+export function resolveIntlLocale(locale: string): "en" | "de" | "pl" {
+  const normalized = locale.toLowerCase();
+  if (normalized === "shakespeare" || normalized.startsWith("en")) return "en";
+  if (normalized.startsWith("de")) return "de";
+  if (normalized.startsWith("pl")) return "pl";
+  return "en";
+}
+
 export function formatBytes(bytes: number, locale: string): string {
   if (!Number.isFinite(bytes) || bytes <= 0) return "0 B";
   const units = ["B", "KB", "MB", "GB", "TB"];
   const index = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
   const value = bytes / 1024 ** index;
   const decimals = value >= 10 || index === 0 ? 0 : 1;
-  return `${new Intl.NumberFormat(locale, {
+  const safeLocale = resolveIntlLocale(locale);
+  return `${new Intl.NumberFormat(safeLocale, {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals
   }).format(value)} ${units[index]}`;
@@ -27,7 +36,8 @@ export function formatDate(value: string | null, locale: string, t: Translate): 
   const normalizedValue = /^\d{4}-\d{2}-\d{2}$/.test(value) ? `${value}T12:00:00Z` : value;
   const date = new Date(normalizedValue);
   if (Number.isNaN(date.getTime())) return value;
-  return new Intl.DateTimeFormat(locale, {
+  const safeLocale = resolveIntlLocale(locale);
+  return new Intl.DateTimeFormat(safeLocale, {
     year: "numeric",
     month: "short",
     day: "2-digit"

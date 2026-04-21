@@ -80,10 +80,16 @@ interface I18nContextValue {
 const I18nContext = createContext<I18nContextValue | undefined>(undefined);
 
 export function I18nProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocale] = useState<SupportedLocale>(() => loadStoredLocale() ?? detectPreferredLocale());
+  const [locale, setLocaleState] = useState<SupportedLocale>(
+    () => loadStoredLocale() ?? detectPreferredLocale()
+  );
+
+  const setLocale = useCallback((nextLocale: SupportedLocale) => {
+    setLocaleState(coerceLocale(nextLocale));
+  }, []);
 
   useEffect(() => {
-    document.documentElement.lang = locale;
+    document.documentElement.lang = toCanonicalLocale(locale);
   }, [locale]);
 
   useEffect(() => {
@@ -105,7 +111,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
       setLocale,
       t
     }),
-    [locale, t]
+    [locale, setLocale, t]
   );
 
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
@@ -142,8 +148,22 @@ export function translate(
   params?: TranslationParams
 ): string {
   if (locale === "shakespeare") {
-    const source = resolveMessage(dictionaries.en, "en", key, params);
-    if (source) return toShakespeare(source);
+    const englishValue = getValue(dictionaries.en, key);
+
+    // Temporary safe mode: only transform plain string leaves.
+    if (typeof englishValue === "string") {
+      return toShakespeare(interpolate("en", englishValue, params));
+    }
+
+    if (isPluralTranslation(englishValue)) {
+      const count = Number(params?.count ?? 0);
+      const category = new Intl.PluralRules("en").select(count);
+      const template = englishValue[category] ?? englishValue.other;
+      return interpolate("en", template, params);
+    }
+
+    const fallback = resolveMessage(dictionaries.en, "en", key, params);
+    if (fallback) return fallback;
     return humanizeMissingKey(key);
   }
 
@@ -224,13 +244,18 @@ function humanizeMissingKey(key: string) {
 
 function loadStoredLocale(): SupportedLocale | null {
   try {
-    return coerceLocale(window.localStorage.getItem(LOCALE_STORAGE_KEY));
+    const stored = window.localStorage.getItem(LOCALE_STORAGE_KEY);
+    return stored ? coerceLocale(stored) : null;
   } catch {
     return null;
   }
 }
 
 function toShakespeare(input: string): string {
+  if (typeof input !== "string") {
+    return "";
+  }
+
   let transformed = input;
 
   for (const [source, replacement] of shakespearePhraseMappings) {
