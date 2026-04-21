@@ -1,24 +1,33 @@
-import type { GameOwnershipStatus, GameStatus, JobStatus, LibraryStatus } from "../domain/types";
-import { gameStatusLabel, libraryStatusLabel, ownershipStatusLabel } from "../domain/format";
+import type {
+  ItemCollectionStatus,
+  ItemInstallState,
+  JobStatus,
+  LibraryStatus
+} from "../domain/types";
+import {
+  collectionStatusLabel,
+  installStateLabel,
+  libraryStatusLabel
+} from "../domain/format";
 
 type BadgeTone = "neutral" | "good" | "warn" | "danger" | "active";
 
 export function StatusBadge({
   status,
-  type = "game"
+  type = "install"
 }: {
-  status: GameStatus | GameOwnershipStatus | LibraryStatus | JobStatus;
-  type?: "game" | "ownership" | "library" | "job";
+  status: ItemInstallState | ItemCollectionStatus | LibraryStatus | JobStatus;
+  type?: "install" | "collection" | "library" | "job";
 }) {
   const tone = getTone(status);
   const label =
     type === "library"
       ? libraryStatusLabel(status as LibraryStatus)
-      : type === "ownership"
-        ? ownershipStatusLabel(status as GameOwnershipStatus)
+      : type === "collection"
+        ? collectionStatusLabel(status as ItemCollectionStatus)
       : type === "job"
         ? status
-        : gameStatusLabel(status as GameStatus);
+        : installStateLabel(status as ItemInstallState);
 
   return <span className={`status-badge status-badge--${tone}`}>{label}</span>;
 }

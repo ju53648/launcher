@@ -81,14 +81,18 @@ export function App() {
   );
 }
 
-function renderRoute(route: AppRoute, setRoute: (route: AppRoute) => void, snapshot: LauncherSnapshot) {
-  if (route.startsWith("game:")) {
-    const id = route.slice("game:".length);
-    const game = snapshot.games.find((entry) => entry.manifest.id === id);
-    return game ? (
-      <GameDetailView game={game} />
+function renderRoute(
+  route: AppRoute,
+  setRoute: (route: AppRoute) => void,
+  snapshot: LauncherSnapshot
+) {
+  if (route.startsWith("item:")) {
+    const id = route.slice("item:".length);
+    const item = snapshot.items.find((entry) => entry.catalog.id === id);
+    return item ? (
+      <GameDetailView item={item} />
     ) : (
-      <EmptyState title="Game not found" body="The manifest is no longer available." />
+      <EmptyState title="Item not found" body="The catalog entry is no longer available." />
     );
   }
 

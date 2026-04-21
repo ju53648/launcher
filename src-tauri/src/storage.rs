@@ -1,4 +1,5 @@
 use std::{
+    collections::BTreeMap,
     fs,
     io::Write,
     path::{Path, PathBuf},
@@ -6,17 +7,18 @@ use std::{
 };
 
 use chrono::Utc;
-use serde::{de::DeserializeOwned, Serialize};
+use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use thiserror::Error;
 
 use crate::{
     libraries::probe_libraries,
     manifest::load_all_manifests,
     models::{
-        GameLibraryEntry, GameOwnershipStatus, GameStatus, GameUpdateInfo, GameView,
-        InstallBehavior, InstallJob, InstalledGame, InstalledGamesDb, InstalledStatus,
-        LauncherConfig, LauncherSnapshot, LauncherUpdateState, ManifestSourceConfig,
-        ManifestSourceType, PrivacyConfig,
+        CatalogItemRecord, CatalogItemType, CollectionEntry, CollectionStateDb,
+        ContentManifest, ContentStateFlags, ContentUpdateInfo, ContentView, InstallBehavior,
+        InstallJob, InstalledItem, InstalledItemsDb, InstalledStatus, ItemCollectionStatus,
+        ItemInstallState, LauncherConfig, LauncherSnapshot, LauncherUpdateState,
+        ManifestSourceConfig, ManifestSourceType, PrivacyConfig,
     },
     paths,
 };
@@ -74,7 +76,9 @@ pub struct LauncherRuntime {
     pub logs_dir: PathBuf,
     pub manifests_dir: PathBuf,
     pub config_path: PathBuf,
-    pub installed_db_path: PathBuf,
+    pub collection_db_path: PathBuf,
+    pub installed_items_path: PathBuf,
+    pub legacy_installed_db_path: PathBuf,
     pub jobs: Arc<Mutex<Vec<InstallJob>>>,
     pub launcher_update: Arc<Mutex<LauncherUpdateState>>,
 }
@@ -99,7 +103,9 @@ impl LauncherRuntime {
 
         Ok(Self {
             config_path: data_dir.join("launcher-config.json"),
-            installed_db_path: data_dir.join("installed-games.json"),
+            collection_db_path: data_dir.join("content-collection.json"),
+            installed_items_path: data_dir.join("installed-items.json"),
+            legacy_installed_db_path: data_dir.join("installed-games.json"),
             data_dir,
             cache_dir,
             logs_dir,
@@ -144,62 +150,150 @@ impl LauncherRuntime {
         write_json(&self.config_path, config)
     }
 
-    pub fn load_installed_db(&self) -> Result<InstalledGamesDb> {
-        if !self.installed_db_path.exists() {
-            let db = InstalledGamesDb {
-                games: vec![],
-                library_entries: vec![],
-            };
-            self.save_installed_db(&db)?;
-            self.append_log("INFO", "Created default installed games database");
+    pub fn load_collection_db(&self) -> Result<CollectionStateDb> {
+        if !self.collection_db_path.exists() {
+            let db = default_collection_db();
+            self.save_collection_db(&db)?;
+            self.append_log("INFO", "Created default collection state database");
             return Ok(db);
         }
 
-        match read_json(&self.installed_db_path) {
+        match read_json(&self.collection_db_path) {
             Ok(db) => Ok(db),
             Err(err) => {
                 self.append_log(
                     "WARN",
                     &format!(
-                        "Installed games database was unreadable; backing it up and using defaults: {err}"
+                        "Collection state database was unreadable; backing it up and using defaults: {err}"
                     ),
                 );
-                backup_invalid_json(&self.installed_db_path);
-                let db = InstalledGamesDb {
-                    games: vec![],
-                    library_entries: vec![],
-                };
+                backup_invalid_json(&self.collection_db_path);
+                let db = default_collection_db();
+                self.save_collection_db(&db)?;
+                Ok(db)
+            }
+        }
+    }
+
+    pub fn save_collection_db(&self, db: &CollectionStateDb) -> Result<()> {
+        write_json(&self.collection_db_path, db)
+    }
+
+    pub fn load_installed_db(&self) -> Result<InstalledItemsDb> {
+        if !self.installed_items_path.exists() {
+            let db = default_installed_items_db();
+            self.save_installed_db(&db)?;
+            self.append_log("INFO", "Created default installed items database");
+            return Ok(db);
+        }
+
+        match read_json(&self.installed_items_path) {
+            Ok(db) => Ok(db),
+            Err(err) => {
+                self.append_log(
+                    "WARN",
+                    &format!(
+                        "Installed items database was unreadable; backing it up and using defaults: {err}"
+                    ),
+                );
+                backup_invalid_json(&self.installed_items_path);
+                let db = default_installed_items_db();
                 self.save_installed_db(&db)?;
                 Ok(db)
             }
         }
     }
 
-    pub fn save_installed_db(&self, db: &InstalledGamesDb) -> Result<()> {
-        write_json(&self.installed_db_path, db)
+    pub fn save_installed_db(&self, db: &InstalledItemsDb) -> Result<()> {
+        write_json(&self.installed_items_path, db)
     }
 
-    pub fn update_installed_game(&self, game: InstalledGame) -> Result<()> {
+    pub fn update_installed_item(
+        &self,
+        item: InstalledItem,
+        manifest: &ContentManifest,
+    ) -> Result<()> {
+        self.upsert_collection_entry_from_manifest(manifest, true)?;
+
         let mut db = self.load_installed_db()?;
-        add_library_entry_if_missing(&mut db, &game.game_id);
-        if let Some(existing) = db.games.iter_mut().find(|entry| entry.game_id == game.game_id) {
-            *existing = game;
+        if let Some(existing) = db.items.iter_mut().find(|entry| entry.item_id == item.item_id) {
+            *existing = item;
         } else {
-            db.games.push(game);
+            db.items.push(item);
         }
         self.save_installed_db(&db)
     }
 
-    pub fn remove_installed_game(&self, game_id: &str) -> Result<()> {
+    pub fn remove_installed_item(&self, item_id: &str) -> Result<()> {
         let mut db = self.load_installed_db()?;
-        db.games.retain(|game| game.game_id != game_id);
+        db.items.retain(|item| item.item_id != item_id);
         self.save_installed_db(&db)
     }
 
-    pub fn add_game_to_library(&self, game_id: &str) -> Result<()> {
-        let mut db = self.load_installed_db()?;
-        add_library_entry_if_missing(&mut db, game_id);
-        self.save_installed_db(&db)
+    pub fn add_item_to_library(&self, manifest: &ContentManifest) -> Result<()> {
+        self.upsert_collection_entry_from_manifest(manifest, true)
+    }
+
+    pub fn record_item_error(
+        &self,
+        item_id: &str,
+        catalog: Option<&CatalogItemRecord>,
+        error: &str,
+    ) -> Result<()> {
+        let mut db = self.load_collection_db()?;
+        if let Some(entry) = db.entries.iter_mut().find(|entry| entry.item_id == item_id) {
+            entry.last_error = Some(error.into());
+            entry.last_error_at = Some(Utc::now());
+            if let Some(catalog) = catalog {
+                entry.catalog = catalog.clone();
+            }
+        } else {
+            db.entries.push(CollectionEntry {
+                item_id: item_id.into(),
+                discoverable: catalog.is_some(),
+                added_at: Utc::now(),
+                last_used_at: None,
+                last_error: Some(error.into()),
+                last_error_at: Some(Utc::now()),
+                catalog: catalog.cloned().unwrap_or_else(|| placeholder_catalog_record(item_id)),
+            });
+        }
+        self.save_collection_db(&db)
+    }
+
+    pub fn clear_item_error(&self, item_id: &str) -> Result<()> {
+        let mut db = self.load_collection_db()?;
+        if let Some(entry) = db.entries.iter_mut().find(|entry| entry.item_id == item_id) {
+            entry.last_error = None;
+            entry.last_error_at = None;
+            self.save_collection_db(&db)?;
+        }
+        Ok(())
+    }
+
+    pub fn mark_item_used(&self, item_id: &str) -> Result<()> {
+        let mut collection_changed = false;
+        let mut collection_db = self.load_collection_db()?;
+        if let Some(entry) = collection_db.entries.iter_mut().find(|entry| entry.item_id == item_id) {
+            entry.last_used_at = Some(Utc::now());
+            collection_changed = true;
+        }
+        if collection_changed {
+            self.save_collection_db(&collection_db)?;
+        }
+
+        let mut installed_changed = false;
+        let mut installed_db = self.load_installed_db()?;
+        if let Some(item) = installed_db.items.iter_mut().find(|entry| entry.item_id == item_id) {
+            item.last_launched_at = Some(Utc::now());
+            item.last_error = None;
+            installed_changed = true;
+        }
+        if installed_changed {
+            self.save_installed_db(&installed_db)?;
+        }
+
+        self.clear_item_error(item_id)
     }
 
     pub fn append_log(&self, level: &str, message: &str) {
@@ -219,19 +313,48 @@ impl LauncherRuntime {
         let manifest_catalog = load_all_manifests(self);
         let manifest_errors = manifest_catalog.errors;
         let manifests = manifest_catalog.manifests;
-        let mut installed_db = self.load_installed_db()?;
-        let mut db_migrated = false;
-        let installed_game_ids: Vec<String> = installed_db
-            .games
-            .iter()
-            .map(|game| game.game_id.clone())
-            .collect();
-        for game_id in installed_game_ids {
-            db_migrated |= add_library_entry_if_missing(&mut installed_db, &game_id);
+        self.migrate_legacy_state(&manifests)?;
+
+        let mut collection_db = self.load_collection_db()?;
+        let installed_db = self.load_installed_db()?;
+        let mut collection_changed = sync_collection_with_manifests(&mut collection_db, &manifests);
+
+        for installed in &installed_db.items {
+            if collection_db
+                .entries
+                .iter()
+                .any(|entry| entry.item_id == installed.item_id)
+            {
+                continue;
+            }
+
+            let manifest = manifests.iter().find(|entry| entry.id == installed.item_id);
+            collection_db.entries.push(CollectionEntry {
+                item_id: installed.item_id.clone(),
+                discoverable: manifest.is_some(),
+                added_at: installed.installed_at,
+                last_used_at: installed.last_launched_at,
+                last_error: installed.last_error.clone(),
+                last_error_at: installed
+                    .last_error
+                    .as_ref()
+                    .and(
+                        installed
+                            .last_verified_at
+                            .clone()
+                            .or(Some(installed.installed_at)),
+                    ),
+                catalog: manifest
+                    .map(summary_from_manifest)
+                    .unwrap_or_else(|| placeholder_catalog_record(&installed.item_id)),
+            });
+            collection_changed = true;
         }
-        if db_migrated {
-            self.save_installed_db(&installed_db)?;
+
+        if collection_changed {
+            self.save_collection_db(&collection_db)?;
         }
+
         let jobs = self
             .jobs
             .lock()
@@ -243,23 +366,43 @@ impl LauncherRuntime {
             .map_err(|_| CommandError::Storage("Launcher update state is locked".into()))?
             .clone();
 
-        let games = manifests
+        let manifest_map = manifests
             .into_iter()
-            .map(|manifest| {
-                let installed = installed_db
-                    .games
-                    .iter()
-                    .find(|game| game.game_id == manifest.id)
-                    .cloned();
-                let library_entry = installed_db
-                    .library_entries
-                    .iter()
-                    .find(|entry| entry.game_id == manifest.id)
-                    .cloned();
+            .map(|manifest| (manifest.id.clone(), manifest))
+            .collect::<BTreeMap<_, _>>();
+        let collection_map = collection_db
+            .entries
+            .into_iter()
+            .map(|entry| (entry.item_id.clone(), entry))
+            .collect::<BTreeMap<_, _>>();
+        let installed_map = installed_db
+            .items
+            .into_iter()
+            .map(|item| (item.item_id.clone(), item))
+            .collect::<BTreeMap<_, _>>();
+
+        let mut item_ids = manifest_map.keys().cloned().collect::<Vec<_>>();
+        for item_id in collection_map.keys() {
+            if !item_ids.iter().any(|existing| existing == item_id) {
+                item_ids.push(item_id.clone());
+            }
+        }
+        for item_id in installed_map.keys() {
+            if !item_ids.iter().any(|existing| existing == item_id) {
+                item_ids.push(item_id.clone());
+            }
+        }
+
+        let mut items = item_ids
+            .into_iter()
+            .map(|item_id| {
+                let manifest = manifest_map.get(&item_id).cloned();
+                let collection_entry = collection_map.get(&item_id).cloned();
+                let installed = installed_map.get(&item_id).cloned();
                 let active_job = jobs
                     .iter()
                     .find(|job| {
-                        job.game_id == manifest.id
+                        job.item_id == item_id
                             && matches!(
                                 job.status,
                                 crate::models::JobStatus::Queued | crate::models::JobStatus::Running
@@ -267,58 +410,87 @@ impl LauncherRuntime {
                     })
                     .cloned();
 
-                let available_update = installed.as_ref().and_then(|game| {
-                    if game.installed_version != manifest.version {
-                        Some(GameUpdateInfo {
-                            current_version: game.installed_version.clone(),
-                            available_version: manifest.version.clone(),
-                            changelog: manifest.changelog.clone(),
-                        })
-                    } else {
-                        None
-                    }
+                let catalog = manifest
+                    .as_ref()
+                    .map(summary_from_manifest)
+                    .or_else(|| collection_entry.as_ref().map(|entry| entry.catalog.clone()))
+                    .unwrap_or_else(|| placeholder_catalog_record(&item_id));
+
+                let available_update = manifest.as_ref().and_then(|manifest| {
+                    installed.as_ref().and_then(|item| {
+                        if item.installed_version != manifest.version {
+                            Some(ContentUpdateInfo {
+                                current_version: item.installed_version.clone(),
+                                available_version: manifest.version.clone(),
+                                changelog: manifest.changelog.clone(),
+                            })
+                        } else {
+                            None
+                        }
+                    })
                 });
 
-                let status = if active_job.is_some() {
-                    GameStatus::Installing
-                } else if installed
+                let error = installed
                     .as_ref()
-                    .is_some_and(|game| game.status == InstalledStatus::Broken)
-                {
-                    GameStatus::Error
+                    .is_some_and(|item| item.status == InstalledStatus::Broken)
+                    || collection_entry
+                        .as_ref()
+                        .is_some_and(|entry| entry.last_error.is_some());
+                let install_state = if active_job.is_some() {
+                    ItemInstallState::Installing
+                } else if error {
+                    ItemInstallState::Error
                 } else if available_update.is_some() {
-                    GameStatus::UpdateAvailable
+                    ItemInstallState::UpdateAvailable
                 } else if installed.is_some() {
-                    GameStatus::Installed
+                    ItemInstallState::Installed
                 } else {
-                    GameStatus::NotInstalled
+                    ItemInstallState::NotInstalled
                 };
-                let ownership_status = if installed
+                let collection_status = if error {
+                    ItemCollectionStatus::Error
+                } else if available_update.is_some() {
+                    ItemCollectionStatus::UpdateAvailable
+                } else if installed.is_some() {
+                    ItemCollectionStatus::Installed
+                } else if collection_entry.is_some() {
+                    ItemCollectionStatus::Added
+                } else {
+                    ItemCollectionStatus::NotAdded
+                };
+                let state = ContentStateFlags {
+                    discoverable: manifest.is_some(),
+                    added: collection_entry.is_some(),
+                    installed: installed.is_some(),
+                    update_available: available_update.is_some(),
+                    error,
+                };
+                let last_error = installed
                     .as_ref()
-                    .is_some_and(|game| game.status == InstalledStatus::Broken)
-                {
-                    GameOwnershipStatus::Error
-                } else if available_update.is_some() {
-                    GameOwnershipStatus::UpdateAvailable
-                } else if installed.is_some() {
-                    GameOwnershipStatus::Installed
-                } else if library_entry.is_some() {
-                    GameOwnershipStatus::Added
-                } else {
-                    GameOwnershipStatus::NotAdded
-                };
+                    .and_then(|item| item.last_error.clone())
+                    .or_else(|| collection_entry.as_ref().and_then(|entry| entry.last_error.clone()));
 
-                GameView {
+                ContentView {
+                    catalog,
                     manifest,
-                    status,
-                    ownership_status,
+                    state,
+                    install_state,
+                    collection_status,
                     installed,
-                    library_entry,
+                    collection_entry,
                     active_job,
                     available_update,
+                    last_error,
                 }
             })
-            .collect();
+            .collect::<Vec<_>>();
+
+        items.sort_by(|left, right| {
+            left.catalog
+                .name
+                .to_lowercase()
+                .cmp(&right.catalog.name.to_lowercase())
+        });
 
         Ok(LauncherSnapshot {
             app_version: env!("CARGO_PKG_VERSION").into(),
@@ -330,27 +502,243 @@ impl LauncherRuntime {
                 .into_owned(),
             manifest_errors,
             config,
-            games,
+            items,
             jobs,
             launcher_update: update_state,
         })
     }
-}
 
-fn add_library_entry_if_missing(db: &mut InstalledGamesDb, game_id: &str) -> bool {
-    if db
-        .library_entries
-        .iter()
-        .any(|entry| entry.game_id == game_id)
-    {
-        return false;
+    pub fn upsert_collection_entry_from_manifest(
+        &self,
+        manifest: &ContentManifest,
+        clear_error: bool,
+    ) -> Result<()> {
+        let mut db = self.load_collection_db()?;
+        let next_catalog = summary_from_manifest(manifest);
+        if let Some(entry) = db.entries.iter_mut().find(|entry| entry.item_id == manifest.id) {
+            entry.discoverable = true;
+            entry.catalog = next_catalog;
+            if clear_error {
+                entry.last_error = None;
+                entry.last_error_at = None;
+            }
+        } else {
+            db.entries.push(CollectionEntry {
+                item_id: manifest.id.clone(),
+                discoverable: true,
+                added_at: Utc::now(),
+                last_used_at: None,
+                last_error: None,
+                last_error_at: None,
+                catalog: next_catalog,
+            });
+        }
+        self.save_collection_db(&db)
     }
 
-    db.library_entries.push(GameLibraryEntry {
-        game_id: game_id.into(),
-        added_at: Utc::now(),
-    });
-    true
+    fn migrate_legacy_state(&self, manifests: &[ContentManifest]) -> Result<()> {
+        if self.collection_db_path.exists() || self.installed_items_path.exists() {
+            return Ok(());
+        }
+
+        if !self.legacy_installed_db_path.exists() {
+            return Ok(());
+        }
+
+        let legacy = match read_json::<LegacyInstalledGamesDb>(&self.legacy_installed_db_path) {
+            Ok(legacy) => legacy,
+            Err(err) => {
+                self.append_log(
+                    "WARN",
+                    &format!(
+                        "Legacy installed state was unreadable; backing it up and starting fresh: {err}"
+                    ),
+                );
+                backup_invalid_json(&self.legacy_installed_db_path);
+                self.save_collection_db(&default_collection_db())?;
+                self.save_installed_db(&default_installed_items_db())?;
+                return Ok(());
+            }
+        };
+
+        let manifest_map = manifests
+            .iter()
+            .map(|manifest| (manifest.id.as_str(), manifest))
+            .collect::<BTreeMap<_, _>>();
+
+        let mut collection_entries = legacy
+            .library_entries
+            .into_iter()
+            .map(|entry| {
+                let manifest = manifest_map.get(entry.item_id.as_str()).copied();
+                CollectionEntry {
+                    item_id: entry.item_id.clone(),
+                    discoverable: manifest.is_some(),
+                    added_at: entry.added_at,
+                    last_used_at: None,
+                    last_error: None,
+                    last_error_at: None,
+                    catalog: manifest
+                        .map(summary_from_manifest)
+                        .unwrap_or_else(|| placeholder_catalog_record(&entry.item_id)),
+                }
+            })
+            .collect::<Vec<_>>();
+
+        let installed_items = legacy
+            .games
+            .into_iter()
+            .map(|item| InstalledItem {
+                item_id: item.item_id.clone(),
+                installed_version: item.installed_version,
+                library_id: item.library_id,
+                install_path: item.install_path,
+                installed_at: item.installed_at,
+                last_verified_at: item.last_verified_at,
+                last_launched_at: None,
+                size_on_disk_bytes: item.size_on_disk_bytes,
+                status: item.status,
+                last_error: item.last_error.clone(),
+            })
+            .collect::<Vec<_>>();
+
+        for item in &installed_items {
+            if collection_entries
+                .iter()
+                .any(|entry| entry.item_id == item.item_id)
+            {
+                continue;
+            }
+
+            let manifest = manifest_map.get(item.item_id.as_str()).copied();
+            collection_entries.push(CollectionEntry {
+                item_id: item.item_id.clone(),
+                discoverable: manifest.is_some(),
+                added_at: item.installed_at,
+                last_used_at: None,
+                last_error: item.last_error.clone(),
+                last_error_at: item
+                    .last_error
+                    .as_ref()
+                    .and(item.last_verified_at.clone().or(Some(item.installed_at))),
+                catalog: manifest
+                    .map(summary_from_manifest)
+                    .unwrap_or_else(|| placeholder_catalog_record(&item.item_id)),
+            });
+        }
+
+        self.save_collection_db(&CollectionStateDb {
+            entries: collection_entries,
+        })?;
+        self.save_installed_db(&InstalledItemsDb {
+            items: installed_items,
+        })?;
+        self.append_log("INFO", "Migrated legacy installed-games.json into split state files");
+        Ok(())
+    }
+}
+
+fn summary_from_manifest(manifest: &ContentManifest) -> CatalogItemRecord {
+    CatalogItemRecord {
+        id: manifest.id.clone(),
+        item_type: manifest.item_type.clone(),
+        name: manifest.name.clone(),
+        description: manifest.description.clone(),
+        developer: manifest.developer.clone(),
+        release_date: manifest.release_date.clone(),
+        categories: if manifest.categories.is_empty() {
+            vec![default_category_for_type(&manifest.item_type)]
+        } else {
+            manifest.categories.clone()
+        },
+        tags: manifest.tags.clone(),
+        cover_image: manifest.cover_image.clone(),
+        banner_image: manifest.banner_image.clone(),
+        icon_image: manifest.icon_image.clone(),
+    }
+}
+
+fn placeholder_catalog_record(item_id: &str) -> CatalogItemRecord {
+    CatalogItemRecord {
+        id: item_id.into(),
+        item_type: CatalogItemType::Game,
+        name: fallback_item_name(item_id),
+        description: "This item is currently unavailable in the Shop, but it remains in your local collection.".into(),
+        developer: "Lumorix".into(),
+        release_date: "Unavailable".into(),
+        categories: vec!["Unavailable".into()],
+        tags: vec!["Offline".into()],
+        cover_image: String::new(),
+        banner_image: String::new(),
+        icon_image: String::new(),
+    }
+}
+
+fn fallback_item_name(item_id: &str) -> String {
+    item_id
+        .split('.')
+        .next_back()
+        .filter(|segment| !segment.trim().is_empty())
+        .map(|segment| {
+            segment
+                .split(['-', '_'])
+                .filter(|part| !part.is_empty())
+                .map(|part| {
+                    let mut chars = part.chars();
+                    let first = chars
+                        .next()
+                        .map(|ch| ch.to_uppercase().to_string())
+                        .unwrap_or_default();
+                    format!("{first}{}", chars.as_str())
+                })
+                .collect::<Vec<_>>()
+                .join(" ")
+        })
+        .filter(|name| !name.is_empty())
+        .unwrap_or_else(|| item_id.to_string())
+}
+
+fn default_category_for_type(item_type: &CatalogItemType) -> String {
+    match item_type {
+        CatalogItemType::Game => "Games".into(),
+        CatalogItemType::Tool => "Tools".into(),
+        CatalogItemType::Project => "Projects".into(),
+    }
+}
+
+fn sync_collection_with_manifests(
+    db: &mut CollectionStateDb,
+    manifests: &[ContentManifest],
+) -> bool {
+    let manifest_map = manifests
+        .iter()
+        .map(|manifest| (manifest.id.as_str(), manifest))
+        .collect::<BTreeMap<_, _>>();
+    let mut changed = false;
+
+    for entry in &mut db.entries {
+        if let Some(manifest) = manifest_map.get(entry.item_id.as_str()).copied() {
+            let next_catalog = summary_from_manifest(manifest);
+            if !entry.discoverable || entry.catalog != next_catalog {
+                entry.discoverable = true;
+                entry.catalog = next_catalog;
+                changed = true;
+            }
+        } else if entry.discoverable {
+            entry.discoverable = false;
+            changed = true;
+        }
+    }
+
+    changed
+}
+
+fn default_collection_db() -> CollectionStateDb {
+    CollectionStateDb { entries: vec![] }
+}
+
+fn default_installed_items_db() -> InstalledItemsDb {
+    InstalledItemsDb { items: vec![] }
 }
 
 fn default_config() -> LauncherConfig {
@@ -431,4 +819,36 @@ pub fn directory_size(path: &Path) -> u64 {
         }
     }
     total
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct LegacyInstalledGamesDb {
+    #[serde(default)]
+    games: Vec<LegacyInstalledItem>,
+    #[serde(default, alias = "libraryEntries")]
+    library_entries: Vec<LegacyLibraryEntry>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct LegacyInstalledItem {
+    #[serde(alias = "gameId")]
+    item_id: String,
+    installed_version: String,
+    library_id: String,
+    install_path: String,
+    installed_at: chrono::DateTime<Utc>,
+    last_verified_at: Option<chrono::DateTime<Utc>>,
+    size_on_disk_bytes: u64,
+    status: InstalledStatus,
+    last_error: Option<String>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct LegacyLibraryEntry {
+    #[serde(alias = "gameId")]
+    item_id: String,
+    added_at: chrono::DateTime<Utc>,
 }

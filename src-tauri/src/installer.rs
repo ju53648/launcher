@@ -15,8 +15,8 @@ use uuid::Uuid;
 use crate::{
     manifest::find_manifest,
     models::{
-        DownloadSource, InstallJob, InstallPhase, InstallStrategy, InstalledGame, InstalledStatus,
-        JobStatus, LibraryStatus,
+        CatalogItemRecord, DownloadSource, InstallJob, InstallOperation, InstallPhase,
+        InstallStrategy, InstalledItem, InstalledStatus, JobStatus, LibraryStatus,
     },
     paths::safe_join,
     storage::{directory_size, CommandError, LauncherRuntime, Result},
@@ -32,11 +32,11 @@ pub enum InstallMode {
 
 pub fn start_install_job(
     runtime: &LauncherRuntime,
-    game_id: String,
+    item_id: String,
     library_id: String,
     mode: InstallMode,
 ) -> Result<InstallJob> {
-    let manifest = find_manifest(runtime, &game_id)?;
+    let manifest = find_manifest(runtime, &item_id)?;
     let config = runtime.load_config()?;
     let library = config
         .libraries
@@ -57,18 +57,19 @@ pub fn start_install_job(
         .map_err(|_| CommandError::Storage("Install job state is locked".into()))?;
 
     if jobs.iter().any(|job| {
-        job.game_id == game_id && matches!(job.status, JobStatus::Queued | JobStatus::Running)
+        job.item_id == item_id && matches!(job.status, JobStatus::Queued | JobStatus::Running)
     }) {
         return Err(CommandError::Install(
-            "A job for this game is already running".into(),
+            "A job for this item is already running".into(),
         ));
     }
 
     let job = InstallJob {
         id: Uuid::new_v4().to_string(),
-        game_id: game_id.clone(),
-        game_name: manifest.name.clone(),
+        item_id: item_id.clone(),
+        item_name: manifest.name.clone(),
         library_id: library_id.clone(),
+        operation: install_operation(mode),
         phase: InstallPhase::Queued,
         status: JobStatus::Queued,
         progress: 0.0,
@@ -92,7 +93,7 @@ pub fn start_install_job(
     let job_id = job.id.clone();
     tauri::async_runtime::spawn(async move {
         if let Err(err) =
-            run_install_pipeline(runtime_clone.clone(), job_id.clone(), game_id, library_id, mode)
+            run_install_pipeline(runtime_clone.clone(), job_id.clone(), item_id, library_id, mode)
                 .await
         {
             runtime_clone.append_log("ERROR", &format!("Install pipeline failed: {err}"));
@@ -124,14 +125,14 @@ pub fn clear_completed_jobs(runtime: &LauncherRuntime) -> Result<Vec<InstallJob>
     Ok(jobs.clone())
 }
 
-pub fn verify_game(runtime: &LauncherRuntime, game_id: &str) -> Result<InstalledGame> {
-    let manifest = find_manifest(runtime, game_id)?;
+pub fn verify_item(runtime: &LauncherRuntime, item_id: &str) -> Result<InstalledItem> {
+    let manifest = find_manifest(runtime, item_id)?;
     let mut db = runtime.load_installed_db()?;
     let installed = db
-        .games
+        .items
         .iter_mut()
-        .find(|game| game.game_id == game_id)
-        .ok_or_else(|| CommandError::Install("Game is not installed".into()))?;
+        .find(|item| item.item_id == item_id)
+        .ok_or_else(|| CommandError::Install("Item is not installed".into()))?;
 
     let install_path = PathBuf::from(&installed.install_path);
     let executable_path = safe_join(&install_path, &manifest.executable)?;
@@ -139,11 +140,17 @@ pub fn verify_game(runtime: &LauncherRuntime, game_id: &str) -> Result<Installed
     if !install_path.exists() || !executable_path.exists() {
         installed.status = InstalledStatus::Broken;
         installed.last_error = Some("Executable or install folder is missing".into());
+        runtime.record_item_error(
+            item_id,
+            Some(&catalog_record_from_manifest(&manifest)),
+            "Executable or install folder is missing",
+        )?;
     } else {
         installed.status = InstalledStatus::Installed;
         installed.last_error = None;
         installed.last_verified_at = Some(Utc::now());
         installed.size_on_disk_bytes = directory_size(&install_path);
+        runtime.clear_item_error(item_id)?;
     }
 
     let result = installed.clone();
@@ -151,19 +158,19 @@ pub fn verify_game(runtime: &LauncherRuntime, game_id: &str) -> Result<Installed
     Ok(result)
 }
 
-pub fn uninstall_game(runtime: &LauncherRuntime, game_id: &str) -> Result<()> {
+pub fn uninstall_item(runtime: &LauncherRuntime, item_id: &str) -> Result<()> {
     let db = runtime.load_installed_db()?;
     let installed = db
-        .games
+        .items
         .iter()
-        .find(|game| game.game_id == game_id)
-        .ok_or_else(|| CommandError::Install("Game is not installed".into()))?;
+        .find(|item| item.item_id == item_id)
+        .ok_or_else(|| CommandError::Install("Item is not installed".into()))?;
     let config = runtime.load_config()?;
     let library = config
         .libraries
         .iter()
         .find(|library| library.id == installed.library_id)
-        .ok_or_else(|| CommandError::Install("Installed game references a missing library".into()))?;
+        .ok_or_else(|| CommandError::Install("Installed item references a missing library".into()))?;
 
     let library_root = PathBuf::from(&library.path);
     let install_path = PathBuf::from(&installed.install_path);
@@ -175,40 +182,40 @@ pub fn uninstall_game(runtime: &LauncherRuntime, game_id: &str) -> Result<()> {
         })?;
     }
 
-    runtime.remove_installed_game(game_id)?;
-    runtime.append_log("INFO", &format!("Uninstalled game {game_id}"));
+    runtime.remove_installed_item(item_id)?;
+    runtime.append_log("INFO", &format!("Uninstalled item {item_id}"));
     Ok(())
 }
 
-pub fn move_install_game(
+pub fn move_install_item(
     runtime: &LauncherRuntime,
-    game_id: String,
+    item_id: String,
     target_library_id: String,
 ) -> Result<InstallJob> {
     let db = runtime.load_installed_db()?;
     let installed = db
-        .games
+        .items
         .iter()
-        .find(|game| game.game_id == game_id)
-        .ok_or_else(|| CommandError::Install("Game is not installed".into()))?;
+        .find(|item| item.item_id == item_id)
+        .ok_or_else(|| CommandError::Install("Item is not installed".into()))?;
     if installed.library_id == target_library_id {
         return Err(CommandError::Validation(
-            "Game is already installed in the selected library".into(),
+            "Item is already installed in the selected library".into(),
         ));
     }
 
-    start_install_job(runtime, game_id, target_library_id, InstallMode::Move)
+    start_install_job(runtime, item_id, target_library_id, InstallMode::Move)
 }
 
 async fn run_install_pipeline(
     runtime: LauncherRuntime,
     job_id: String,
-    game_id: String,
+    item_id: String,
     library_id: String,
     mode: InstallMode,
 ) -> Result<()> {
     if matches!(mode, InstallMode::Move) {
-        return run_move_pipeline(runtime, job_id, game_id, library_id).await;
+        return run_move_pipeline(runtime, job_id, item_id, library_id).await;
     }
 
     update_job(
@@ -221,7 +228,7 @@ async fn run_install_pipeline(
         0,
     )?;
 
-    let manifest = find_manifest(&runtime, &game_id)?;
+    let manifest = find_manifest(&runtime, &item_id)?;
     let config = runtime.load_config()?;
     let library = config
         .libraries
@@ -246,7 +253,7 @@ async fn run_install_pipeline(
 
     if matches!(mode, InstallMode::Install) && install_path.exists() {
         let existing_db = runtime.load_installed_db()?;
-        let already_installed = existing_db.games.iter().any(|game| game.game_id == game_id);
+        let already_installed = existing_db.items.iter().any(|item| item.item_id == item_id);
         if !already_installed && fs::read_dir(&install_path).is_ok_and(|mut entries| entries.next().is_some()) {
             return Err(CommandError::Install(format!(
                 "Install folder {} is not empty",
@@ -294,7 +301,7 @@ async fn run_install_pipeline(
         &job_id,
         InstallPhase::Installing,
         58.0,
-        "Writing game files",
+        "Writing item files",
         manifest.install_size_bytes / 2,
         manifest.install_size_bytes,
     )?;
@@ -311,7 +318,7 @@ async fn run_install_pipeline(
             },
             _,
         ) => {
-            install_synthetic_game(
+            install_synthetic_item(
                 &runtime,
                 &job_id,
                 executable_template,
@@ -351,13 +358,14 @@ async fn run_install_pipeline(
         )));
     }
 
-    let install_record = InstalledGame {
-        game_id: manifest.id.clone(),
+    let install_record = InstalledItem {
+        item_id: manifest.id.clone(),
         installed_version: manifest.version.clone(),
         library_id,
         install_path: install_path.to_string_lossy().into_owned(),
         installed_at: Utc::now(),
         last_verified_at: Some(Utc::now()),
+        last_launched_at: None,
         size_on_disk_bytes: directory_size(&install_path),
         status: InstalledStatus::Installed,
         last_error: None,
@@ -374,19 +382,20 @@ async fn run_install_pipeline(
         ))
     })?;
 
-    runtime.update_installed_game(install_record)?;
+    runtime.update_installed_item(install_record, &manifest)?;
     update_job(
         &runtime,
         &job_id,
         InstallPhase::Completed,
         100.0,
-        "Ready to play",
+        "Ready to use",
         manifest.install_size_bytes,
         manifest.install_size_bytes,
     )?;
     mutate_job(&runtime, &job_id, |job| {
         job.status = JobStatus::Completed;
     })?;
+    runtime.clear_item_error(&manifest.id)?;
     runtime.append_log("INFO", &format!("Completed {:?} for {}", mode, manifest.id));
 
     Ok(())
@@ -395,7 +404,7 @@ async fn run_install_pipeline(
 async fn run_move_pipeline(
     runtime: LauncherRuntime,
     job_id: String,
-    game_id: String,
+    item_id: String,
     target_library_id: String,
 ) -> Result<()> {
     update_job(
@@ -408,7 +417,7 @@ async fn run_move_pipeline(
         0,
     )?;
 
-    let manifest = find_manifest(&runtime, &game_id)?;
+    let manifest = find_manifest(&runtime, &item_id)?;
     let config = runtime.load_config()?;
     let target_library = config
         .libraries
@@ -424,14 +433,14 @@ async fn run_move_pipeline(
 
     let db = runtime.load_installed_db()?;
     let installed = db
-        .games
+        .items
         .iter()
-        .find(|game| game.game_id == game_id)
+        .find(|item| item.item_id == item_id)
         .cloned()
-        .ok_or_else(|| CommandError::Install("Game is not installed".into()))?;
+        .ok_or_else(|| CommandError::Install("Item is not installed".into()))?;
     if installed.library_id == target_library_id {
         return Err(CommandError::Validation(
-            "Game is already in the selected library".into(),
+            "Item is already in the selected library".into(),
         ));
     }
 
@@ -447,7 +456,7 @@ async fn run_move_pipeline(
         .libraries
         .iter()
         .find(|library| library.id == installed.library_id)
-        .ok_or_else(|| CommandError::Install("Installed game references a missing library".into()))?;
+        .ok_or_else(|| CommandError::Install("Installed item references a missing library".into()))?;
 
     let source_library_root = PathBuf::from(&source_library.path);
     let target_library_root = PathBuf::from(&target_library.path);
@@ -528,10 +537,10 @@ async fn run_move_pipeline(
 
     let mut db = runtime.load_installed_db()?;
     let entry = db
-        .games
+        .items
         .iter_mut()
-        .find(|game| game.game_id == game_id)
-        .ok_or_else(|| CommandError::Install("Installed game was removed during move".into()))?;
+        .find(|item| item.item_id == item_id)
+        .ok_or_else(|| CommandError::Install("Installed item was removed during move".into()))?;
     entry.library_id = target_library_id;
     entry.install_path = final_target.to_string_lossy().into_owned();
     entry.last_verified_at = Some(Utc::now());
@@ -568,6 +577,7 @@ async fn run_move_pipeline(
     mutate_job(&runtime, &job_id, |job| {
         job.status = JobStatus::Completed;
     })?;
+    runtime.clear_item_error(&manifest.id)?;
     runtime.append_log("INFO", &format!("Moved install for {}", manifest.id));
 
     Ok(())
@@ -583,7 +593,7 @@ async fn run_synthetic_download_steps(
         job_id,
         InstallPhase::Downloading,
         12.0,
-        "Preparing local demo package",
+        "Preparing local package",
         0,
         total_bytes,
     )?;
@@ -958,13 +968,13 @@ fn verify_copied_directory(source: &Path, target: &Path) -> Result<()> {
     Ok(())
 }
 
-async fn install_synthetic_game(
+async fn install_synthetic_item(
     runtime: &LauncherRuntime,
     job_id: &str,
     executable_template: &str,
     content_files: &[crate::models::SyntheticFile],
     install_path: &Path,
-    game_name: &str,
+    item_name: &str,
     version: &str,
 ) -> Result<()> {
     for (index, file) in content_files.iter().enumerate() {
@@ -998,7 +1008,7 @@ async fn install_synthetic_game(
     }
 
     let script = executable_template
-        .replace("{{GAME_NAME}}", game_name)
+        .replace("{{GAME_NAME}}", item_name)
         .replace("{{VERSION}}", version);
     fs::write(&executable, script).map_err(|err| {
         CommandError::Install(format!("Could not write {}: {err}", executable.display()))
@@ -1165,16 +1175,72 @@ fn check_cancelled(runtime: &LauncherRuntime, job_id: &str) -> Result<()> {
 }
 
 fn fail_job(runtime: &LauncherRuntime, job_id: &str, error: String) {
-    let _ = mutate_job(runtime, job_id, |job| {
-        if job.status == JobStatus::Cancelled {
+    let job_snapshot = runtime
+        .jobs
+        .lock()
+        .ok()
+        .and_then(|jobs| jobs.iter().find(|job| job.id == job_id).cloned());
+
+    if job_snapshot
+        .as_ref()
+        .is_some_and(|job| job.status == JobStatus::Cancelled)
+    {
+        let _ = mutate_job(runtime, job_id, |job| {
             job.phase = InstallPhase::Cancelled;
             job.message = "Cancelled".into();
-            return;
+        });
+        return;
+    }
+
+    if let Some(job) = &job_snapshot {
+        if let Ok(mut db) = runtime.load_installed_db() {
+            if let Some(installed) = db.items.iter_mut().find(|item| item.item_id == job.item_id) {
+                installed.status = InstalledStatus::Broken;
+                installed.last_error = Some(error.clone());
+                let _ = runtime.save_installed_db(&db);
+            }
         }
+
+        let catalog = find_manifest(runtime, &job.item_id)
+            .ok()
+            .map(|manifest| catalog_record_from_manifest(&manifest));
+        let _ = runtime.record_item_error(&job.item_id, catalog.as_ref(), &error);
+    }
+
+    let _ = mutate_job(runtime, job_id, |job| {
         job.status = JobStatus::Failed;
         job.phase = InstallPhase::Failed;
         job.message = "Installation failed".into();
         job.error = Some(error);
         job.updated_at = Utc::now();
     });
+}
+
+fn install_operation(mode: InstallMode) -> InstallOperation {
+    match mode {
+        InstallMode::Install => InstallOperation::Install,
+        InstallMode::Update => InstallOperation::Update,
+        InstallMode::Repair => InstallOperation::Repair,
+        InstallMode::Move => InstallOperation::Move,
+    }
+}
+
+fn catalog_record_from_manifest(manifest: &crate::models::ContentManifest) -> CatalogItemRecord {
+    CatalogItemRecord {
+        id: manifest.id.clone(),
+        item_type: manifest.item_type.clone(),
+        name: manifest.name.clone(),
+        description: manifest.description.clone(),
+        developer: manifest.developer.clone(),
+        release_date: manifest.release_date.clone(),
+        categories: if manifest.categories.is_empty() {
+            vec!["Games".into()]
+        } else {
+            manifest.categories.clone()
+        },
+        tags: manifest.tags.clone(),
+        cover_image: manifest.cover_image.clone(),
+        banner_image: manifest.banner_image.clone(),
+        icon_image: manifest.icon_image.clone(),
+    }
 }

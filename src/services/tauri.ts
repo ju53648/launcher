@@ -45,8 +45,8 @@ export const tauriApi = {
     callCommand<LauncherSnapshot>("remove_library", { libraryId }),
   setDefaultLibrary: (libraryId: string) =>
     callCommand<LauncherSnapshot>("set_default_library", { libraryId }),
-  addGameToLibrary: (gameId: string) =>
-    callCommand<LauncherSnapshot>("add_game_to_library", { gameId }),
+  addItemToLibrary: (itemId: string) =>
+    callCommand<LauncherSnapshot>("add_item_to_library", { itemId }),
   updatePreferences: (
     checkLauncherUpdatesOnStart: boolean,
     checkGameUpdatesOnStart: boolean,
@@ -61,20 +61,20 @@ export const tauriApi = {
       createDesktopShortcuts,
       keepDownloadCache
     }),
-  startInstallGame: (gameId: string, libraryId: string | null) =>
-    callCommand<InstallJob>("start_install_game", { gameId, libraryId }),
-  startUpdateGame: (gameId: string) =>
-    callCommand<InstallJob>("start_update_game", { gameId }),
-  repairGame: (gameId: string) => callCommand<InstallJob>("repair_game", { gameId }),
-  moveInstallGame: (gameId: string, targetLibraryId: string) =>
-    callCommand<InstallJob>("move_install_game", { gameId, targetLibraryId }),
-  uninstallGame: (gameId: string) =>
-    callCommand<LauncherSnapshot>("uninstall_game", { gameId }),
-  launchGame: (gameId: string) => callCommand<CommandOk>("launch_game", { gameId }),
-  openInstallFolder: (gameId: string) =>
-    callCommand<CommandOk>("open_install_folder", { gameId }),
+  startInstallItem: (itemId: string, libraryId: string | null) =>
+    callCommand<InstallJob>("start_install_item", { itemId, libraryId }),
+  startUpdateItem: (itemId: string) =>
+    callCommand<InstallJob>("start_update_item", { itemId }),
+  repairItem: (itemId: string) => callCommand<InstallJob>("repair_item", { itemId }),
+  moveInstallItem: (itemId: string, targetLibraryId: string) =>
+    callCommand<InstallJob>("move_install_item", { itemId, targetLibraryId }),
+  uninstallItem: (itemId: string) =>
+    callCommand<LauncherSnapshot>("uninstall_item", { itemId }),
+  launchItem: (itemId: string) => callCommand<CommandOk>("launch_item", { itemId }),
+  openInstallFolder: (itemId: string) =>
+    callCommand<CommandOk>("open_install_folder", { itemId }),
   checkLauncherUpdates: () => callCommand<LauncherSnapshot>("check_launcher_updates"),
-  checkGameUpdates: () => callCommand<LauncherSnapshot>("check_game_updates"),
+  checkItemUpdates: () => callCommand<LauncherSnapshot>("check_item_updates"),
   cancelJob: (jobId: string) => callCommand<LauncherSnapshot>("cancel_job", { jobId }),
   clearCompletedJobs: () => callCommand<LauncherSnapshot>("clear_completed_jobs")
 };

@@ -11,10 +11,11 @@ mod process;
 mod storage;
 
 use commands::{
-    add_game_to_library, add_library, bootstrap, cancel_job, check_game_updates,
-    check_launcher_updates, clear_completed_jobs, complete_onboarding, get_snapshot, launch_game,
-    open_install_folder, move_install_game, remove_library, rename_library, repair_game,
-    set_default_library, start_install_game, start_update_game, uninstall_game, update_preferences,
+    add_item_to_library, add_library, bootstrap, cancel_job, check_item_updates,
+    check_launcher_updates, clear_completed_jobs, complete_onboarding, get_snapshot, launch_item,
+    move_install_item, open_install_folder, remove_library, rename_library, repair_item,
+    set_default_library, start_install_item, start_update_item, uninstall_item,
+    update_preferences,
 };
 use storage::LauncherRuntime;
 
@@ -35,16 +36,16 @@ fn main() {
             rename_library,
             remove_library,
             set_default_library,
-            add_game_to_library,
-            start_install_game,
-            start_update_game,
-            repair_game,
-            uninstall_game,
-            move_install_game,
-            launch_game,
+            add_item_to_library,
+            start_install_item,
+            start_update_item,
+            repair_item,
+            uninstall_item,
+            move_install_item,
+            launch_item,
             open_install_folder,
             check_launcher_updates,
-            check_game_updates,
+            check_item_updates,
             cancel_job,
             clear_completed_jobs,
             update_preferences

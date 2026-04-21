@@ -3,7 +3,7 @@ use std::{collections::BTreeMap, fs};
 use url::Url;
 
 use crate::{
-    models::{DownloadSource, GameManifest, InstallStrategy},
+    models::{ContentManifest, DownloadSource, InstallStrategy},
     paths::{folder_name_is_safe, safe_join},
     storage::{CommandError, LauncherRuntime, Result},
 };
@@ -12,12 +12,12 @@ const EMBEDDED_MANIFESTS: &[&str] = &[include_str!("../manifests/lumorix-dropdas
 
 #[derive(Debug, Clone)]
 pub struct ManifestCatalog {
-    pub manifests: Vec<GameManifest>,
+    pub manifests: Vec<ContentManifest>,
     pub errors: Vec<String>,
 }
 
 pub fn load_all_manifests(runtime: &LauncherRuntime) -> ManifestCatalog {
-    let mut manifests = BTreeMap::<String, GameManifest>::new();
+    let mut manifests = BTreeMap::<String, ContentManifest>::new();
     let mut errors = Vec::<String>::new();
 
     for (index, raw) in EMBEDDED_MANIFESTS.iter().enumerate() {
@@ -44,11 +44,11 @@ pub fn load_all_manifests(runtime: &LauncherRuntime) -> ManifestCatalog {
                     runtime,
                     &mut errors,
                     format!(
-                "Could not read manifest directory {}: {err}",
-                runtime.manifests_dir.display()
+                        "Could not read manifest directory {}: {err}",
+                        runtime.manifests_dir.display()
                     ),
                 );
-                let mut values: Vec<GameManifest> = manifests.into_values().collect();
+                let mut values: Vec<ContentManifest> = manifests.into_values().collect();
                 values.sort_by(|a, b| a.name.to_lowercase().cmp(&b.name.to_lowercase()));
                 return ManifestCatalog {
                     manifests: values,
@@ -86,7 +86,7 @@ pub fn load_all_manifests(runtime: &LauncherRuntime) -> ManifestCatalog {
         }
     }
 
-    let mut values: Vec<GameManifest> = manifests.into_values().collect();
+    let mut values: Vec<ContentManifest> = manifests.into_values().collect();
     values.sort_by(|a, b| a.name.to_lowercase().cmp(&b.name.to_lowercase()));
     ManifestCatalog {
         manifests: values,
@@ -94,16 +94,16 @@ pub fn load_all_manifests(runtime: &LauncherRuntime) -> ManifestCatalog {
     }
 }
 
-pub fn find_manifest(runtime: &LauncherRuntime, game_id: &str) -> Result<GameManifest> {
+pub fn find_manifest(runtime: &LauncherRuntime, item_id: &str) -> Result<ContentManifest> {
     let catalog = load_all_manifests(runtime);
     catalog
         .manifests
         .into_iter()
-        .find(|manifest| manifest.id == game_id)
-        .ok_or_else(|| CommandError::Manifest(format!("Unknown game id: {game_id}")))
+        .find(|manifest| manifest.id == item_id)
+        .ok_or_else(|| CommandError::Manifest(format!("Unknown item id: {item_id}")))
 }
 
-fn parse_manifest(raw: &str) -> Result<GameManifest> {
+fn parse_manifest(raw: &str) -> Result<ContentManifest> {
     serde_json::from_str(raw)
         .map_err(|err| CommandError::Manifest(format!("Manifest JSON is invalid: {err}")))
 }
@@ -113,7 +113,7 @@ fn record_manifest_error(runtime: &LauncherRuntime, errors: &mut Vec<String>, me
     errors.push(message);
 }
 
-pub fn validate_manifest(manifest: &GameManifest) -> Result<()> {
+pub fn validate_manifest(manifest: &ContentManifest) -> Result<()> {
     if manifest.id.trim().is_empty() || manifest.name.trim().is_empty() {
         return Err(CommandError::Manifest(
             "Manifest id and name are required".into(),

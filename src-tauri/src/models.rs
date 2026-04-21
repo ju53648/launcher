@@ -68,15 +68,62 @@ pub enum LibraryStatus {
     Inaccessible,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Default)]
+#[serde(rename_all = "camelCase")]
+pub enum CatalogItemType {
+    #[default]
+    Game,
+    Tool,
+    Project,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct CatalogItemRecord {
+    pub id: String,
+    #[serde(default)]
+    pub item_type: CatalogItemType,
+    pub name: String,
+    pub description: String,
+    pub developer: String,
+    pub release_date: String,
+    #[serde(default)]
+    pub categories: Vec<String>,
+    #[serde(default)]
+    pub tags: Vec<String>,
+    pub cover_image: String,
+    pub banner_image: String,
+    pub icon_image: String,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct InstalledGame {
-    pub game_id: String,
+pub struct CollectionEntry {
+    pub item_id: String,
+    pub discoverable: bool,
+    pub added_at: DateTime<Utc>,
+    pub last_used_at: Option<DateTime<Utc>>,
+    pub last_error: Option<String>,
+    pub last_error_at: Option<DateTime<Utc>>,
+    pub catalog: CatalogItemRecord,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CollectionStateDb {
+    pub entries: Vec<CollectionEntry>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct InstalledItem {
+    pub item_id: String,
     pub installed_version: String,
     pub library_id: String,
     pub install_path: String,
     pub installed_at: DateTime<Utc>,
     pub last_verified_at: Option<DateTime<Utc>>,
+    pub last_launched_at: Option<DateTime<Utc>>,
     pub size_on_disk_bytes: u64,
     pub status: InstalledStatus,
     pub last_error: Option<String>,
@@ -92,28 +139,24 @@ pub enum InstalledStatus {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct InstalledGamesDb {
-    pub games: Vec<InstalledGame>,
-    #[serde(default)]
-    pub library_entries: Vec<GameLibraryEntry>,
+pub struct InstalledItemsDb {
+    pub items: Vec<InstalledItem>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct GameLibraryEntry {
-    pub game_id: String,
-    pub added_at: DateTime<Utc>,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct GameManifest {
+pub struct ContentManifest {
     pub id: String,
+    #[serde(default)]
+    pub item_type: CatalogItemType,
     pub name: String,
     pub version: String,
     pub description: String,
     pub developer: String,
     pub release_date: String,
+    #[serde(default)]
+    pub categories: Vec<String>,
+    #[serde(default)]
     pub tags: Vec<String>,
     pub cover_image: String,
     pub banner_image: String,
@@ -121,7 +164,7 @@ pub struct GameManifest {
     pub executable: String,
     pub install_size_bytes: u64,
     pub default_install_folder: String,
-    pub supported_actions: Vec<GameAction>,
+    pub supported_actions: Vec<ContentAction>,
     pub install_strategy: InstallStrategy,
     pub download: DownloadSource,
     pub changelog: Vec<ChangelogEntry>,
@@ -129,7 +172,7 @@ pub struct GameManifest {
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
-pub enum GameAction {
+pub enum ContentAction {
     Install,
     Launch,
     Update,
@@ -193,26 +236,39 @@ pub struct LauncherSnapshot {
     pub recommended_library_path: String,
     pub manifest_errors: Vec<String>,
     pub config: LauncherConfig,
-    pub games: Vec<GameView>,
+    pub items: Vec<ContentView>,
     pub jobs: Vec<InstallJob>,
     pub launcher_update: LauncherUpdateState,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct GameView {
-    pub manifest: GameManifest,
-    pub status: GameStatus,
-    pub ownership_status: GameOwnershipStatus,
-    pub installed: Option<InstalledGame>,
-    pub library_entry: Option<GameLibraryEntry>,
+pub struct ContentView {
+    pub catalog: CatalogItemRecord,
+    pub manifest: Option<ContentManifest>,
+    pub state: ContentStateFlags,
+    pub install_state: ItemInstallState,
+    pub collection_status: ItemCollectionStatus,
+    pub installed: Option<InstalledItem>,
+    pub collection_entry: Option<CollectionEntry>,
     pub active_job: Option<InstallJob>,
-    pub available_update: Option<GameUpdateInfo>,
+    pub available_update: Option<ContentUpdateInfo>,
+    pub last_error: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ContentStateFlags {
+    pub discoverable: bool,
+    pub added: bool,
+    pub installed: bool,
+    pub update_available: bool,
+    pub error: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
-pub enum GameStatus {
+pub enum ItemInstallState {
     NotInstalled,
     Installing,
     Installed,
@@ -222,7 +278,7 @@ pub enum GameStatus {
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
-pub enum GameOwnershipStatus {
+pub enum ItemCollectionStatus {
     NotAdded,
     Added,
     Installed,
@@ -232,19 +288,29 @@ pub enum GameOwnershipStatus {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct GameUpdateInfo {
+pub struct ContentUpdateInfo {
     pub current_version: String,
     pub available_version: String,
     pub changelog: Vec<ChangelogEntry>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub enum InstallOperation {
+    Install,
+    Update,
+    Repair,
+    Move,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct InstallJob {
     pub id: String,
-    pub game_id: String,
-    pub game_name: String,
+    pub item_id: String,
+    pub item_name: String,
     pub library_id: String,
+    pub operation: InstallOperation,
     pub phase: InstallPhase,
     pub status: JobStatus,
     pub progress: f32,

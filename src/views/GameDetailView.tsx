@@ -4,88 +4,102 @@ import { useState } from "react";
 import { InstallDialog } from "../components/InstallDialog";
 import { ProgressBar } from "../components/ProgressBar";
 import { StatusBadge } from "../components/StatusBadge";
-import { formatBytes, formatDate } from "../domain/format";
-import type { GameView } from "../domain/types";
+import { formatBytes, formatDate, itemTypeLabel } from "../domain/format";
+import type { ContentView } from "../domain/types";
 import { useLauncher } from "../store/LauncherStore";
 
-export function GameDetailView({ game }: { game: GameView }) {
+export function GameDetailView({ item }: { item: ContentView }) {
   const {
     snapshot,
-    addGameToLibrary,
-    installGame,
-    launchGame,
-    updateGame,
-    repairGame,
-    uninstallGame,
+    addItemToLibrary,
+    installItem,
+    launchItem,
+    updateItem,
+    repairItem,
+    uninstallItem,
     openInstallFolder
   } = useLauncher();
   const [installOpen, setInstallOpen] = useState(false);
 
   if (!snapshot) return null;
 
+  const manifest = item.manifest;
+
   return (
     <div className="view-stack">
       <section className="detail-hero">
-        <img src={game.manifest.bannerImage} alt="" />
+        {item.catalog.bannerImage ? (
+          <img src={item.catalog.bannerImage} alt="" />
+        ) : (
+          <div className="media-placeholder media-placeholder--hero" />
+        )}
         <div className="detail-hero__content">
           <div className="detail-hero__title">
-            <img src={game.manifest.iconImage} alt="" />
+            {item.catalog.iconImage ? (
+              <img src={item.catalog.iconImage} alt="" />
+            ) : (
+              <div className="item-thumb item-thumb--hero item-thumb--fallback">
+                <span>{item.catalog.name.slice(0, 2).toUpperCase()}</span>
+              </div>
+            )}
             <div>
-              <p className="eyebrow">{game.manifest.developer}</p>
-              <h2>{game.manifest.name}</h2>
+              <p className="eyebrow">
+                {item.catalog.developer} · {itemTypeLabel(item.catalog.itemType)}
+              </p>
+              <h2>{item.catalog.name}</h2>
               <div className="tag-row">
-                {game.manifest.tags.map((tag) => (
+                {[...item.catalog.categories, ...item.catalog.tags].map((tag) => (
                   <span key={tag}>{tag}</span>
                 ))}
               </div>
             </div>
           </div>
-          <StatusBadge status={game.ownershipStatus} type="ownership" />
+          <StatusBadge status={item.collectionStatus} type="collection" />
         </div>
       </section>
 
       <section className="detail-actions">
-        {game.ownershipStatus === "notAdded" && (
-          <button className="button button--primary" onClick={() => addGameToLibrary(game.manifest.id)} type="button">
+        {item.collectionStatus === "notAdded" && manifest && (
+          <button className="button button--primary" onClick={() => addItemToLibrary(item.catalog.id)} type="button">
             <Plus size={16} />
             Add to Library
           </button>
         )}
-        {game.ownershipStatus !== "notAdded" && game.status === "notInstalled" && (
+        {item.collectionStatus !== "notAdded" && item.installState === "notInstalled" && manifest && (
           <button className="button button--primary" onClick={() => setInstallOpen(true)} type="button">
             <Download size={16} />
             Install
           </button>
         )}
-        {game.status === "installed" && (
-          <button className="button button--primary" onClick={() => launchGame(game.manifest.id)} type="button">
+        {item.installState === "installed" && (
+          <button className="button button--primary" onClick={() => launchItem(item.catalog.id)} type="button">
             <Play size={16} />
-            Play
+            Launch
           </button>
         )}
-        {game.status === "updateAvailable" && (
-          <button className="button button--primary" onClick={() => updateGame(game.manifest.id)} type="button">
+        {item.installState === "updateAvailable" && (
+          <button className="button button--primary" onClick={() => updateItem(item.catalog.id)} type="button">
             <RefreshCw size={16} />
             Update
           </button>
         )}
-        {game.status === "error" && (
-          <button className="button button--primary" onClick={() => repairGame(game.manifest.id)} type="button">
+        {item.installState === "error" && (
+          <button className="button button--primary" onClick={() => repairItem(item.catalog.id)} type="button">
             <Wrench size={16} />
             Repair
           </button>
         )}
-        {game.installed && (
+        {item.installed && (
           <>
-            <button className="button button--secondary" onClick={() => repairGame(game.manifest.id)} type="button">
+            <button className="button button--secondary" onClick={() => repairItem(item.catalog.id)} type="button">
               <Wrench size={16} />
               Verify / Repair
             </button>
-            <button className="button button--secondary" onClick={() => openInstallFolder(game.manifest.id)} type="button">
+            <button className="button button--secondary" onClick={() => openInstallFolder(item.catalog.id)} type="button">
               <FolderOpen size={16} />
               Show files
             </button>
-            <button className="button button--danger" onClick={() => uninstallGame(game.manifest.id)} type="button">
+            <button className="button button--danger" onClick={() => uninstallItem(item.catalog.id)} type="button">
               <Trash2 size={16} />
               Uninstall
             </button>
@@ -93,62 +107,77 @@ export function GameDetailView({ game }: { game: GameView }) {
         )}
       </section>
 
-      {game.activeJob && (
+      {item.activeJob && (
         <section className="install-panel">
           <div>
-            <p className="eyebrow">{game.activeJob.phase}</p>
-            <h2>{game.activeJob.message}</h2>
+            <p className="eyebrow">{item.activeJob.phase}</p>
+            <h2>{item.activeJob.message}</h2>
           </div>
-          <ProgressBar value={game.activeJob.progress} />
+          <ProgressBar value={item.activeJob.progress} />
         </section>
       )}
 
       <section className="detail-grid">
         <article className="detail-panel detail-panel--wide">
           <h2>Overview</h2>
-          <p>{game.manifest.description}</p>
+          <p>{item.catalog.description}</p>
           <dl className="spec-list">
             <div>
+              <dt>Type</dt>
+              <dd>{itemTypeLabel(item.catalog.itemType)}</dd>
+            </div>
+            <div>
               <dt>Version</dt>
-              <dd>v{game.manifest.version}</dd>
+              <dd>{manifest ? `v${manifest.version}` : item.installed?.installedVersion ?? "Unavailable"}</dd>
             </div>
             <div>
               <dt>Install size</dt>
-              <dd>{formatBytes(game.manifest.installSizeBytes)}</dd>
+              <dd>{formatBytes(manifest?.installSizeBytes ?? item.installed?.sizeOnDiskBytes ?? 0)}</dd>
             </div>
             <div>
               <dt>Release</dt>
-              <dd>{game.manifest.releaseDate}</dd>
+              <dd>{item.catalog.releaseDate}</dd>
             </div>
             <div>
               <dt>Executable</dt>
-              <dd>{game.manifest.executable}</dd>
+              <dd>{manifest?.executable ?? "Not currently available"}</dd>
+            </div>
+            <div>
+              <dt>Discoverable</dt>
+              <dd>{item.state.discoverable ? "Available in Shop" : "Library only"}</dd>
             </div>
           </dl>
+          {item.lastError && <p className="field-error">{item.lastError}</p>}
         </article>
 
         <article className="detail-panel">
           <h2>Installed</h2>
-          {game.installed ? (
+          {item.installed ? (
             <dl className="spec-list spec-list--stacked">
               <div>
                 <dt>Location</dt>
-                <dd>{game.installed.installPath}</dd>
+                <dd>{item.installed.installPath}</dd>
               </div>
               <div>
                 <dt>Installed</dt>
-                <dd>{formatDate(game.installed.installedAt)}</dd>
+                <dd>{formatDate(item.installed.installedAt)}</dd>
               </div>
               <div>
                 <dt>Verified</dt>
-                <dd>{formatDate(game.installed.lastVerifiedAt)}</dd>
+                <dd>{formatDate(item.installed.lastVerifiedAt)}</dd>
+              </div>
+              <div>
+                <dt>Last opened</dt>
+                <dd>{formatDate(item.installed.lastLaunchedAt ?? item.collectionEntry?.lastUsedAt ?? null)}</dd>
               </div>
             </dl>
           ) : (
             <p className="muted">
-              {game.ownershipStatus === "notAdded"
-                ? "Add this game to your Library before installing."
-                : "Not installed yet."}
+              {item.collectionStatus === "notAdded"
+                ? "Add this item to your Library before installing it."
+                : manifest
+                  ? "Added to your Library, but not installed yet."
+                  : "This item is currently unavailable in the Shop and cannot be reinstalled right now."}
             </p>
           )}
         </article>
@@ -159,27 +188,31 @@ export function GameDetailView({ game }: { game: GameView }) {
           <p className="eyebrow">Release notes</p>
           <h2>Changelog</h2>
         </div>
-        {game.manifest.changelog.map((entry) => (
-          <article key={`${entry.version}-${entry.date}`} className="changelog-entry">
-            <strong>v{entry.version}</strong>
-            <span>{entry.date}</span>
-            <ul>
-              {entry.items.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-          </article>
-        ))}
+        {manifest?.changelog.length ? (
+          manifest.changelog.map((entry) => (
+            <article key={`${entry.version}-${entry.date}`} className="changelog-entry">
+              <strong>v{entry.version}</strong>
+              <span>{entry.date}</span>
+              <ul>
+                {entry.items.map((change) => (
+                  <li key={change}>{change}</li>
+                ))}
+              </ul>
+            </article>
+          ))
+        ) : (
+          <p className="muted">No changelog is available for this item right now.</p>
+        )}
       </section>
 
-      {installOpen && (
+      {installOpen && manifest && (
         <InstallDialog
-          game={game}
+          item={item}
           libraries={snapshot.config.libraries}
           defaultLibraryId={snapshot.config.defaultLibraryId}
           onClose={() => setInstallOpen(false)}
           onInstall={async (libraryId) => {
-            await installGame(game.manifest.id, libraryId);
+            await installItem(item.catalog.id, libraryId);
           }}
         />
       )}

@@ -3,6 +3,7 @@ import { Download, ExternalLink, ShieldCheck } from "lucide-react";
 import { LauncherUpdatePanel } from "../components/LauncherUpdatePanel";
 import { StatusBadge } from "../components/StatusBadge";
 import { formatDate } from "../domain/format";
+import { releaseInfo } from "../releaseInfo";
 import { useLauncher } from "../store/LauncherStore";
 
 export function AboutView() {
@@ -20,8 +21,8 @@ export function AboutView() {
           </span>
         </div>
         <p>
-          A local-first Windows game launcher foundation built for private installs, explicit
-          updates and clean library ownership.
+          A local-first Windows launcher foundation built for private installs, explicit updates,
+          and clean local ownership across Lumorix games, tools, and projects.
         </p>
         <div className="action-row">
           <button
@@ -81,15 +82,15 @@ export function AboutView() {
       <section className="settings-section">
         <div>
           <p className="eyebrow">Product changelog</p>
-          <h2>v0.1.0</h2>
+          <h2>v{releaseInfo.version}</h2>
         </div>
         <div className="changelog-entry">
-          <strong>Foundation build</strong>
-          <span>2026-04-20</span>
+          <strong>{releaseInfo.title}</strong>
+          <span>{formatDate(releaseInfo.date)}</span>
           <ul>
-            <li>Tauri/Rust desktop shell with React and TypeScript UI.</li>
-            <li>Local config, multiple libraries, manifest catalog and install queue.</li>
-            <li>Launcher and per-game update checks prepared without telemetry.</li>
+            {releaseInfo.notes.map((note) => (
+              <li key={`${releaseInfo.version}-${note}`}>{note}</li>
+            ))}
           </ul>
         </div>
       </section>

@@ -109,6 +109,24 @@ Lumorix is wired for Tauri's signed updater flow:
 
 To make the button download a real update, publish a release containing the generated installer/update artifact, its `.sig` file and a valid `latest.json` matching `distribution/launcher-latest.example.json`.
 
+## Release Source Of Truth
+
+Future launcher releases are driven from a single file: `release-info.json`.
+
+1. Edit `release-info.json`.
+2. Run `npm run prepare-release`.
+3. Commit, tag `vX.Y.Z`, and push.
+
+That flow syncs the derived release files automatically:
+
+- `package.json`
+- `package-lock.json`
+- `src-tauri/Cargo.toml`
+- `src-tauri/tauri.conf.json`
+- `distribution/latest.json`
+
+Those derived files should not be edited by hand for releases anymore.
+
 ## Manifest Format
 
 Game manifests are JSON files with stable launcher-facing fields:

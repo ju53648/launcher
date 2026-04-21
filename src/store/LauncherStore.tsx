@@ -29,7 +29,7 @@ interface LauncherContextValue {
   renameLibrary: (libraryId: string, name: string) => Promise<void>;
   removeLibrary: (libraryId: string) => Promise<void>;
   setDefaultLibrary: (libraryId: string) => Promise<void>;
-  addGameToLibrary: (gameId: string) => Promise<void>;
+  addItemToLibrary: (itemId: string) => Promise<void>;
   updatePreferences: (
     checkLauncherUpdatesOnStart: boolean,
     checkGameUpdatesOnStart: boolean,
@@ -37,15 +37,15 @@ interface LauncherContextValue {
     createDesktopShortcuts: boolean,
     keepDownloadCache: boolean
   ) => Promise<void>;
-  installGame: (gameId: string, libraryId: string | null) => Promise<InstallJob | null>;
-  updateGame: (gameId: string) => Promise<InstallJob | null>;
-  repairGame: (gameId: string) => Promise<InstallJob | null>;
-  uninstallGame: (gameId: string) => Promise<void>;
-  launchGame: (gameId: string) => Promise<void>;
-  openInstallFolder: (gameId: string) => Promise<void>;
+  installItem: (itemId: string, libraryId: string | null) => Promise<InstallJob | null>;
+  updateItem: (itemId: string) => Promise<InstallJob | null>;
+  repairItem: (itemId: string) => Promise<InstallJob | null>;
+  uninstallItem: (itemId: string) => Promise<void>;
+  launchItem: (itemId: string) => Promise<void>;
+  openInstallFolder: (itemId: string) => Promise<void>;
   checkLauncherUpdates: () => Promise<void>;
   installLauncherUpdate: () => Promise<void>;
-  checkGameUpdates: () => Promise<void>;
+  checkItemUpdates: () => Promise<void>;
   cancelJob: (jobId: string) => Promise<void>;
   clearCompletedJobs: () => Promise<void>;
 }
@@ -143,8 +143,8 @@ export function LauncherProvider({ children }: { children: ReactNode }) {
         runSnapshotAction("remove-library", () => launcherApi.removeLibrary(libraryId)),
       setDefaultLibrary: (libraryId) =>
         runSnapshotAction("set-default-library", () => launcherApi.setDefaultLibrary(libraryId)),
-      addGameToLibrary: (gameId) =>
-        runSnapshotAction("add-game-to-library", () => launcherApi.addGameToLibrary(gameId)),
+      addItemToLibrary: (itemId) =>
+        runSnapshotAction("add-item-to-library", () => launcherApi.addItemToLibrary(itemId)),
       updatePreferences: (
         checkLauncherUpdatesOnStart,
         checkGameUpdatesOnStart,
@@ -161,21 +161,26 @@ export function LauncherProvider({ children }: { children: ReactNode }) {
             keepDownloadCache
           )
         ),
-      installGame: async (gameId, libraryId) =>
-        runJobAction("install-game", () => launcherApi.startInstallGame(gameId, libraryId)),
-      updateGame: async (gameId) =>
-        runJobAction("update-game", () => launcherApi.startUpdateGame(gameId)),
-      repairGame: async (gameId) =>
-        runJobAction("repair-game", () => launcherApi.repairGame(gameId)),
-      uninstallGame: (gameId) =>
-        runSnapshotAction("uninstall-game", () => launcherApi.uninstallGame(gameId)),
-      launchGame: (gameId) => runCommandAction("launch-game", () => launcherApi.launchGame(gameId)),
-      openInstallFolder: (gameId) =>
-        runCommandAction("open-folder", () => launcherApi.openInstallFolder(gameId)),
+      installItem: async (itemId, libraryId) =>
+        runJobAction("install-item", () => launcherApi.startInstallItem(itemId, libraryId)),
+      updateItem: async (itemId) =>
+        runJobAction("update-item", () => launcherApi.startUpdateItem(itemId)),
+      repairItem: async (itemId) =>
+        runJobAction("repair-item", () => launcherApi.repairItem(itemId)),
+      uninstallItem: (itemId) =>
+        runSnapshotAction("uninstall-item", () => launcherApi.uninstallItem(itemId)),
+      launchItem: (itemId) => runCommandAction("launch-item", () => launcherApi.launchItem(itemId)),
+      openInstallFolder: (itemId) =>
+        runCommandAction("open-folder", () => launcherApi.openInstallFolder(itemId)),
       checkLauncherUpdates: async () => {
         setBusyAction("check-launcher-update");
         setError(null);
         try {
+          try {
+            await launcherApi.checkLauncherUpdates();
+          } catch (backgroundError) {
+            console.warn("[launcher] remote update metadata check failed", backgroundError);
+          }
           await checkLauncherUpdate(publishUpdateProgress);
           await refresh();
         } catch (caught) {
@@ -208,8 +213,8 @@ export function LauncherProvider({ children }: { children: ReactNode }) {
           setBusyAction(null);
         }
       },
-      checkGameUpdates: () =>
-        runSnapshotAction("game-update-check", () => launcherApi.checkGameUpdates()),
+      checkItemUpdates: () =>
+        runSnapshotAction("item-update-check", () => launcherApi.checkItemUpdates()),
       cancelJob: (jobId) => runSnapshotAction("cancel-job", () => launcherApi.cancelJob(jobId)),
       clearCompletedJobs: () =>
         runSnapshotAction("clear-completed-jobs", () => launcherApi.clearCompletedJobs())

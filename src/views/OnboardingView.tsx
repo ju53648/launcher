@@ -25,9 +25,9 @@ export function OnboardingView() {
 
         <div className="onboarding__copy">
           <p className="eyebrow">First setup</p>
-          <h1>Your games stay on your machine.</h1>
+          <h1>Your Lumorix content stays on your machine.</h1>
           <p>
-            Choose where Lumorix installs games. No account, no cloud lock-in, no hidden
+            Choose where Lumorix installs content. No account, no cloud lock-in, no hidden
             analytics. Network access is reserved for manifests, downloads and explicit update
             checks.
           </p>

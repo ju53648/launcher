@@ -1,5 +1,5 @@
 {
-  "version": "0.3.1",
+  "version": "0.3.3",
   "title": "Shop and Library Refactor",
   "notes": "Shop and Library Refactor\n\n- Added Shop view\n- Separated Shop and Library\n- Improved Downloads visibility\n- Refactored collection state model",
   "notesList": [
@@ -9,11 +9,10 @@
     "Refactored collection state model"
   ],
   "pub_date": "2026-04-21T00:00:00Z",
-  "releaseUrl": "https://github.com/lumorix/launcher/releases/tag/v0.3.1",
   "platforms": {
     "windows-x86_64": {
-      "url": "https://github.com/lumorix/launcher/releases/download/v0.3.1/Lumorix.Launcher_0.3.1_x64-setup.nsis.zip",
-      "signature": "REPLACE_WITH_TAURI_UPDATER_SIGNATURE"
+      "url": "__GENERATED_IN_CI__",
+      "signature": "__GENERATED_IN_CI__"
     }
   }
 }

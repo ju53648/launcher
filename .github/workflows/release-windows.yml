@@ -37,6 +37,19 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Validate release-info against tag
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+
+          $releaseInfo = Get-Content -Raw "release-info.json" | ConvertFrom-Json
+          $expectedTag = "v$($releaseInfo.version)"
+          $actualTag = "${{ github.ref_name }}"
+
+          if ($actualTag -ne $expectedTag) {
+            throw "Release tag mismatch. release-info.json expects $expectedTag but workflow is running for $actualTag."
+          }
+
       - name: Build signed Tauri bundles and updater artifacts
         run: npm run tauri:build
 
@@ -81,15 +94,24 @@ jobs:
           $signature = (Get-Content -Raw $releaseSignaturePath).Trim()
           $latestPath = Join-Path $PWD "distribution/latest.json"
           $updaterUrl = "https://github.com/${{ github.repository }}/releases/download/$version/$assetName"
+          $releaseUrl = "https://github.com/${{ github.repository }}/releases/tag/$version"
 
           Write-Host "Updater asset URL: $updaterUrl"
           Write-Host "Signature source used: $releaseSignaturePath"
           Write-Host "Signature SHA256: $((Get-FileHash $releaseSignaturePath -Algorithm SHA256).Hash)"
 
+          if (-not (Test-Path $latestPath)) {
+            throw "Generated latest.json not found at: $latestPath"
+          }
+
+          $existingLatest = Get-Content -Raw $latestPath | ConvertFrom-Json -AsHashtable
           $json = [ordered]@{
-            version = $version
-            notes = "Release $version"
-            pub_date = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
+            version = $existingLatest.version
+            title = $existingLatest.title
+            notes = $existingLatest.notes
+            notesList = $existingLatest.notesList
+            pub_date = $existingLatest.pub_date
+            releaseUrl = $releaseUrl
             platforms = [ordered]@{
               "windows-x86_64" = [ordered]@{
                 url = $updaterUrl

@@ -3,8 +3,8 @@ use tauri::State;
 use crate::{
     installer::{
         cancel_job as cancel_install_job, clear_completed_jobs as clear_finished_jobs,
-        move_install_game as move_install, start_install_job,
-        uninstall_game as uninstall_installed_game, verify_game, InstallMode,
+        move_install_item as move_install, start_install_job,
+        uninstall_item as uninstall_installed_item, verify_item, InstallMode,
     },
     launcher_update::check_launcher_updates as run_launcher_update_check,
     libraries::{
@@ -14,7 +14,7 @@ use crate::{
     manifest::find_manifest,
     models::{CommandOk, InstallJob, LauncherSnapshot},
     paths::recommended_library_path,
-    process::{launch_game as spawn_game_process, open_install_folder as open_folder},
+    process::{launch_item as spawn_item_process, open_install_folder as open_folder},
     storage::{CommandError, LauncherRuntime, Result},
 };
 
@@ -152,98 +152,99 @@ pub fn update_preferences(
 }
 
 #[tauri::command]
-pub fn add_game_to_library(
+pub fn add_item_to_library(
     state: State<'_, LauncherRuntime>,
-    game_id: String,
+    item_id: String,
 ) -> Result<LauncherSnapshot> {
-    find_manifest(&state, &game_id)?;
-    state.add_game_to_library(&game_id)?;
-    state.append_log("INFO", &format!("Added game to library: {game_id}"));
+    let manifest = find_manifest(&state, &item_id)?;
+    state.add_item_to_library(&manifest)?;
+    state.append_log("INFO", &format!("Added item to library: {item_id}"));
     state.build_snapshot()
 }
 
 #[tauri::command]
-pub fn start_install_game(
+pub fn start_install_item(
     state: State<'_, LauncherRuntime>,
-    game_id: String,
+    item_id: String,
     library_id: Option<String>,
 ) -> Result<InstallJob> {
     let config = state.load_config()?;
     let selected_library_id = library_id
         .or(config.default_library_id.clone())
         .ok_or_else(|| CommandError::Validation("No library is configured".into()))?;
-    state.add_game_to_library(&game_id)?;
-    start_install_job(&state, game_id, selected_library_id, InstallMode::Install)
+    let manifest = find_manifest(&state, &item_id)?;
+    state.add_item_to_library(&manifest)?;
+    start_install_job(&state, item_id, selected_library_id, InstallMode::Install)
 }
 
 #[tauri::command]
-pub fn start_update_game(
+pub fn start_update_item(
     state: State<'_, LauncherRuntime>,
-    game_id: String,
+    item_id: String,
 ) -> Result<InstallJob> {
     let installed_db = state.load_installed_db()?;
     let installed = installed_db
-        .games
+        .items
         .iter()
-        .find(|game| game.game_id == game_id)
-        .ok_or_else(|| CommandError::Install("Game is not installed".into()))?;
+        .find(|item| item.item_id == item_id)
+        .ok_or_else(|| CommandError::Install("Item is not installed".into()))?;
     start_install_job(
         &state,
-        game_id,
+        item_id,
         installed.library_id.clone(),
         InstallMode::Update,
     )
 }
 
 #[tauri::command]
-pub fn repair_game(state: State<'_, LauncherRuntime>, game_id: String) -> Result<InstallJob> {
+pub fn repair_item(state: State<'_, LauncherRuntime>, item_id: String) -> Result<InstallJob> {
     let installed_db = state.load_installed_db()?;
     let installed = installed_db
-        .games
+        .items
         .iter()
-        .find(|game| game.game_id == game_id)
-        .ok_or_else(|| CommandError::Install("Game is not installed".into()))?;
+        .find(|item| item.item_id == item_id)
+        .ok_or_else(|| CommandError::Install("Item is not installed".into()))?;
     start_install_job(
         &state,
-        game_id,
+        item_id,
         installed.library_id.clone(),
         InstallMode::Repair,
     )
 }
 
 #[tauri::command]
-pub fn uninstall_game(
+pub fn uninstall_item(
     state: State<'_, LauncherRuntime>,
-    game_id: String,
+    item_id: String,
 ) -> Result<LauncherSnapshot> {
-    uninstall_installed_game(&state, &game_id)?;
+    uninstall_installed_item(&state, &item_id)?;
     state.build_snapshot()
 }
 
 #[tauri::command]
-pub fn move_install_game(
+pub fn move_install_item(
     state: State<'_, LauncherRuntime>,
-    game_id: String,
+    item_id: String,
     target_library_id: String,
 ) -> Result<InstallJob> {
-    move_install(&state, game_id, target_library_id)
+    move_install(&state, item_id, target_library_id)
 }
 
 #[tauri::command]
-pub fn launch_game(state: State<'_, LauncherRuntime>, game_id: String) -> Result<CommandOk> {
-    verify_game(&state, &game_id)?;
-    spawn_game_process(&state, &game_id)?;
+pub fn launch_item(state: State<'_, LauncherRuntime>, item_id: String) -> Result<CommandOk> {
+    verify_item(&state, &item_id)?;
+    spawn_item_process(&state, &item_id)?;
     Ok(CommandOk {
-        message: "Game launched".into(),
+        message: "Item launched".into(),
     })
 }
 
 #[tauri::command]
 pub fn open_install_folder(
     state: State<'_, LauncherRuntime>,
-    game_id: String,
+    item_id: String,
 ) -> Result<CommandOk> {
-    open_folder(&state, &game_id)?;
+    open_folder(&state, &item_id)?;
     Ok(CommandOk {
         message: "Install folder opened".into(),
     })
@@ -267,8 +268,8 @@ pub async fn check_launcher_updates(
 }
 
 #[tauri::command]
-pub fn check_game_updates(state: State<'_, LauncherRuntime>) -> Result<LauncherSnapshot> {
-    state.append_log("INFO", "Game update check requested");
+pub fn check_item_updates(state: State<'_, LauncherRuntime>) -> Result<LauncherSnapshot> {
+    state.append_log("INFO", "Item update check requested");
     state.build_snapshot()
 }
 

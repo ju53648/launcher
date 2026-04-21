@@ -17,11 +17,11 @@ export function SettingsView() {
     updatePreferences,
     checkLauncherUpdates,
     installLauncherUpdate,
-    checkGameUpdates,
+    checkItemUpdates,
     busyAction,
     updateProgress
   } = useLauncher();
-  const [newLibraryName, setNewLibraryName] = useState("Games");
+  const [newLibraryName, setNewLibraryName] = useState("Main");
   const [newLibraryPath, setNewLibraryPath] = useState("");
   const [libraryNames, setLibraryNames] = useState<Record<string, string>>({});
 
@@ -68,7 +68,7 @@ export function SettingsView() {
             <input
               value={newLibraryName}
               onChange={(event) => setNewLibraryName(event.target.value)}
-              placeholder="Games"
+              placeholder="Main"
             />
           </label>
           <label>
@@ -161,7 +161,7 @@ export function SettingsView() {
         <div className="toggle-grid">
           {[
             ["checkLauncherUpdatesOnStart", "Check launcher updates on start"],
-            ["checkGameUpdatesOnStart", "Check game updates on start"],
+            ["checkGameUpdatesOnStart", "Check item updates on start"],
             ["askForLibraryEachInstall", "Ask for library on every install"],
             ["createDesktopShortcuts", "Create desktop shortcuts"],
             ["keepDownloadCache", "Keep download cache"]
@@ -201,9 +201,9 @@ export function SettingsView() {
             <RefreshCw size={16} />
             {busyAction === "install-launcher-update" ? "Updating launcher..." : "Update launcher"}
           </button>
-          <button className="button button--secondary" onClick={checkGameUpdates} type="button">
+          <button className="button button--secondary" onClick={checkItemUpdates} type="button">
             <RefreshCw size={16} />
-            Check games
+            Check library items
           </button>
         </div>
         <LauncherUpdatePanel progress={updateProgress} />

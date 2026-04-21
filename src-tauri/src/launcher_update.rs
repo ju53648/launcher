@@ -103,7 +103,16 @@ fn parse_tauri_latest_manifest(raw: &str) -> Result<LauncherReleaseManifest> {
         })
         .ok_or_else(|| CommandError::Network("Update manifest is missing release URL".into()))?;
 
-    let notes = if let Some(items) = value.get("notes").and_then(|entry| entry.as_array()) {
+    let notes = if let Some(items) = value
+        .get("notesList")
+        .and_then(|entry| entry.as_array())
+        .or_else(|| value.get("notes_list").and_then(|entry| entry.as_array()))
+    {
+        items
+            .iter()
+            .filter_map(|entry| entry.as_str().map(ToString::to_string))
+            .collect::<Vec<_>>()
+    } else if let Some(items) = value.get("notes").and_then(|entry| entry.as_array()) {
         items
             .iter()
             .filter_map(|entry| entry.as_str().map(ToString::to_string))

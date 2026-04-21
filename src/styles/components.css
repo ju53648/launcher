@@ -564,6 +564,12 @@
   font-size: 24px;
 }
 
+.home-dashboard__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+
 .metric-panel {
   display: grid;
   gap: var(--space-2);
@@ -600,6 +606,11 @@
   align-items: center;
 }
 
+.queue-strip__stack {
+  display: grid;
+  gap: var(--space-3);
+}
+
 .queue-strip__job {
   border: 1px solid var(--color-line);
   border-radius: var(--radius-md);
@@ -626,6 +637,12 @@
 .activity-panel {
   display: grid;
   gap: var(--space-4);
+}
+
+.home-columns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-5);
 }
 
 .activity-panel .section-toolbar {
@@ -663,6 +680,95 @@
   border: 1px solid var(--color-line);
   border-radius: var(--radius-md);
   object-fit: cover;
+}
+
+.item-list {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.item-list__row {
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-md);
+  background: #0e1214;
+  color: var(--color-text);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.item-list__row:hover {
+  border-color: rgba(0, 223, 160, 0.24);
+  background: rgba(0, 223, 160, 0.04);
+}
+
+.item-list__row span,
+.home-action-card span {
+  display: block;
+  color: var(--color-muted);
+}
+
+.item-list__row strong,
+.home-action-card strong {
+  color: var(--color-text);
+}
+
+.item-thumb {
+  width: 46px;
+  height: 46px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-line);
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.item-thumb--compact {
+  width: 40px;
+  height: 40px;
+}
+
+.item-thumb--hero {
+  width: 86px;
+  height: 86px;
+}
+
+.item-thumb--fallback {
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(circle at 25% 20%, rgba(0, 223, 160, 0.20), transparent 55%),
+    linear-gradient(135deg, #0d1416, #151d21);
+  color: var(--color-text);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+
+.home-action-list {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.home-action-card {
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-md);
+  background: #0e1214;
+  color: var(--color-text);
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-smooth), transform var(--transition-fast);
+}
+
+.home-action-card:hover {
+  border-color: rgba(0, 223, 160, 0.24);
+  box-shadow: 0 0 18px rgba(0, 223, 160, 0.07);
+  transform: translateY(-1px);
 }
 
 .activity-row strong,
@@ -711,6 +817,91 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
   gap: var(--space-5);
+}
+
+.shop-filters,
+.recommendations-panel,
+.downloads-section {
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-md);
+  background: rgba(17, 20, 22, 0.90);
+  padding: var(--space-5);
+}
+
+.shop-filters {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.shop-search {
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-md);
+  background: #0e1214;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 0 var(--space-4);
+}
+
+.shop-search svg,
+.shop-filter-group span {
+  color: var(--color-muted);
+}
+
+.shop-search input {
+  border: 0;
+  background: transparent;
+  padding-left: 0;
+  box-shadow: none;
+}
+
+.shop-filter-groups {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.shop-filter-group {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.shop-filter-group > span {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 13px;
+}
+
+.recommendation-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-3);
+}
+
+.recommendation-card {
+  border: 1px solid rgba(245, 213, 96, 0.18);
+  border-radius: var(--radius-md);
+  background:
+    linear-gradient(135deg, rgba(245, 213, 96, 0.08), transparent 65%),
+    #0e1214;
+  color: var(--color-text);
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-smooth);
+}
+
+.recommendation-card:hover {
+  border-color: rgba(245, 213, 96, 0.34);
+  transform: translateY(-1px);
+  box-shadow: 0 0 18px rgba(245, 213, 96, 0.09);
+}
+
+.recommendation-card span {
+  color: var(--color-muted);
+  font-size: 13px;
 }
 
 .shop-intro {
@@ -838,6 +1029,11 @@
   align-self: end;
 }
 
+.section-toolbar--compact {
+  margin-bottom: 0;
+  padding-bottom: var(--space-4);
+}
+
 .game-card {
   min-height: 520px;
   overflow: hidden;
@@ -902,12 +1098,21 @@
   min-height: 66px;
 }
 
+.game-card__tags,
 .game-card__meta,
 .game-card__actions {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-3);
   align-items: center;
+}
+
+.game-card__tags span {
+  border: 1px solid var(--color-line);
+  border-radius: 999px;
+  color: var(--color-muted);
+  padding: 6px 10px;
+  font-size: 12px;
 }
 
 .game-card__actions {
@@ -1112,6 +1317,11 @@
   gap: var(--space-5);
 }
 
+.downloads-section {
+  display: grid;
+  gap: var(--space-4);
+}
+
 .download-row {
   display: grid;
   grid-template-columns: 1fr auto;
@@ -1296,6 +1506,30 @@
   object-fit: cover;
 }
 
+.media-placeholder {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(circle at 24% 20%, rgba(0, 223, 160, 0.20), transparent 50%),
+    radial-gradient(circle at 80% 78%, rgba(0, 180, 220, 0.16), transparent 44%),
+    linear-gradient(135deg, #0a0f12, #151d21);
+  color: rgba(240, 247, 244, 0.92);
+  font-weight: 900;
+  letter-spacing: -0.04em;
+}
+
+.media-placeholder--card {
+  min-height: 100%;
+  font-size: 24px;
+}
+
+.media-placeholder--hero {
+  position: absolute;
+  inset: 0;
+}
+
 .modal__hero::after {
   content: "";
   position: absolute;
@@ -1412,6 +1646,7 @@
   }
 
   .dashboard-grid,
+  .home-columns,
   .detail-grid,
   .toggle-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1453,6 +1688,7 @@
   }
 
   .dashboard-grid,
+  .home-columns,
   .detail-grid,
   .toggle-grid,
   .add-library,

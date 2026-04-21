@@ -1,13 +1,15 @@
 export type LibraryStatus = "available" | "missing" | "inaccessible";
 
-export type GameStatus =
+export type CatalogItemType = "game" | "tool" | "project";
+
+export type ItemInstallState =
   | "notInstalled"
   | "installing"
   | "installed"
   | "updateAvailable"
   | "error";
 
-export type GameOwnershipStatus =
+export type ItemCollectionStatus =
   | "notAdded"
   | "added"
   | "installed"
@@ -27,7 +29,9 @@ export type InstallPhase =
   | "cancelled"
   | "failed";
 
-export type GameAction =
+export type InstallOperation = "install" | "update" | "repair" | "move";
+
+export type ItemAction =
   | "install"
   | "launch"
   | "update"
@@ -77,13 +81,39 @@ export interface LibraryFolder {
   status: LibraryStatus;
 }
 
-export interface GameManifest {
+export interface CatalogItemRecord {
   id: string;
+  itemType: CatalogItemType;
+  name: string;
+  description: string;
+  developer: string;
+  releaseDate: string;
+  categories: string[];
+  tags: string[];
+  coverImage: string;
+  bannerImage: string;
+  iconImage: string;
+}
+
+export interface CollectionEntry {
+  itemId: string;
+  discoverable: boolean;
+  addedAt: string;
+  lastUsedAt: string | null;
+  lastError: string | null;
+  lastErrorAt: string | null;
+  catalog: CatalogItemRecord;
+}
+
+export interface ContentManifest {
+  id: string;
+  itemType: CatalogItemType;
   name: string;
   version: string;
   description: string;
   developer: string;
   releaseDate: string;
+  categories: string[];
   tags: string[];
   coverImage: string;
   bannerImage: string;
@@ -91,7 +121,7 @@ export interface GameManifest {
   executable: string;
   installSizeBytes: number;
   defaultInstallFolder: string;
-  supportedActions: GameAction[];
+  supportedActions: ItemAction[];
   installStrategy: InstallStrategy;
   download: DownloadSource;
   changelog: ChangelogEntry[];
@@ -131,34 +161,39 @@ export interface ChangelogEntry {
   items: string[];
 }
 
-export interface InstalledGame {
-  gameId: string;
+export interface InstalledItem {
+  itemId: string;
   installedVersion: string;
   libraryId: string;
   installPath: string;
   installedAt: string;
   lastVerifiedAt: string | null;
+  lastLaunchedAt: string | null;
   sizeOnDiskBytes: number;
   status: "installed" | "broken" | "updating";
   lastError: string | null;
 }
 
-export interface GameLibraryEntry {
-  gameId: string;
-  addedAt: string;
-}
-
-export interface GameUpdateInfo {
+export interface ContentUpdateInfo {
   currentVersion: string;
   availableVersion: string;
   changelog: ChangelogEntry[];
 }
 
+export interface ContentStateFlags {
+  discoverable: boolean;
+  added: boolean;
+  installed: boolean;
+  updateAvailable: boolean;
+  error: boolean;
+}
+
 export interface InstallJob {
   id: string;
-  gameId: string;
-  gameName: string;
+  itemId: string;
+  itemName: string;
   libraryId: string;
+  operation: InstallOperation;
   phase: InstallPhase;
   status: JobStatus;
   progress: number;
@@ -180,14 +215,17 @@ export interface LauncherUpdateState {
   error: string | null;
 }
 
-export interface GameView {
-  manifest: GameManifest;
-  status: GameStatus;
-  ownershipStatus: GameOwnershipStatus;
-  installed: InstalledGame | null;
-  libraryEntry: GameLibraryEntry | null;
+export interface ContentView {
+  catalog: CatalogItemRecord;
+  manifest: ContentManifest | null;
+  state: ContentStateFlags;
+  installState: ItemInstallState;
+  collectionStatus: ItemCollectionStatus;
+  installed: InstalledItem | null;
+  collectionEntry: CollectionEntry | null;
   activeJob: InstallJob | null;
-  availableUpdate: GameUpdateInfo | null;
+  availableUpdate: ContentUpdateInfo | null;
+  lastError: string | null;
 }
 
 export interface LauncherSnapshot {
@@ -198,7 +236,7 @@ export interface LauncherSnapshot {
   recommendedLibraryPath: string;
   manifestErrors: string[];
   config: LauncherConfig;
-  games: GameView[];
+  items: ContentView[];
   jobs: InstallJob[];
   launcherUpdate: LauncherUpdateState;
 }

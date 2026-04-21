@@ -1,75 +1,94 @@
 import { Download, Play, Wrench } from "lucide-react";
 
-import { formatBytes } from "../domain/format";
-import type { GameView } from "../domain/types";
+import { formatBytes, itemTypeLabel } from "../domain/format";
+import type { ContentView } from "../domain/types";
 import { ProgressBar } from "./ProgressBar";
 import { StatusBadge } from "./StatusBadge";
 
 export function GameCard({
-  game,
+  item,
   onOpen,
   onInstall,
   onLaunch,
   onUpdate,
   onRepair
 }: {
-  game: GameView;
+  item: ContentView;
   onOpen: () => void;
   onInstall: () => void;
   onLaunch: () => void;
   onUpdate: () => void;
   onRepair: () => void;
 }) {
-  const { manifest } = game;
+  const manifest = item.manifest;
 
   return (
     <article className="game-card">
       <button className="game-card__media" onClick={onOpen} type="button">
-        <img src={manifest.coverImage} alt={`${manifest.name} cover`} />
+        {item.catalog.coverImage ? (
+          <img src={item.catalog.coverImage} alt={`${item.catalog.name} cover`} />
+        ) : (
+          <div className="media-placeholder media-placeholder--card">
+            <span>{item.catalog.name.slice(0, 2).toUpperCase()}</span>
+          </div>
+        )}
       </button>
       <div className="game-card__body">
         <div className="game-card__title-row">
           <div>
-            <h3>{manifest.name}</h3>
-            <p>{manifest.developer}</p>
+            <h3>{item.catalog.name}</h3>
+            <p>
+              {item.catalog.developer} · {itemTypeLabel(item.catalog.itemType)}
+            </p>
           </div>
-          <StatusBadge status={game.ownershipStatus} type="ownership" />
+          <StatusBadge status={item.collectionStatus} type="collection" />
         </div>
 
-        <p className="game-card__description">{manifest.description}</p>
+        <p className="game-card__description">{item.catalog.description}</p>
 
-        {game.activeJob ? (
+        <div className="game-card__tags">
+          {item.catalog.categories.slice(0, 2).map((category) => (
+            <span key={category}>{category}</span>
+          ))}
+          {item.catalog.tags.slice(0, 2).map((tag) => (
+            <span key={tag}>{tag}</span>
+          ))}
+        </div>
+
+        {item.activeJob ? (
           <div className="game-card__job">
-            <span>{game.activeJob.message}</span>
-            <ProgressBar value={game.activeJob.progress} compact />
+            <span>{item.activeJob.message}</span>
+            <ProgressBar value={item.activeJob.progress} compact />
           </div>
         ) : (
           <div className="game-card__meta">
-            <span>v{manifest.version}</span>
-            <span>{formatBytes(manifest.installSizeBytes)}</span>
+            <span>{manifest ? `v${manifest.version}` : "Unavailable in Shop"}</span>
+            <span>{formatBytes(manifest?.installSizeBytes ?? item.installed?.sizeOnDiskBytes ?? 0)}</span>
           </div>
         )}
 
+        {item.lastError && <p className="field-error">{item.lastError}</p>}
+
         <div className="game-card__actions">
-          {game.status === "installed" && (
+          {item.installState === "installed" && (
             <button className="button button--primary" onClick={onLaunch} type="button">
               <Play size={16} />
-              Play
+              Launch
             </button>
           )}
-          {game.status === "notInstalled" && (
+          {item.installState === "notInstalled" && manifest && (
             <button className="button button--primary" onClick={onInstall} type="button">
               <Download size={16} />
               Install
             </button>
           )}
-          {game.status === "updateAvailable" && (
+          {item.installState === "updateAvailable" && (
             <button className="button button--primary" onClick={onUpdate} type="button">
               <Download size={16} />
               Update
             </button>
           )}
-          {game.status === "error" && (
+          {item.installState === "error" && (
             <button className="button button--primary" onClick={onRepair} type="button">
               <Wrench size={16} />
               Repair

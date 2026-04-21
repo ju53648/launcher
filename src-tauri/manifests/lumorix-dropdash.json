@@ -1,10 +1,15 @@
 {
   "id": "com.lumorix.dropdash",
+  "itemType": "game",
   "name": "Lumorix DropDash",
   "version": "1.0.0",
   "description": "A tiny offline arcade test title for validating Lumorix Launcher install, launch, uninstall, and future update flows.",
   "developer": "Lumorix",
   "releaseDate": "2026-04-20",
+  "categories": [
+    "Arcade",
+    "Offline"
+  ],
   "tags": [
     "Arcade",
     "Offline",

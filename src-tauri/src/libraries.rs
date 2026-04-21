@@ -4,7 +4,7 @@ use chrono::Utc;
 use uuid::Uuid;
 
 use crate::{
-    models::{InstalledGamesDb, LibraryFolder, LibraryStatus, LauncherConfig},
+    models::{InstalledItemsDb, LibraryFolder, LibraryStatus, LauncherConfig},
     paths::validate_library_path,
     storage::{CommandError, Result},
 };
@@ -76,10 +76,10 @@ pub fn ensure_unique_library_path(config: &LauncherConfig, path: &str) -> Result
     Ok(())
 }
 
-pub fn ensure_library_is_removable(db: &InstalledGamesDb, library_id: &str) -> Result<()> {
-    if db.games.iter().any(|game| game.library_id == library_id) {
+pub fn ensure_library_is_removable(db: &InstalledItemsDb, library_id: &str) -> Result<()> {
+    if db.items.iter().any(|item| item.library_id == library_id) {
         return Err(CommandError::Validation(
-            "Move or uninstall games from this library before removing it".into(),
+            "Move or uninstall installed items from this library before removing it".into(),
         ));
     }
 

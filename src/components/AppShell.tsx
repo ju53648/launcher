@@ -9,9 +9,17 @@ import {
   ShieldCheck
 } from "lucide-react";
 
+import { getActiveJobs, getDiscoverableItems, getLibraryItems } from "../domain/selectors";
 import type { LauncherSnapshot } from "../domain/types";
 
-export type AppRoute = "home" | "shop" | "library" | "downloads" | "settings" | "about" | `game:${string}`;
+export type AppRoute =
+  | "home"
+  | "shop"
+  | "library"
+  | "downloads"
+  | "settings"
+  | "about"
+  | `item:${string}`;
 
 const navItems: Array<{
   route: AppRoute;
@@ -37,7 +45,7 @@ export function AppShell({
   snapshot: LauncherSnapshot;
   children: React.ReactNode;
 }) {
-  const runningJobs = snapshot.jobs.filter((job) => job.status === "running" || job.status === "queued");
+  const activeJobs = getActiveJobs(snapshot);
 
   return (
     <div className="app-shell">
@@ -63,9 +71,7 @@ export function AppShell({
               >
                 <Icon size={18} />
                 <span>{item.label}</span>
-                {item.route === "downloads" && runningJobs.length > 0 && (
-                  <em>{runningJobs.length}</em>
-                )}
+                {item.route === "downloads" && activeJobs.length > 0 && <em>{activeJobs.length}</em>}
               </button>
             );
           })}
@@ -73,7 +79,7 @@ export function AppShell({
 
         <div className="privacy-chip">
           <ShieldCheck size={18} />
-          <span>No account. No telemetry.</span>
+          <span>No account. No ads. Local-first.</span>
         </div>
       </aside>
 
@@ -96,54 +102,69 @@ export function AppShell({
 
 function isNavItemActive(route: AppRoute, itemRoute: AppRoute, snapshot: LauncherSnapshot): boolean {
   if (route === itemRoute) return true;
-  if (!route.startsWith("game:")) return false;
-  const id = route.slice("game:".length);
-  const game = snapshot.games.find((entry) => entry.manifest.id === id);
-  if (game?.ownershipStatus === "notAdded") {
+  if (!route.startsWith("item:")) return false;
+  const id = route.slice("item:".length);
+  const item = snapshot.items.find((entry) => entry.catalog.id === id);
+  if (item?.collectionStatus === "notAdded") {
     return itemRoute === "shop";
   }
   return itemRoute === "library";
 }
 
 function metaForRoute(route: AppRoute, snapshot: LauncherSnapshot): string {
-  const libraryCount = snapshot.games.filter((game) => game.ownershipStatus !== "notAdded").length;
+  const discoverableCount = getDiscoverableItems(snapshot).length;
+  const libraryCount = getLibraryItems(snapshot).length;
+  const activeJobs = getActiveJobs(snapshot).length;
+
   if (route === "shop") {
-    return `${snapshot.games.length} ${snapshot.games.length === 1 ? "game" : "games"} available`;
+    return `${discoverableCount} ${discoverableCount === 1 ? "item" : "items"} available`;
   }
-  if (route === "library" || route.startsWith("game:")) {
-    return `${libraryCount} in library`;
+  if (route === "library" || route.startsWith("item:")) {
+    return `${libraryCount} in your collection`;
   }
-  return `${snapshot.games.length} catalog ${snapshot.games.length === 1 ? "title" : "titles"}`;
+  if (route === "downloads") {
+    return activeJobs > 0
+      ? `${activeJobs} active ${activeJobs === 1 ? "job" : "jobs"}`
+      : "Queue is clear";
+  }
+  return `${discoverableCount} discoverable ${discoverableCount === 1 ? "item" : "items"}`;
 }
 
 function subtitleForRoute(route: AppRoute): string {
-  if (route.startsWith("game:")) return "Game details";
+  if (route.startsWith("item:")) return "Item details";
   switch (route) {
-    case "home":     return "Overview";
-    case "shop":     return "Discovery";
-    case "library":  return "Your collection";
-    case "downloads":return "Active installs";
-    case "settings": return "Preferences";
-    case "about":    return "Lumorix Launcher";
-    default:         return "Lumorix";
+    case "home":
+      return "Personal dashboard";
+    case "shop":
+      return "Discovery";
+    case "library":
+      return "Your collection";
+    case "downloads":
+      return "Installs and updates";
+    case "settings":
+      return "Preferences";
+    case "about":
+      return "Lumorix Launcher";
+    default:
+      return "Lumorix";
   }
 }
 
 function titleForRoute(route: AppRoute, snapshot: LauncherSnapshot) {
-  if (route.startsWith("game:")) {
-    const id = route.slice("game:".length);
-    return snapshot.games.find((game) => game.manifest.id === id)?.manifest.name ?? "Game";
+  if (route.startsWith("item:")) {
+    const id = route.slice("item:".length);
+    return snapshot.items.find((item) => item.catalog.id === id)?.catalog.name ?? "Item";
   }
 
   switch (route) {
     case "home":
-      return "Command Center";
+      return "Home";
     case "shop":
       return "Shop";
     case "library":
-      return "Game Library";
+      return "Library";
     case "downloads":
-      return "Install Queue";
+      return "Downloads";
     case "settings":
       return "Settings";
     case "about":

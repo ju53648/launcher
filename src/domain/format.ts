@@ -1,4 +1,11 @@
-import type { GameOwnershipStatus, GameStatus, InstallPhase, LibraryStatus } from "./types";
+import type {
+  CatalogItemType,
+  InstallOperation,
+  InstallPhase,
+  ItemCollectionStatus,
+  ItemInstallState,
+  LibraryStatus
+} from "./types";
 
 export function formatBytes(bytes: number): string {
   if (!Number.isFinite(bytes) || bytes <= 0) return "0 B";
@@ -10,15 +17,18 @@ export function formatBytes(bytes: number): string {
 
 export function formatDate(value: string | null): string {
   if (!value) return "Never";
+  const normalizedValue = /^\d{4}-\d{2}-\d{2}$/.test(value) ? `${value}T12:00:00Z` : value;
+  const date = new Date(normalizedValue);
+  if (Number.isNaN(date.getTime())) return value;
   return new Intl.DateTimeFormat("de-DE", {
     year: "numeric",
     month: "short",
     day: "2-digit"
-  }).format(new Date(value));
+  }).format(date);
 }
 
-export function gameStatusLabel(status: GameStatus): string {
-  const labels: Record<GameStatus, string> = {
+export function installStateLabel(status: ItemInstallState): string {
+  const labels: Record<ItemInstallState, string> = {
     notInstalled: "Not installed",
     installing: "Installing",
     installed: "Installed",
@@ -28,8 +38,8 @@ export function gameStatusLabel(status: GameStatus): string {
   return labels[status];
 }
 
-export function ownershipStatusLabel(status: GameOwnershipStatus): string {
-  const labels: Record<GameOwnershipStatus, string> = {
+export function collectionStatusLabel(status: ItemCollectionStatus): string {
+  const labels: Record<ItemCollectionStatus, string> = {
     notAdded: "Not in library",
     added: "In library",
     installed: "Installed",
@@ -61,4 +71,23 @@ export function phaseLabel(phase: InstallPhase): string {
     failed: "Failed"
   };
   return labels[phase];
+}
+
+export function operationLabel(operation: InstallOperation): string {
+  const labels: Record<InstallOperation, string> = {
+    install: "Install",
+    update: "Update",
+    repair: "Repair",
+    move: "Move"
+  };
+  return labels[operation];
+}
+
+export function itemTypeLabel(itemType: CatalogItemType): string {
+  const labels: Record<CatalogItemType, string> = {
+    game: "Game",
+    tool: "Tool",
+    project: "Project"
+  };
+  return labels[itemType];
 }

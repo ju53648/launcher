@@ -46,8 +46,22 @@ npm run tauri:build
 
 ## 4) Publish a new release (future standard flow)
 
-1. Bump version in [src-tauri/tauri.conf.json](src-tauri/tauri.conf.json) and [package.json](package.json).
-2. Commit and tag:
+1. Edit [release-info.json](release-info.json).
+2. Sync derived release metadata and build the signed bundles:
+
+```powershell
+npm run prepare-release
+```
+
+This updates the generated release files automatically:
+- [package.json](package.json)
+- [package-lock.json](package-lock.json)
+- [src-tauri/Cargo.toml](src-tauri/Cargo.toml)
+- [src-tauri/tauri.conf.json](src-tauri/tauri.conf.json)
+- [distribution/latest.json](distribution/latest.json)
+
+Do not edit those generated release files manually anymore.
+3. Commit and tag:
 
 ```powershell
 git add .
@@ -56,10 +70,10 @@ git tag vX.Y.Z
 git push origin main --tags
 ```
 
-3. GitHub Action [.github/workflows/release-windows.yml](.github/workflows/release-windows.yml) runs automatically and uploads:
+4. GitHub Action [.github/workflows/release-windows.yml](.github/workflows/release-windows.yml) runs automatically and uploads:
 - installer files (.msi, .exe)
 - updater artifacts (.zip + .sig)
-- static latest.json
+- finalized latest.json
 
 ## 5) In-app updater test
 
@@ -92,4 +106,4 @@ Local build artifacts:
 - [src-tauri/target/release/bundle](src-tauri/target/release/bundle)
 
 Updater manifest published in release:
-- latest.json (uploaded from distribution/latest.json by workflow)
+- latest.json (generated from release-info.json, then finalized and uploaded by workflow)

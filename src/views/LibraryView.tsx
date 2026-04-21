@@ -4,25 +4,27 @@ import type { AppRoute } from "../components/AppShell";
 import { EmptyState } from "../components/EmptyState";
 import { GameCard } from "../components/GameCard";
 import { InstallDialog } from "../components/InstallDialog";
-import type { GameView } from "../domain/types";
+import { getLibraryItems } from "../domain/selectors";
+import type { ContentView, ItemCollectionStatus } from "../domain/types";
 import { useLauncher } from "../store/LauncherStore";
 
-const filters: Array<{ value: "all" | "installed" | "added" | "updateAvailable"; label: string }> = [
+const filters: Array<{ value: "all" | ItemCollectionStatus; label: string }> = [
   { value: "all", label: "All" },
   { value: "installed", label: "Installed" },
   { value: "added", label: "Ready to install" },
-  { value: "updateAvailable", label: "Updates" }
+  { value: "updateAvailable", label: "Updates" },
+  { value: "error", label: "Needs repair" }
 ];
 
 export function LibraryView({ setRoute }: { setRoute: (route: AppRoute) => void }) {
-  const { snapshot, installGame, launchGame, updateGame, repairGame } = useLauncher();
+  const { snapshot, installItem, launchItem, updateItem, repairItem } = useLauncher();
   const [filter, setFilter] = useState<(typeof filters)[number]["value"]>("all");
-  const [installTarget, setInstallTarget] = useState<GameView | null>(null);
+  const [installTarget, setInstallTarget] = useState<ContentView | null>(null);
 
-  const games = useMemo(() => {
+  const items = useMemo(() => {
     if (!snapshot) return [];
-    const libraryGames = snapshot.games.filter((game) => game.ownershipStatus !== "notAdded");
-    return libraryGames.filter((game) => filter === "all" || game.ownershipStatus === filter);
+    const libraryItems = getLibraryItems(snapshot);
+    return libraryItems.filter((item) => filter === "all" || item.collectionStatus === filter);
   }, [filter, snapshot]);
 
   if (!snapshot) return null;
@@ -42,13 +44,13 @@ export function LibraryView({ setRoute }: { setRoute: (route: AppRoute) => void 
         ))}
       </div>
 
-      {games.length === 0 ? (
+      {items.length === 0 ? (
         <EmptyState
-          title={filter === "all" ? "Your library is empty" : "No games match this filter"}
+          title={filter === "all" ? "Your Library is empty" : "No items match this filter"}
           body={
             filter === "all"
-              ? "Add games from the Shop to build your collection. Installed games will also appear here automatically."
-              : "Try another library filter, or add more games from the Shop."
+              ? "Add something from the Shop to start building your Lumorix collection. Once added, it stays here for install, launch, update, and repair actions."
+              : "Try another filter or head back to the Shop to add more content."
           }
           action={
             <button className="button button--primary" onClick={() => setRoute("shop")} type="button">
@@ -58,15 +60,15 @@ export function LibraryView({ setRoute }: { setRoute: (route: AppRoute) => void 
         />
       ) : (
         <section className="library-grid">
-          {games.map((game) => (
+          {items.map((item) => (
             <GameCard
-              key={game.manifest.id}
-              game={game}
-              onOpen={() => setRoute(`game:${game.manifest.id}`)}
-              onInstall={() => setInstallTarget(game)}
-              onLaunch={() => launchGame(game.manifest.id)}
-              onUpdate={() => updateGame(game.manifest.id)}
-              onRepair={() => repairGame(game.manifest.id)}
+              key={item.catalog.id}
+              item={item}
+              onOpen={() => setRoute(`item:${item.catalog.id}`)}
+              onInstall={() => setInstallTarget(item)}
+              onLaunch={() => launchItem(item.catalog.id)}
+              onUpdate={() => updateItem(item.catalog.id)}
+              onRepair={() => repairItem(item.catalog.id)}
             />
           ))}
         </section>
@@ -74,12 +76,12 @@ export function LibraryView({ setRoute }: { setRoute: (route: AppRoute) => void 
 
       {installTarget && (
         <InstallDialog
-          game={installTarget}
+          item={installTarget}
           libraries={snapshot.config.libraries}
           defaultLibraryId={snapshot.config.defaultLibraryId}
           onClose={() => setInstallTarget(null)}
           onInstall={async (libraryId) => {
-            await installGame(installTarget.manifest.id, libraryId);
+            await installItem(installTarget.catalog.id, libraryId);
           }}
         />
       )}

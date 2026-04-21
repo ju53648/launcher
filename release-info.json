@@ -1,0 +1,11 @@
+{
+  "version": "0.3.3",
+  "title": "Shop and Library Refactor",
+  "date": "2026-04-21",
+  "notes": [
+    "Added Shop view",
+    "Separated Shop and Library",
+    "Improved Downloads visibility",
+    "Refactored collection state model"
+  ]
+}
