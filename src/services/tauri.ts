@@ -18,15 +18,23 @@ export async function callCommand<T>(command: string, args?: Record<string, unkn
   }
 }
 
-export async function chooseDirectory(): Promise<string | null> {
+export async function chooseDirectory({
+  title,
+  prompt,
+  defaultPath
+}: {
+  title: string;
+  prompt: string;
+  defaultPath: string;
+}): Promise<string | null> {
   if (!isTauriRuntime()) {
-    return window.prompt("Library folder path", "C:\\Lumorix\\Games");
+    return window.prompt(prompt, defaultPath);
   }
 
   const selected = await open({
     directory: true,
     multiple: false,
-    title: "Choose Lumorix library folder"
+    title
   });
 
   return typeof selected === "string" ? selected : null;
@@ -61,6 +69,8 @@ export const tauriApi = {
       createDesktopShortcuts,
       keepDownloadCache
     }),
+  setLanguage: (language: "en" | "de" | "pl") =>
+    callCommand<LauncherSnapshot>("set_language", { language }),
   startInstallItem: (itemId: string, libraryId: string | null) =>
     callCommand<InstallJob>("start_install_item", { itemId, libraryId }),
   startUpdateItem: (itemId: string) =>

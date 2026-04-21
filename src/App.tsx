@@ -3,6 +3,7 @@ import { useState } from "react";
 import { AppShell, type AppRoute } from "./components/AppShell";
 import { EmptyState } from "./components/EmptyState";
 import { ErrorToast } from "./components/ErrorToast";
+import { useI18n } from "./i18n";
 import { AboutView } from "./views/AboutView";
 import { DownloadsView } from "./views/DownloadsView";
 import { GameDetailView } from "./views/GameDetailView";
@@ -15,6 +16,7 @@ import { useLauncher } from "./store/LauncherStore";
 import type { LauncherSnapshot } from "./domain/types";
 
 export function App() {
+  const { t } = useI18n();
   const { snapshot, loading, error, clearError } = useLauncher();
   const [route, setRoute] = useState<AppRoute>("home");
   const [manifestWarningDismissed, setManifestWarningDismissed] = useState(false);
@@ -25,7 +27,10 @@ export function App() {
           message:
             snapshot.manifestErrors.length === 1
               ? snapshot.manifestErrors[0]
-              : `${snapshot.manifestErrors[0]} (${snapshot.manifestErrors.length} manifest issues total)`
+              : t("app.manifestWarning.multiple", {
+                  message: snapshot.manifestErrors[0],
+                  count: snapshot.manifestErrors.length
+                })
         }
       : null;
 
@@ -35,8 +40,8 @@ export function App() {
         <div className="brand">
           <span className="brand__mark">LX</span>
           <span>
-            <strong>Lumorix</strong>
-            <small>Launcher</small>
+            <strong>{t("common.brandName")}</strong>
+            <small>{t("common.brandProduct")}</small>
           </span>
         </div>
         <div className="loading-line" />
@@ -48,8 +53,8 @@ export function App() {
     return (
       <main className="loading-screen">
         <EmptyState
-          title="Launcher state unavailable"
-          body="Lumorix could not initialize local storage. Check folder permissions and restart."
+          title={t("app.stateUnavailable.title")}
+          body={t("app.stateUnavailable.body")}
         />
         {error && <ErrorToast error={error} onClose={clearError} />}
       </main>
@@ -71,7 +76,7 @@ export function App() {
   return (
     <>
       <AppShell route={route} setRoute={setRoute} snapshot={snapshot}>
-        {renderRoute(route, setRoute, snapshot)}
+        {renderRoute(route, setRoute, snapshot, t)}
       </AppShell>
       {error && <ErrorToast error={error} onClose={clearError} />}
       {!error && manifestWarning && (
@@ -84,15 +89,16 @@ export function App() {
 function renderRoute(
   route: AppRoute,
   setRoute: (route: AppRoute) => void,
-  snapshot: LauncherSnapshot
+  snapshot: LauncherSnapshot,
+  t: (key: string, params?: Record<string, string | number | null | undefined>) => string
 ) {
   if (route.startsWith("item:")) {
     const id = route.slice("item:".length);
     const item = snapshot.items.find((entry) => entry.catalog.id === id);
     return item ? (
-      <GameDetailView item={item} />
+      <GameDetailView item={item} setRoute={setRoute} />
     ) : (
-      <EmptyState title="Item not found" body="The catalog entry is no longer available." />
+      <EmptyState title={t("app.itemNotFound.title")} body={t("app.itemNotFound.body")} />
     );
   }
 

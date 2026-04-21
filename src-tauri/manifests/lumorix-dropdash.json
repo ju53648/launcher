@@ -3,7 +3,7 @@
   "itemType": "game",
   "name": "Lumorix DropDash",
   "version": "1.0.0",
-  "description": "A tiny offline arcade test title for validating Lumorix Launcher install, launch, uninstall, and future update flows.",
+  "description": "A compact offline arcade release for validating Lumorix Launcher install, launch, uninstall, and future update flows.",
   "developer": "Lumorix",
   "releaseDate": "2026-04-20",
   "categories": [
@@ -11,9 +11,10 @@
     "Offline"
   ],
   "tags": [
-    "Arcade",
-    "Offline",
-    "Test Title"
+    { "id": "arcade", "weight": 3 },
+    { "id": "offline", "weight": 3 },
+    { "id": "city", "weight": 1 },
+    { "id": "exploration", "weight": 1 }
   ],
   "coverImage": "/assets/games/lumorix-dropdash-cover.svg",
   "bannerImage": "/assets/games/lumorix-dropdash-banner.svg",
@@ -34,7 +35,7 @@
     "contentFiles": [
       {
         "path": "index.html",
-        "content": "<!doctype html>\n<html lang=\"en\">\n  <head>\n    <meta charset=\"utf-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n    <title>Lumorix DropDash</title>\n    <link rel=\"stylesheet\" href=\"styles.css\">\n  </head>\n  <body>\n    <main class=\"game-shell\" aria-label=\"Lumorix DropDash\">\n      <section class=\"stage-wrap\">\n        <canvas id=\"gameCanvas\" width=\"960\" height=\"540\" aria-label=\"DropDash playfield\"></canvas>\n\n        <div class=\"hud\" aria-live=\"polite\">\n          <div>\n            <span class=\"hud-label\">Score</span>\n            <strong id=\"score\">0</strong>\n          </div>\n          <div>\n            <span class=\"hud-label\">Best</span>\n            <strong id=\"bestScore\">0</strong>\n          </div>\n          <div>\n            <span class=\"hud-label\">Shield</span>\n            <strong id=\"shieldStatus\">Ready</strong>\n          </div>\n        </div>\n\n        <section id=\"titleScreen\" class=\"overlay\">\n          <p class=\"eyebrow\">Lumorix Test Title</p>\n          <h1>Lumorix DropDash</h1>\n          <p class=\"intro\">Slip between falling shards, grab bright cores, and keep the dash lane alive.</p>\n          <div class=\"control-grid\">\n            <span>A / Left</span>\n            <span>D / Right</span>\n            <span>Space to pulse</span>\n          </div>\n          <button id=\"startButton\" type=\"button\">Start Run</button>\n        </section>\n\n        <section id=\"gameOverScreen\" class=\"overlay hidden\">\n          <p class=\"eyebrow\">Run Complete</p>\n          <h2>Crash Detected</h2>\n          <p id=\"finalScore\" class=\"intro\">Score 0</p>\n          <button id=\"restartButton\" type=\"button\">Restart</button>\n        </section>\n      </section>\n\n      <footer>\n        <span>Dodge red shards.</span>\n        <span>Collect cyan cores.</span>\n        <span>Press P to pause.</span>\n      </footer>\n    </main>\n\n    <script src=\"script.js\"></script>\n  </body>\n</html>\n"
+        "content": "<!doctype html>\n<html lang=\"en\">\n  <head>\n    <meta charset=\"utf-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n    <title>Lumorix DropDash</title>\n    <link rel=\"stylesheet\" href=\"styles.css\">\n  </head>\n  <body>\n    <main class=\"game-shell\" aria-label=\"Lumorix DropDash\">\n      <section class=\"stage-wrap\">\n        <canvas id=\"gameCanvas\" width=\"960\" height=\"540\" aria-label=\"DropDash playfield\"></canvas>\n\n        <div class=\"hud\" aria-live=\"polite\">\n          <div>\n            <span class=\"hud-label\">Score</span>\n            <strong id=\"score\">0</strong>\n          </div>\n          <div>\n            <span class=\"hud-label\">Best</span>\n            <strong id=\"bestScore\">0</strong>\n          </div>\n          <div>\n            <span class=\"hud-label\">Shield</span>\n            <strong id=\"shieldStatus\">Ready</strong>\n          </div>\n        </div>\n\n        <section id=\"titleScreen\" class=\"overlay\">\n          <p class=\"eyebrow\">Lumorix Arcade Run</p>\n          <h1>Lumorix DropDash</h1>\n          <p class=\"intro\">Slip between falling shards, grab bright cores, and keep the dash lane alive.</p>\n          <div class=\"control-grid\">\n            <span>A / Left</span>\n            <span>D / Right</span>\n            <span>Space to pulse</span>\n          </div>\n          <button id=\"startButton\" type=\"button\">Start Run</button>\n        </section>\n\n        <section id=\"gameOverScreen\" class=\"overlay hidden\">\n          <p class=\"eyebrow\">Run Complete</p>\n          <h2>Crash Detected</h2>\n          <p id=\"finalScore\" class=\"intro\">Score 0</p>\n          <button id=\"restartButton\" type=\"button\">Restart</button>\n        </section>\n      </section>\n\n      <footer>\n        <span>Dodge red shards.</span>\n        <span>Collect cyan cores.</span>\n        <span>Press P to pause.</span>\n      </footer>\n    </main>\n\n    <script src=\"script.js\"></script>\n  </body>\n</html>\n"
       },
       {
         "path": "styles.css",
@@ -59,7 +60,7 @@
       "version": "1.0.0",
       "date": "2026-04-20",
       "items": [
-        "Initial local launcher integration test release.",
+        "Initial launcher-ready release.",
         "Adds a playable dodge-and-collect arcade loop with restart and local high score.",
         "Uses a synthetic offline package for reliable install, launch, repair, and uninstall testing."
       ]

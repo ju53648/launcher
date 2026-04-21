@@ -1,4 +1,4 @@
-use std::{collections::BTreeMap, fs};
+use std::{collections::{BTreeMap, BTreeSet}, fs};
 
 use url::Url;
 
@@ -8,7 +8,11 @@ use crate::{
     storage::{CommandError, LauncherRuntime, Result},
 };
 
-const EMBEDDED_MANIFESTS: &[&str] = &[include_str!("../manifests/lumorix-dropdash.json")];
+const EMBEDDED_MANIFESTS: &[&str] = &[
+    include_str!("../manifests/lumorix-dropdash.json"),
+    include_str!("../manifests/signal-lab.json"),
+    include_str!("../manifests/project-atlas.json"),
+];
 
 #[derive(Debug, Clone)]
 pub struct ManifestCatalog {
@@ -125,6 +129,30 @@ pub fn validate_manifest(manifest: &ContentManifest) -> Result<()> {
             "Unsafe default install folder in manifest {}",
             manifest.id
         )));
+    }
+
+    let mut seen_tags = BTreeSet::new();
+    for tag in &manifest.tags {
+        if tag.id.trim().is_empty() {
+            return Err(CommandError::Manifest(format!(
+                "Manifest {} contains a tag with an empty id",
+                manifest.id
+            )));
+        }
+
+        if !(1..=3).contains(&tag.weight) {
+            return Err(CommandError::Manifest(format!(
+                "Manifest {} contains tag '{}' with unsupported weight {}",
+                manifest.id, tag.id, tag.weight
+            )));
+        }
+
+        if !seen_tags.insert(tag.id.as_str()) {
+            return Err(CommandError::Manifest(format!(
+                "Manifest {} defines tag '{}' more than once",
+                manifest.id, tag.id
+            )));
+        }
     }
 
     let install_root = std::path::Path::new("C:\\LumorixValidation");

@@ -1,11 +1,15 @@
 {
-  "version": "0.3.3",
-  "title": "Shop and Library Refactor",
+  "version": "0.4.0",
+  "title": "Shop & Discovery Update",
   "date": "2026-04-21",
   "notes": [
-    "Added Shop view",
-    "Separated Shop and Library",
-    "Improved Downloads visibility",
-    "Refactored collection state model"
+    "New Shop system for discovering games and Lumorix projects",
+    "Clear separation between Shop and Library",
+    "Smart local recommendations based on your installed content",
+    "Structured tag system for better discovery and future scaling",
+    "Refactored core platform to support more than just games",
+    "Improved download, install, and update flows",
+    "More stable updater with better error handling",
+    "Cleaner and more consistent launcher UI"
   ]
 }

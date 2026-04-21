@@ -12,7 +12,7 @@ use crate::{
         normalize_default_library, normalize_library_name,
     },
     manifest::find_manifest,
-    models::{CommandOk, InstallJob, LauncherSnapshot},
+    models::{AppLanguage, CommandOk, InstallJob, LauncherSnapshot},
     paths::recommended_library_path,
     process::{launch_item as spawn_item_process, open_install_folder as open_folder},
     storage::{CommandError, LauncherRuntime, Result},
@@ -42,7 +42,7 @@ pub fn complete_onboarding(
                 .unwrap_or_else(|_| "C:\\Lumorix\\Games".into())
         });
         ensure_unique_library_path(&config, &path)?;
-        let library = create_library("Main Library".into(), path, true)?;
+        let library = create_library(default_library_name(config.language).into(), path, true)?;
         config.default_library_id = Some(library.id.clone());
         config.libraries.push(library);
     }
@@ -148,6 +148,18 @@ pub fn update_preferences(
     config.install_behavior.keep_download_cache = keep_download_cache;
     state.save_config(&config)?;
     state.append_log("INFO", "Updated preferences");
+    state.build_snapshot()
+}
+
+#[tauri::command]
+pub fn set_language(
+    state: State<'_, LauncherRuntime>,
+    language: AppLanguage,
+) -> Result<LauncherSnapshot> {
+    let mut config = state.load_config()?;
+    config.language = Some(language);
+    state.save_config(&config)?;
+    state.append_log("INFO", "Updated launcher language");
     state.build_snapshot()
 }
 
@@ -283,4 +295,12 @@ pub fn cancel_job(state: State<'_, LauncherRuntime>, job_id: String) -> Result<L
 pub fn clear_completed_jobs(state: State<'_, LauncherRuntime>) -> Result<LauncherSnapshot> {
     clear_finished_jobs(&state)?;
     state.build_snapshot()
+}
+
+fn default_library_name(language: Option<AppLanguage>) -> &'static str {
+    match language.unwrap_or(AppLanguage::En) {
+        AppLanguage::En => "Main Library",
+        AppLanguage::De => "Hauptbibliothek",
+        AppLanguage::Pl => "Biblioteka główna",
+    }
 }

@@ -1,0 +1,42 @@
+{
+  "items": {
+    "com.lumorix.dropdash": {
+      "description": "Ein kompaktes Offline-Arcade-Release zum Validieren von Installation, Start, Deinstallation und kuenftigen Update-Ablaufen im Lumorix Launcher.",
+      "categories": ["Arcade", "Offline"],
+      "changelog": {
+        "1.0.0": [
+          "Erstes launcherfertiges Release.",
+          "Fuegt eine spielbare Dodge-and-Collect-Arcade-Schleife mit Neustart und lokalem Highscore hinzu.",
+          "Verwendet ein synthetisches Offline-Paket fuer zuverlaessige Installations-, Start-, Reparatur- und Deinstallations-Tests."
+        ]
+      }
+    },
+    "com.lumorix.signal-lab": {
+      "description": "Ein kompaktes lokales Utility-Sandbox-Werkzeug zum Validieren von Lumorix-Tool-Verteilung, leichten Build-Ablaufen und Sammlungsverhalten.",
+      "categories": ["Creator-Tools", "Dienstprogramme"],
+      "changelog": {
+        "0.9.2": [
+          "Fuehrt ein leichtgewichtiges lokales Utility-Paket fuer Shop- und Bibliotheksablaeufe ein."
+        ]
+      }
+    },
+    "com.lumorix.project-atlas": {
+      "description": "Ein Lumorix-Projektprototyp mit Fokus auf Open-World-Survival-Systeme innerhalb derselben Launcher-Oberflaeche.",
+      "categories": ["Projekte", "Prototyp"],
+      "changelog": {
+        "0.4.0": [
+          "Fuehrt ein Projektpaket mit Schwerpunkt auf Erkundung, Crafting und Worldbuilding ein."
+        ]
+      }
+    }
+  },
+  "releaseInfo": {
+    "title": "Shop- und Bibliotheks-Refactoring",
+    "notes": [
+      "Shop-Ansicht hinzugefuegt",
+      "Shop und Bibliothek getrennt",
+      "Sichtbarkeit der Downloads verbessert",
+      "Sammlungsmodell ueberarbeitet"
+    ]
+  }
+}

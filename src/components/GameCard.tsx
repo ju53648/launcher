@@ -1,7 +1,9 @@
 import { Download, Play, Wrench } from "lucide-react";
 
-import { formatBytes, itemTypeLabel } from "../domain/format";
+import { formatBytes, itemTypeLabel, jobProgressLabel } from "../domain/format";
+import { getTagLabel, sortTagsByWeight } from "../domain/tags";
 import type { ContentView } from "../domain/types";
+import { useI18n } from "../i18n";
 import { ProgressBar } from "./ProgressBar";
 import { StatusBadge } from "./StatusBadge";
 
@@ -20,13 +22,17 @@ export function GameCard({
   onUpdate: () => void;
   onRepair: () => void;
 }) {
+  const { locale, t } = useI18n();
   const manifest = item.manifest;
 
   return (
     <article className="game-card">
       <button className="game-card__media" onClick={onOpen} type="button">
         {item.catalog.coverImage ? (
-          <img src={item.catalog.coverImage} alt={`${item.catalog.name} cover`} />
+          <img
+            src={item.catalog.coverImage}
+            alt={t("accessibility.coverImage", { name: item.catalog.name })}
+          />
         ) : (
           <div className="media-placeholder media-placeholder--card">
             <span>{item.catalog.name.slice(0, 2).toUpperCase()}</span>
@@ -38,7 +44,7 @@ export function GameCard({
           <div>
             <h3>{item.catalog.name}</h3>
             <p>
-              {item.catalog.developer} · {itemTypeLabel(item.catalog.itemType)}
+              {item.catalog.developer} / {itemTypeLabel(item.catalog.itemType, t)}
             </p>
           </div>
           <StatusBadge status={item.collectionStatus} type="collection" />
@@ -50,20 +56,27 @@ export function GameCard({
           {item.catalog.categories.slice(0, 2).map((category) => (
             <span key={category}>{category}</span>
           ))}
-          {item.catalog.tags.slice(0, 2).map((tag) => (
-            <span key={tag}>{tag}</span>
-          ))}
+          {sortTagsByWeight(item.catalog.tags)
+            .slice(0, 2)
+            .map((tag) => (
+              <span key={tag.id}>{getTagLabel(tag.id, t)}</span>
+            ))}
         </div>
 
         {item.activeJob ? (
           <div className="game-card__job">
-            <span>{item.activeJob.message}</span>
+            <span>{jobProgressLabel(item.activeJob, t)}</span>
             <ProgressBar value={item.activeJob.progress} compact />
           </div>
         ) : (
           <div className="game-card__meta">
-            <span>{manifest ? `v${manifest.version}` : "Unavailable in Shop"}</span>
-            <span>{formatBytes(manifest?.installSizeBytes ?? item.installed?.sizeOnDiskBytes ?? 0)}</span>
+            <span>{manifest ? `v${manifest.version}` : t("shop.card.unavailable")}</span>
+            <span>
+              {formatBytes(
+                manifest?.installSizeBytes ?? item.installed?.sizeOnDiskBytes ?? 0,
+                locale
+              )}
+            </span>
           </div>
         )}
 
@@ -73,29 +86,29 @@ export function GameCard({
           {item.installState === "installed" && (
             <button className="button button--primary" onClick={onLaunch} type="button">
               <Play size={16} />
-              Launch
+              {t("common.actions.launch")}
             </button>
           )}
           {item.installState === "notInstalled" && manifest && (
             <button className="button button--primary" onClick={onInstall} type="button">
               <Download size={16} />
-              Install
+              {t("common.actions.install")}
             </button>
           )}
           {item.installState === "updateAvailable" && (
             <button className="button button--primary" onClick={onUpdate} type="button">
               <Download size={16} />
-              Update
+              {t("common.actions.update")}
             </button>
           )}
           {item.installState === "error" && (
             <button className="button button--primary" onClick={onRepair} type="button">
               <Wrench size={16} />
-              Repair
+              {t("common.actions.repair")}
             </button>
           )}
           <button className="button button--ghost" onClick={onOpen} type="button">
-            Details
+            {t("common.actions.details")}
           </button>
         </div>
       </div>

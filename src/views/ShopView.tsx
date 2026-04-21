@@ -3,27 +3,25 @@ import { useDeferredValue, useMemo, useState } from "react";
 
 import type { AppRoute } from "../components/AppShell";
 import { EmptyState } from "../components/EmptyState";
+import { RecommendationSection } from "../components/RecommendationSection";
 import { StatusBadge } from "../components/StatusBadge";
-import {
-  getDiscoverableItems,
-  getRecommendedItems,
-  getShopCategories,
-  getShopTags
-} from "../domain/selectors";
 import { formatBytes, itemTypeLabel } from "../domain/format";
+import {
+  getBecauseYouPlayedRecommendations,
+  getDiscoverableItems,
+  getForYouRecommendations,
+  getShopCategories,
+  getShopTagGroups
+} from "../domain/selectors";
+import { getTagCategoryLabel, getTagLabel, sortTagsByWeight } from "../domain/tags";
 import type { CatalogItemType, ContentView } from "../domain/types";
+import { useI18n } from "../i18n";
 import { useLauncher } from "../store/LauncherStore";
 
 type TypeFilter = "all" | CatalogItemType;
 
-const typeFilters: Array<{ value: TypeFilter; label: string }> = [
-  { value: "all", label: "All types" },
-  { value: "game", label: "Games" },
-  { value: "tool", label: "Tools" },
-  { value: "project", label: "Projects" }
-];
-
 export function ShopView({ setRoute }: { setRoute: (route: AppRoute) => void }) {
+  const { locale, t } = useI18n();
   const { snapshot, addItemToLibrary, busyAction } = useLauncher();
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
@@ -33,16 +31,24 @@ export function ShopView({ setRoute }: { setRoute: (route: AppRoute) => void }) 
 
   if (!snapshot) return null;
 
+  const typeFilters: Array<{ value: TypeFilter; label: string }> = [
+    { value: "all", label: t("shop.filters.allTypes") },
+    { value: "game", label: t("status.itemType.game") },
+    { value: "tool", label: t("status.itemType.tool") },
+    { value: "project", label: t("status.itemType.project") }
+  ];
+
   const discoverableItems = getDiscoverableItems(snapshot);
   const categories = getShopCategories(snapshot);
-  const tags = getShopTags(snapshot);
-  const recommendations = getRecommendedItems(snapshot, 3);
+  const tagGroups = getShopTagGroups(snapshot);
+  const forYouRecommendations = getForYouRecommendations(snapshot, 3);
+  const becausePlayed = getBecauseYouPlayedRecommendations(snapshot, 3);
 
   const filteredItems = useMemo(() => {
     return discoverableItems.filter((item) => {
       if (typeFilter !== "all" && item.catalog.itemType !== typeFilter) return false;
       if (categoryFilter !== "all" && !item.catalog.categories.includes(categoryFilter)) return false;
-      if (tagFilter !== "all" && !item.catalog.tags.includes(tagFilter)) return false;
+      if (tagFilter !== "all" && !item.catalog.tags.some((tag) => tag.id === tagFilter)) return false;
       if (!deferredSearch) return true;
 
       const haystack = [
@@ -50,55 +56,50 @@ export function ShopView({ setRoute }: { setRoute: (route: AppRoute) => void }) 
         item.catalog.developer,
         item.catalog.description,
         ...item.catalog.categories,
-        ...item.catalog.tags
+        ...item.catalog.tags.map((tag) => getTagLabel(tag.id, t))
       ]
         .join(" ")
         .toLowerCase();
       return haystack.includes(deferredSearch);
     });
-  }, [categoryFilter, deferredSearch, discoverableItems, tagFilter, typeFilter]);
+  }, [categoryFilter, deferredSearch, discoverableItems, tagFilter, t, typeFilter]);
 
   return (
     <div className="view-stack">
       <section className="shop-intro">
         <div>
-          <p className="eyebrow">Discovery</p>
-          <h2>Find Lumorix content worth keeping locally</h2>
-          <p>
-            The Shop is your discovery layer. Add what you want to your Library, then install or
-            update it on your terms.
-          </p>
+          <p className="eyebrow">{t("shop.intro.eyebrow")}</p>
+          <h2>{t("shop.intro.title")}</h2>
+          <p>{t("shop.intro.body")}</p>
         </div>
         <div className="shop-intro__stat">
           <Sparkles size={20} />
           <strong>{discoverableItems.length}</strong>
-          <span>{discoverableItems.length === 1 ? "discoverable item" : "discoverable items"}</span>
+          <span>{t("shop.discoverableCount", { count: discoverableItems.length })}</span>
         </div>
       </section>
 
-      {recommendations.length > 0 && (
-        <section className="recommendations-panel">
-          <div className="section-toolbar">
-            <div>
-              <p className="eyebrow">For your library</p>
-              <h2>Recommended next</h2>
-            </div>
-          </div>
-          <div className="recommendation-grid">
-            {recommendations.map((item) => (
-              <button
-                key={item.catalog.id}
-                className="recommendation-card"
-                onClick={() => setRoute(`item:${item.catalog.id}`)}
-                type="button"
-              >
-                <strong>{item.catalog.name}</strong>
-                <span>{item.catalog.tags.slice(0, 3).join(" · ")}</span>
-              </button>
-            ))}
-          </div>
-        </section>
-      )}
+      <RecommendationSection
+        eyebrow={t("shop.recommendations.forYouEyebrow")}
+        title={t("shop.recommendations.forYouTitle")}
+        description={t("shop.recommendations.forYouBody")}
+        entries={forYouRecommendations}
+        onOpen={(itemId) => setRoute(`item:${itemId}`)}
+      />
+
+      <RecommendationSection
+        eyebrow={t("shop.recommendations.becausePlayedEyebrow")}
+        title={
+          becausePlayed.sourceItem
+            ? t("shop.recommendations.becausePlayedTitle", {
+                name: becausePlayed.sourceItem.catalog.name
+              })
+            : ""
+        }
+        description={t("shop.recommendations.becausePlayedBody")}
+        entries={becausePlayed.recommendations}
+        onOpen={(itemId) => setRoute(`item:${itemId}`)}
+      />
 
       <section className="shop-filters">
         <label className="shop-search">
@@ -106,7 +107,7 @@ export function ShopView({ setRoute }: { setRoute: (route: AppRoute) => void }) 
           <input
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            placeholder="Search by name, developer, tag, or category"
+            placeholder={t("shop.filters.searchPlaceholder")}
           />
         </label>
 
@@ -127,7 +128,7 @@ export function ShopView({ setRoute }: { setRoute: (route: AppRoute) => void }) 
           <div className="shop-filter-group">
             <span>
               <Filter size={14} />
-              Categories
+              {t("shop.filters.categories")}
             </span>
             <div className="filter-row">
               <button
@@ -135,7 +136,7 @@ export function ShopView({ setRoute }: { setRoute: (route: AppRoute) => void }) 
                 onClick={() => setCategoryFilter("all")}
                 type="button"
               >
-                All
+                {t("shop.filters.all")}
               </button>
               {categories.map((category) => (
                 <button
@@ -153,7 +154,7 @@ export function ShopView({ setRoute }: { setRoute: (route: AppRoute) => void }) 
           <div className="shop-filter-group">
             <span>
               <Filter size={14} />
-              Tags
+              {t("shop.filters.tags")}
             </span>
             <div className="filter-row">
               <button
@@ -161,17 +162,26 @@ export function ShopView({ setRoute }: { setRoute: (route: AppRoute) => void }) 
                 onClick={() => setTagFilter("all")}
                 type="button"
               >
-                All
+                {t("shop.filters.all")}
               </button>
-              {tags.map((tag) => (
-                <button
-                  key={tag}
-                  className={`filter-pill ${tagFilter === tag ? "is-active" : ""}`}
-                  onClick={() => setTagFilter(tag)}
-                  type="button"
-                >
-                  {tag}
-                </button>
+            </div>
+            <div className="shop-tag-groups">
+              {tagGroups.map((group) => (
+                <div key={group.category} className="shop-tag-group">
+                  <small>{getTagCategoryLabel(group.category, t)}</small>
+                  <div className="filter-row">
+                    {group.tags.map((tagId) => (
+                      <button
+                        key={tagId}
+                        className={`filter-pill ${tagFilter === tagId ? "is-active" : ""}`}
+                        onClick={() => setTagFilter(tagId)}
+                        type="button"
+                      >
+                        {getTagLabel(tagId, t)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               ))}
             </div>
           </div>
@@ -180,20 +190,20 @@ export function ShopView({ setRoute }: { setRoute: (route: AppRoute) => void }) 
 
       {discoverableItems.length === 0 ? (
         <EmptyState
-          title="The Shop is empty"
-          body="Enable a manifest source or add catalog manifests to make content available here."
+          title={t("shop.emptyState.emptyTitle")}
+          body={t("shop.emptyState.emptyBody")}
         />
       ) : filteredItems.length === 0 ? (
         <EmptyState
-          title="No items match these filters"
-          body="Try another search, clear a filter, or explore a different category."
+          title={t("shop.emptyState.filteredTitle")}
+          body={t("shop.emptyState.filteredBody")}
         />
       ) : (
         <>
           <div className="section-toolbar section-toolbar--compact">
             <div>
-              <p className="eyebrow">Results</p>
-              <h2>{filteredItems.length} shown</h2>
+              <p className="eyebrow">{t("shop.results.eyebrow")}</p>
+              <h2>{t("shop.results.shown", { count: filteredItems.length })}</h2>
             </div>
           </div>
           <section className="shop-grid">
@@ -206,6 +216,7 @@ export function ShopView({ setRoute }: { setRoute: (route: AppRoute) => void }) 
                 onOpen={() => setRoute(`item:${item.catalog.id}`)}
                 onLibrary={() => setRoute("library")}
                 onDownloads={() => setRoute("downloads")}
+                locale={locale}
               />
             ))}
           </section>
@@ -221,7 +232,8 @@ function ShopCard({
   onAdd,
   onOpen,
   onLibrary,
-  onDownloads
+  onDownloads,
+  locale
 }: {
   item: ContentView;
   busy: boolean;
@@ -229,14 +241,19 @@ function ShopCard({
   onOpen: () => void;
   onLibrary: () => void;
   onDownloads: () => void;
+  locale: string;
 }) {
+  const { t } = useI18n();
   const manifest = item.manifest;
 
   return (
     <article className="shop-card">
       <button className="shop-card__media" onClick={onOpen} type="button">
         {item.catalog.coverImage ? (
-          <img src={item.catalog.coverImage} alt={`${item.catalog.name} cover`} />
+          <img
+            src={item.catalog.coverImage}
+            alt={t("accessibility.coverImage", { name: item.catalog.name })}
+          />
         ) : (
           <div className="media-placeholder media-placeholder--card">
             <span>{item.catalog.name.slice(0, 2).toUpperCase()}</span>
@@ -247,7 +264,7 @@ function ShopCard({
         <div className="shop-card__heading">
           <div>
             <p>
-              {item.catalog.developer} · {itemTypeLabel(item.catalog.itemType)}
+              {item.catalog.developer} / {itemTypeLabel(item.catalog.itemType, t)}
             </p>
             <h3>{item.catalog.name}</h3>
           </div>
@@ -257,35 +274,40 @@ function ShopCard({
         <p className="shop-card__description">{item.catalog.description}</p>
 
         <div className="shop-card__tags">
-          {[...item.catalog.categories, ...item.catalog.tags].slice(0, 4).map((tag) => (
-            <span key={tag}>{tag}</span>
+          {item.catalog.categories.slice(0, 2).map((category) => (
+            <span key={category}>{category}</span>
           ))}
+          {sortTagsByWeight(item.catalog.tags)
+            .slice(0, 2)
+            .map((tag) => (
+              <span key={tag.id}>{getTagLabel(tag.id, t)}</span>
+            ))}
         </div>
 
         <div className="shop-card__meta">
-          <span>{manifest ? `v${manifest.version}` : "Unavailable"}</span>
-          <span>{formatBytes(manifest?.installSizeBytes ?? 0)}</span>
+          <span>{manifest ? `v${manifest.version}` : t("shop.card.unavailable")}</span>
+          <span>{formatBytes(manifest?.installSizeBytes ?? 0, locale)}</span>
         </div>
 
         <div className="shop-card__actions">
           {!item.state.added ? (
             <button className="button button--primary" disabled={busy} onClick={onAdd} type="button">
               <Plus size={16} />
-              {busy ? "Adding..." : "Add to Library"}
+              {busy ? t("common.actions.addingToLibrary") : t("common.actions.addToLibrary")}
             </button>
           ) : item.activeJob ? (
             <button className="button button--secondary" onClick={onDownloads} type="button">
               <Download size={16} />
-              View Download
+              {t("common.actions.viewDownload")}
             </button>
           ) : (
             <button className="button button--secondary" onClick={onLibrary} type="button">
               <Check size={16} />
-              View in Library
+              {t("shop.card.viewInLibrary")}
             </button>
           )}
           <button className="button button--ghost" onClick={onOpen} type="button">
-            Details
+            {t("common.actions.details")}
           </button>
         </div>
       </div>

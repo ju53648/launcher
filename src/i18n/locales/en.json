@@ -1,0 +1,505 @@
+{
+  "common": {
+    "brandName": "Lumorix",
+    "brandProduct": "Launcher",
+    "progress": "Progress",
+    "never": "Never",
+    "notAvailable": "Unavailable",
+    "noRemoteSource": "No remote source",
+    "languages": {
+      "en": "English",
+      "de": "Deutsch",
+      "pl": "Polski"
+    },
+    "messages": {
+      "noAccountNoAdsLocalFirst": "No account. No ads. Local-first.",
+      "applyImmediately": "Changes apply immediately and stay active after restart.",
+      "restartNotRequired": "Restart is not required."
+    },
+    "actions": {
+      "save": "Save",
+      "cancel": "Cancel",
+      "close": "Close",
+      "details": "Details",
+      "install": "Install",
+      "launch": "Launch",
+      "update": "Update",
+      "repair": "Repair",
+      "verifyRepair": "Verify / Repair",
+      "uninstall": "Uninstall",
+      "showFiles": "Show files",
+      "chooseFolder": "Choose folder",
+      "useRecommended": "Use recommended",
+      "addLibrary": "Add library",
+      "addToLibrary": "Add to Library",
+      "addingToLibrary": "Adding...",
+      "viewDownload": "View Download",
+      "viewDownloads": "View Downloads",
+      "viewLibrary": "View Library",
+      "openLibrary": "Open Library",
+      "openCollection": "Open collection",
+      "browseShop": "Browse Shop",
+      "openDownloads": "Open downloads",
+      "makeDefault": "Make default",
+      "checkUpdates": "Check updates",
+      "checkForUpdates": "Check for updates",
+      "installUpdate": "Install update",
+      "downloadAndInstall": "Download and install",
+      "clearFinished": "Clear finished",
+      "checkLauncher": "Check launcher",
+      "updateLauncher": "Update launcher",
+      "checkLibraryItems": "Check library items",
+      "enterLumorix": "Enter Lumorix",
+      "openShop": "Open Shop",
+      "installingShort": "Installing...",
+      "checkingShort": "Checking...",
+      "updatingShort": "Updating..."
+    },
+    "labels": {
+      "name": "Name",
+      "path": "Path",
+      "current": "Current",
+      "latest": "Latest",
+      "checked": "Checked",
+      "version": "Version",
+      "type": "Type",
+      "installSize": "Install size",
+      "release": "Release",
+      "executable": "Executable",
+      "discoverable": "Discoverable",
+      "location": "Location",
+      "installed": "Installed",
+      "verified": "Verified",
+      "lastOpened": "Last opened",
+      "data": "Data",
+      "cache": "Cache",
+      "logs": "Logs",
+      "lastSeen": "Last seen",
+      "active": "Active",
+      "queued": "Queued",
+      "history": "History",
+      "releaseNotes": "Release notes",
+      "changelog": "Changelog",
+      "overview": "Overview",
+      "primaryLibrary": "Primary library",
+      "matchingTags": "Matches {{tags}}"
+    }
+  },
+  "status": {
+    "itemType": {
+      "game": "Game",
+      "tool": "Tool",
+      "project": "Project"
+    },
+    "install": {
+      "notInstalled": "Not installed",
+      "installing": "Installing",
+      "installed": "Installed",
+      "updateAvailable": "Update available",
+      "error": "Needs repair"
+    },
+    "collection": {
+      "notAdded": "Not in library",
+      "added": "In library",
+      "installed": "Installed",
+      "updateAvailable": "Update available",
+      "error": "Needs repair"
+    },
+    "library": {
+      "available": "Available",
+      "missing": "Missing drive",
+      "inaccessible": "Inaccessible"
+    },
+    "job": {
+      "queued": "Queued",
+      "running": "Running",
+      "completed": "Completed",
+      "cancelled": "Cancelled",
+      "failed": "Failed"
+    },
+    "phase": {
+      "queued": "Queued",
+      "preparing": "Preparing",
+      "downloading": "Downloading",
+      "verifying": "Verifying",
+      "installing": "Installing",
+      "finalizing": "Finalizing",
+      "completed": "Completed",
+      "cancelled": "Cancelled",
+      "failed": "Failed"
+    },
+    "operation": {
+      "install": "Install",
+      "update": "Update",
+      "repair": "Repair",
+      "move": "Move"
+    }
+  },
+  "errors": {
+    "title": "Launcher error",
+    "dismiss": "Dismiss error",
+    "codes": {
+      "validation": "Validation error",
+      "storage": "Storage error",
+      "manifest": "Manifest error",
+      "install": "Install error",
+      "network": "Network error",
+      "process": "Process error"
+    }
+  },
+  "app": {
+    "stateUnavailable": {
+      "title": "Launcher state unavailable",
+      "body": "Lumorix could not initialize local storage. Check folder permissions and restart."
+    },
+    "itemNotFound": {
+      "title": "Item not found",
+      "body": "The catalog entry is no longer available."
+    },
+    "manifestWarning": {
+      "multiple": "{{message}} ({{count}} manifest issues total)"
+    }
+  },
+  "shell": {
+    "navigation": "Primary navigation",
+    "nav": {
+      "home": "Home",
+      "shop": "Shop",
+      "library": "Library",
+      "downloads": "Downloads",
+      "settings": "Settings",
+      "about": "About"
+    },
+    "subtitle": {
+      "home": "Personal dashboard",
+      "shop": "Discovery",
+      "library": "Your collection",
+      "downloads": "Installs and updates",
+      "settings": "Preferences",
+      "about": "Lumorix Launcher",
+      "item": "Item details",
+      "fallback": "Lumorix"
+    },
+    "title": {
+      "home": "Home",
+      "shop": "Shop",
+      "library": "Library",
+      "downloads": "Downloads",
+      "settings": "Settings",
+      "about": "About Lumorix",
+      "itemFallback": "Item",
+      "fallback": "Lumorix"
+    },
+    "meta": {
+      "shop": {
+        "one": "{{count}} item available",
+        "other": "{{count}} items available"
+      },
+      "library": {
+        "one": "{{count}} in your collection",
+        "other": "{{count}} in your collection"
+      },
+      "downloadsActive": {
+        "one": "{{count}} active job",
+        "other": "{{count}} active jobs"
+      },
+      "downloadsClear": "Queue is clear",
+      "fallback": {
+        "one": "{{count}} discoverable item",
+        "other": "{{count}} discoverable items"
+      }
+    }
+  },
+  "home": {
+    "hero": {
+      "eyebrow": "Home",
+      "title": "Your local Lumorix control center",
+      "body": "Track your collection, pick up where you left off, and keep installs and launcher updates under control without accounts, ads, or friction."
+    },
+    "updateCard": {
+      "label": "Launcher state",
+      "lastChecked": "Last checked {{date}}",
+      "updateReady": "Update {{version}} is ready",
+      "versionAvailable": "Version {{version}} is available",
+      "runningVersion": "Running v{{version}}"
+    },
+    "metrics": {
+      "collection": "Collection",
+      "collectionDescription": {
+        "one": "{{count}} installed locally",
+        "other": "{{count}} installed locally"
+      },
+      "downloads": "Downloads",
+      "downloadsDescription": {
+        "one": "{{count}} active transfer",
+        "other": "{{count}} active transfers"
+      },
+      "diskUsage": "Disk usage",
+      "diskDescription": {
+        "one": "{{count}} registered library",
+        "other": "{{count}} registered libraries"
+      },
+      "updates": "Updates",
+      "updatesDescription": {
+        "one": "{{count}} item needs updating",
+        "other": "{{count}} items need updating"
+      }
+    },
+    "activeTransfers": {
+      "eyebrow": "Downloads",
+      "title": "Active transfers"
+    },
+    "recentActivity": {
+      "eyebrow": "Recent activity",
+      "title": "What changed lately",
+      "empty": "No recent activity yet. Add something from the Shop to get started.",
+      "added": "Added to Library",
+      "installed": "Installed locally",
+      "updated": "Updated locally",
+      "launched": "Opened recently",
+      "error": "Needs attention"
+    },
+    "recentlyUsed": {
+      "eyebrow": "Recently used",
+      "title": "Jump back in",
+      "empty": "Launch an installed item and it will appear here for quick access.",
+      "used": "Used {{date}}"
+    },
+    "recentInstalls": {
+      "eyebrow": "Recent installs",
+      "title": "Ready on this machine",
+      "empty": "Installed items will show up here once a download or setup finishes.",
+      "installed": "Installed {{date}}"
+    },
+    "nextSteps": {
+      "eyebrow": "Collection status",
+      "title": "Next steps",
+      "discoverTitle": "Discover more items",
+      "discoverBody": "Browse new content and add it to your Library.",
+      "manageTitle": "Manage installs",
+      "manageBody": "Launch, update, repair, or uninstall from your collection.",
+      "settingsTitle": "Adjust local preferences",
+      "settingsBody": "Review library folders, privacy defaults, and update behavior."
+    }
+  },
+  "shop": {
+    "intro": {
+      "eyebrow": "Discovery",
+      "title": "Find Lumorix content worth keeping locally",
+      "body": "The Shop is your discovery layer. Add what you want to your Library, then install or update it on your terms."
+    },
+    "discoverableCount": {
+      "one": "{{count}} discoverable item",
+      "other": "{{count}} discoverable items"
+    },
+    "recommendations": {
+      "forYouEyebrow": "For you",
+      "forYouTitle": "Suggested from your library",
+      "forYouBody": "Weighted tag matches across your library shape these picks.",
+      "becausePlayedEyebrow": "Recent play",
+      "becausePlayedTitle": "Because you played {{name}}",
+      "becausePlayedBody": "These picks share the strongest structured tags with your recent session."
+    },
+    "filters": {
+      "searchPlaceholder": "Search by name, developer, tag, or category",
+      "allTypes": "All types",
+      "categories": "Categories",
+      "tags": "Tags",
+      "all": "All"
+    },
+    "emptyState": {
+      "emptyTitle": "The Shop is empty",
+      "emptyBody": "Enable a manifest source or add catalog manifests to make content available here.",
+      "filteredTitle": "No items match these filters",
+      "filteredBody": "Try another search, clear a filter, or explore a different category."
+    },
+    "results": {
+      "eyebrow": "Results",
+      "shown": "{{count}} shown"
+    },
+    "card": {
+      "unavailable": "Unavailable",
+      "viewInLibrary": "View in Library"
+    }
+  },
+  "library": {
+    "filters": {
+      "all": "All",
+      "installed": "Installed",
+      "added": "Ready to install",
+      "updateAvailable": "Updates",
+      "error": "Needs repair"
+    },
+    "emptyState": {
+      "emptyTitle": "Your Library is empty",
+      "emptyBody": "Add something from the Shop to start building your Lumorix collection. Once added, it stays here for install, launch, update, and repair actions.",
+      "filteredTitle": "No items match this filter",
+      "filteredBody": "Try another filter or head back to the Shop to add more content."
+    }
+  },
+  "downloads": {
+    "emptyState": {
+      "title": "Downloads are quiet",
+      "body": "Installs, updates, repairs, and moves will appear here with live progress and history."
+    },
+    "summary": {
+      "active": "Active",
+      "activeDescription": {
+        "one": "{{count}} job in progress",
+        "other": "{{count}} jobs in progress"
+      },
+      "queued": "Queued",
+      "queuedDescription": "Waiting for a turn",
+      "history": "History",
+      "historyDescription": "Completed, cancelled, or failed"
+    },
+    "toolbar": {
+      "eyebrow": "Transfers and installs",
+      "title": "{{count}} total jobs"
+    },
+    "sections": {
+      "activeEyebrow": "Active now",
+      "activeTitle": "Work in progress",
+      "historyEyebrow": "Recent history",
+      "historyTitle": "Finished jobs"
+    },
+    "row": {
+      "progress": "{{operation}} / {{phase}}"
+    }
+  },
+  "about": {
+    "hero": {
+      "body": "A local-first Windows launcher foundation built for private installs, explicit updates, and clean local ownership across Lumorix games, tools, and projects."
+    },
+    "updateState": {
+      "eyebrow": "Launcher update state",
+      "title": "Version"
+    },
+    "productChangelog": {
+      "eyebrow": "Product changelog"
+    },
+    "privacy": {
+      "title": "Privacy baseline",
+      "body": "No login system, no analytics package, and no automatic data upload path."
+    }
+  },
+  "onboarding": {
+    "eyebrow": "First setup",
+    "title": "Your Lumorix content stays on your machine.",
+    "body": "Choose where Lumorix installs content. No account, no cloud lock-in, no hidden analytics. Network access is reserved for manifests, downloads, and explicit update checks.",
+    "privacyPoints": {
+      "config": "Local config and install metadata",
+      "libraries": "Multiple libraries can be added later",
+      "updates": "Optional, user-triggered update checks"
+    }
+  },
+  "settings": {
+    "language": {
+      "eyebrow": "Language",
+      "title": "Launcher language",
+      "description": "Choose the launcher language. You can change it at any time.",
+      "helper": "Changes apply immediately and are stored on this device.",
+      "active": "Active",
+      "switchNow": "Switch now"
+    },
+    "storage": {
+      "eyebrow": "Storage",
+      "title": "Libraries",
+      "defaultNamePlaceholder": "Main",
+      "defaultChip": "Default",
+      "saveLibrary": "Save",
+      "lastSeen": "Last seen: {{date}}",
+      "removeAria": "Remove library"
+    },
+    "maintenance": {
+      "eyebrow": "Maintenance",
+      "title": "Updates and installs",
+      "toggles": {
+        "checkLauncherUpdatesOnStart": "Check launcher updates on start",
+        "checkGameUpdatesOnStart": "Check item updates on start",
+        "askForLibraryEachInstall": "Ask for library on every install",
+        "createDesktopShortcuts": "Create desktop shortcuts",
+        "keepDownloadCache": "Keep download cache"
+      },
+      "checkLauncherBusy": "Checking launcher...",
+      "updateLauncherBusy": "Updating launcher..."
+    },
+    "privacy": {
+      "eyebrow": "Privacy",
+      "title": "No telemetry",
+      "headline": "Accounts, analytics, and crash uploads are disabled.",
+      "body": "Network is only used for manifest checks, downloads, and explicit update checks."
+    }
+  },
+  "detail": {
+    "phaseLabel": "{{operation}} / {{phase}}",
+    "discoverable": {
+      "yes": "Available in Shop",
+      "no": "Library only"
+    },
+    "executableUnavailable": "Not currently available",
+    "installedPanel": {
+      "notAdded": "Add this item to your Library before installing it.",
+      "notInstalled": "Added to your Library, but not installed yet.",
+      "unavailable": "This item is currently unavailable in the Shop and cannot be reinstalled right now."
+    },
+    "changelogEmpty": "No changelog is available for this item right now.",
+    "similar": {
+      "eyebrow": "Similar titles",
+      "title": "More like this",
+      "body": "These recommendations rank highest on weighted tag overlap."
+    }
+  },
+  "installDialog": {
+    "eyebrow": "Install package",
+    "targetLabel": "Install target",
+    "noLibrariesTitle": "No available library folders",
+    "noLibrariesBody": "Add or reconnect a library in Settings before installing this item."
+  },
+  "updater": {
+    "title": "Launcher update",
+    "statuses": {
+      "checking": "Checking signed launcher release...",
+      "available": "Update {{version}} is available.",
+      "downloading": "Downloading signed update...",
+      "installing": "Installing update...",
+      "installed": "Update installed. Preparing relaunch...",
+      "relaunching": "Relaunching Lumorix...",
+      "restartRequired": "Update installed, but relaunch failed. Please restart Lumorix manually.",
+      "none": "No update available. Lumorix is up to date.",
+      "desktopOnly": "In-app updates are only available in the desktop app.",
+      "error": "Updater failed: {{message}}"
+    }
+  },
+  "taxonomy": {
+    "categories": {
+      "gameplay": "Gameplay",
+      "world": "World",
+      "systems": "Systems"
+    },
+    "tags": {
+      "arcade": "Arcade",
+      "survival": "Survival",
+      "horror": "Horror",
+      "shooter": "Shooter",
+      "sandbox": "Sandbox",
+      "open_world": "Open world",
+      "island": "Island",
+      "forest": "Forest",
+      "city": "City",
+      "lab": "Lab",
+      "crafting": "Crafting",
+      "building": "Building",
+      "exploration": "Exploration",
+      "utility": "Utility",
+      "narrative": "Narrative",
+      "prototype": "Prototype",
+      "offline": "Offline",
+      "local_first": "Local-first"
+    }
+  },
+  "accessibility": {
+    "closeModal": "Close",
+    "coverImage": "{{name}} cover"
+  }
+}

@@ -1,6 +1,7 @@
 import { check } from "@tauri-apps/plugin-updater";
 import { relaunch } from "@tauri-apps/plugin-process";
 
+import type { TranslationParams } from "../i18n";
 import { isTauriRuntime } from "./tauri";
 
 export interface LauncherUpdateProgress {
@@ -14,24 +15,25 @@ export interface LauncherUpdateProgress {
     | "relaunching"
     | "restartRequired"
     | "none"
+    | "desktopOnly"
     | "error";
   progress: number;
-  message: string;
   version?: string;
+  errorMessage?: string;
 }
 
 function progressError(onProgress: (progress: LauncherUpdateProgress) => void, error: unknown): never {
-  const message = errorMessage(error);
+  const message = toErrorMessage(error);
   console.error("[updater] flow failed", error);
   onProgress({
     status: "error",
     progress: 0,
-    message: `Updater failed: ${message}`
+    errorMessage: message
   });
   throw new Error(message);
 }
 
-function errorMessage(error: unknown): string {
+function toErrorMessage(error: unknown): string {
   if (error instanceof Error) {
     return error.message;
   }
@@ -46,17 +48,15 @@ export async function checkLauncherUpdate(
 ) {
   if (!isTauriRuntime()) {
     onProgress({
-      status: "none",
-      progress: 0,
-      message: "In-app updates are only available in the desktop app."
+      status: "desktopOnly",
+      progress: 0
     });
     return null;
   }
 
   onProgress({
     status: "checking",
-    progress: 5,
-    message: "Checking signed launcher release..."
+    progress: 5
   });
 
   try {
@@ -64,8 +64,7 @@ export async function checkLauncherUpdate(
     if (!update) {
       onProgress({
         status: "none",
-        progress: 100,
-        message: "No update available. Lumorix is up to date."
+        progress: 100
       });
       return null;
     }
@@ -73,8 +72,7 @@ export async function checkLauncherUpdate(
     onProgress({
       status: "available",
       progress: 100,
-      version: update.version,
-      message: `Update ${update.version} is available.`
+      version: update.version
     });
     return update;
   } catch (error) {
@@ -102,8 +100,7 @@ export async function downloadAndInstallLauncherUpdate(
           onProgress({
             status: "downloading",
             progress: 2,
-            version: update.version,
-            message: "Downloading signed update..."
+            version: update.version
           });
           break;
         case "Progress":
@@ -111,16 +108,14 @@ export async function downloadAndInstallLauncherUpdate(
           onProgress({
             status: "downloading",
             progress: contentLength > 0 ? Math.min(95, (downloaded / contentLength) * 95) : 40,
-            version: update.version,
-            message: "Downloading signed update..."
+            version: update.version
           });
           break;
         case "Finished":
           onProgress({
             status: "installing",
             progress: 98,
-            version: update.version,
-            message: "Installing update..."
+            version: update.version
           });
           break;
       }
@@ -129,15 +124,13 @@ export async function downloadAndInstallLauncherUpdate(
     onProgress({
       status: "installed",
       progress: 100,
-      version: update.version,
-      message: "Update installed. Preparing relaunch..."
+      version: update.version
     });
 
     onProgress({
       status: "relaunching",
       progress: 100,
-      version: update.version,
-      message: "Relaunching Lumorix..."
+      version: update.version
     });
 
     await relaunch();
@@ -146,9 +139,38 @@ export async function downloadAndInstallLauncherUpdate(
     onProgress({
       status: "restartRequired",
       progress: 100,
-      version: update.version,
-      message: "Update installed, but relaunch failed. Please restart Lumorix manually."
+      version: update.version
     });
     throw error;
+  }
+}
+
+export function describeLauncherUpdateProgress(
+  progress: LauncherUpdateProgress,
+  t: (key: string, params?: TranslationParams) => string
+) {
+  switch (progress.status) {
+    case "checking":
+      return t("updater.statuses.checking");
+    case "available":
+      return t("updater.statuses.available", { version: progress.version ?? "" });
+    case "downloading":
+      return t("updater.statuses.downloading");
+    case "installing":
+      return t("updater.statuses.installing");
+    case "installed":
+      return t("updater.statuses.installed");
+    case "relaunching":
+      return t("updater.statuses.relaunching");
+    case "restartRequired":
+      return t("updater.statuses.restartRequired");
+    case "none":
+      return t("updater.statuses.none");
+    case "desktopOnly":
+      return t("updater.statuses.desktopOnly");
+    case "error":
+      return t("updater.statuses.error", { message: progress.errorMessage ?? "" });
+    default:
+      return "";
   }
 }

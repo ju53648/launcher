@@ -9,6 +9,7 @@ import {
   ShieldCheck
 } from "lucide-react";
 
+import { useI18n } from "../i18n";
 import { getActiveJobs, getDiscoverableItems, getLibraryItems } from "../domain/selectors";
 import type { LauncherSnapshot } from "../domain/types";
 
@@ -23,15 +24,14 @@ export type AppRoute =
 
 const navItems: Array<{
   route: AppRoute;
-  label: string;
   icon: typeof Home;
 }> = [
-  { route: "home", label: "Home", icon: Home },
-  { route: "shop", label: "Shop", icon: ShoppingBag },
-  { route: "library", label: "Library", icon: Library },
-  { route: "downloads", label: "Downloads", icon: Download },
-  { route: "settings", label: "Settings", icon: Settings },
-  { route: "about", label: "About", icon: Info }
+  { route: "home", icon: Home },
+  { route: "shop", icon: ShoppingBag },
+  { route: "library", icon: Library },
+  { route: "downloads", icon: Download },
+  { route: "settings", icon: Settings },
+  { route: "about", icon: Info }
 ];
 
 export function AppShell({
@@ -45,6 +45,7 @@ export function AppShell({
   snapshot: LauncherSnapshot;
   children: React.ReactNode;
 }) {
+  const { t } = useI18n();
   const activeJobs = getActiveJobs(snapshot);
 
   return (
@@ -53,12 +54,12 @@ export function AppShell({
         <button className="brand" onClick={() => setRoute("home")} type="button">
           <span className="brand__mark">LX</span>
           <span>
-            <strong>Lumorix</strong>
-            <small>Launcher</small>
+            <strong>{t("common.brandName")}</strong>
+            <small>{t("common.brandProduct")}</small>
           </span>
         </button>
 
-        <nav className="sidebar__nav" aria-label="Primary navigation">
+        <nav className="sidebar__nav" aria-label={t("shell.navigation")}>
           {navItems.map((item) => {
             const Icon = item.icon;
             const active = isNavItemActive(route, item.route, snapshot);
@@ -70,7 +71,7 @@ export function AppShell({
                 type="button"
               >
                 <Icon size={18} />
-                <span>{item.label}</span>
+                <span>{t(`shell.nav.${item.route}`)}</span>
                 {item.route === "downloads" && activeJobs.length > 0 && <em>{activeJobs.length}</em>}
               </button>
             );
@@ -79,19 +80,19 @@ export function AppShell({
 
         <div className="privacy-chip">
           <ShieldCheck size={18} />
-          <span>No account. No ads. Local-first.</span>
+          <span>{t("common.messages.noAccountNoAdsLocalFirst")}</span>
         </div>
       </aside>
 
       <main className="shell-main">
         <header className="topbar">
           <div>
-            <p className="eyebrow">{subtitleForRoute(route)}</p>
-            <h1>{titleForRoute(route, snapshot)}</h1>
+            <p className="eyebrow">{subtitleForRoute(route, t)}</p>
+            <h1>{titleForRoute(route, snapshot, t)}</h1>
           </div>
           <div className="topbar__meta">
             <Gamepad2 size={16} />
-            <span>{metaForRoute(route, snapshot)}</span>
+            <span>{metaForRoute(route, snapshot, t)}</span>
           </div>
         </header>
         {children}
@@ -111,65 +112,74 @@ function isNavItemActive(route: AppRoute, itemRoute: AppRoute, snapshot: Launche
   return itemRoute === "library";
 }
 
-function metaForRoute(route: AppRoute, snapshot: LauncherSnapshot): string {
+function metaForRoute(
+  route: AppRoute,
+  snapshot: LauncherSnapshot,
+  t: (key: string, params?: Record<string, string | number | null | undefined>) => string
+): string {
   const discoverableCount = getDiscoverableItems(snapshot).length;
   const libraryCount = getLibraryItems(snapshot).length;
   const activeJobs = getActiveJobs(snapshot).length;
 
   if (route === "shop") {
-    return `${discoverableCount} ${discoverableCount === 1 ? "item" : "items"} available`;
+    return t("shell.meta.shop", { count: discoverableCount });
   }
   if (route === "library" || route.startsWith("item:")) {
-    return `${libraryCount} in your collection`;
+    return t("shell.meta.library", { count: libraryCount });
   }
   if (route === "downloads") {
-    return activeJobs > 0
-      ? `${activeJobs} active ${activeJobs === 1 ? "job" : "jobs"}`
-      : "Queue is clear";
+    return activeJobs > 0 ? t("shell.meta.downloadsActive", { count: activeJobs }) : t("shell.meta.downloadsClear");
   }
-  return `${discoverableCount} discoverable ${discoverableCount === 1 ? "item" : "items"}`;
+  return t("shell.meta.fallback", { count: discoverableCount });
 }
 
-function subtitleForRoute(route: AppRoute): string {
-  if (route.startsWith("item:")) return "Item details";
+function subtitleForRoute(
+  route: AppRoute,
+  t: (key: string, params?: Record<string, string | number | null | undefined>) => string
+): string {
+  if (route.startsWith("item:")) return t("shell.subtitle.item");
   switch (route) {
     case "home":
-      return "Personal dashboard";
+      return t("shell.subtitle.home");
     case "shop":
-      return "Discovery";
+      return t("shell.subtitle.shop");
     case "library":
-      return "Your collection";
+      return t("shell.subtitle.library");
     case "downloads":
-      return "Installs and updates";
+      return t("shell.subtitle.downloads");
     case "settings":
-      return "Preferences";
+      return t("shell.subtitle.settings");
     case "about":
-      return "Lumorix Launcher";
+      return t("shell.subtitle.about");
     default:
-      return "Lumorix";
+      return t("shell.subtitle.fallback");
   }
 }
 
-function titleForRoute(route: AppRoute, snapshot: LauncherSnapshot) {
+function titleForRoute(
+  route: AppRoute,
+  snapshot: LauncherSnapshot,
+  t: (key: string, params?: Record<string, string | number | null | undefined>) => string
+) {
   if (route.startsWith("item:")) {
     const id = route.slice("item:".length);
-    return snapshot.items.find((item) => item.catalog.id === id)?.catalog.name ?? "Item";
+    return snapshot.items.find((item) => item.catalog.id === id)?.catalog.name ?? t("shell.title.itemFallback");
   }
 
   switch (route) {
     case "home":
-      return "Home";
+      return t("shell.title.home");
     case "shop":
-      return "Shop";
+      return t("shell.title.shop");
     case "library":
-      return "Library";
+      return t("shell.title.library");
     case "downloads":
-      return "Downloads";
+      return t("shell.title.downloads");
     case "settings":
-      return "Settings";
+      return t("shell.title.settings");
     case "about":
-      return "About Lumorix";
+      return t("shell.title.about");
     default:
-      return "Lumorix";
+      return t("shell.title.fallback");
   }
 }

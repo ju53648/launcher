@@ -3,12 +3,24 @@ import { useState } from "react";
 
 import { InstallDialog } from "../components/InstallDialog";
 import { ProgressBar } from "../components/ProgressBar";
+import { RecommendationSection } from "../components/RecommendationSection";
 import { StatusBadge } from "../components/StatusBadge";
-import { formatBytes, formatDate, itemTypeLabel } from "../domain/format";
+import { formatBytes, formatDate, itemTypeLabel, jobProgressLabel } from "../domain/format";
+import { getSimilarItems } from "../domain/selectors";
+import { getTagLabel, sortTagsByWeight } from "../domain/tags";
 import type { ContentView } from "../domain/types";
+import { useI18n } from "../i18n";
 import { useLauncher } from "../store/LauncherStore";
+import type { AppRoute } from "../components/AppShell";
 
-export function GameDetailView({ item }: { item: ContentView }) {
+export function GameDetailView({
+  item,
+  setRoute
+}: {
+  item: ContentView;
+  setRoute: (route: AppRoute) => void;
+}) {
+  const { locale, t } = useI18n();
   const {
     snapshot,
     addItemToLibrary,
@@ -24,6 +36,7 @@ export function GameDetailView({ item }: { item: ContentView }) {
   if (!snapshot) return null;
 
   const manifest = item.manifest;
+  const similarItems = getSimilarItems(snapshot, item.catalog.id, 3);
 
   return (
     <div className="view-stack">
@@ -44,12 +57,15 @@ export function GameDetailView({ item }: { item: ContentView }) {
             )}
             <div>
               <p className="eyebrow">
-                {item.catalog.developer} · {itemTypeLabel(item.catalog.itemType)}
+                {item.catalog.developer} / {itemTypeLabel(item.catalog.itemType, t)}
               </p>
               <h2>{item.catalog.name}</h2>
               <div className="tag-row">
-                {[...item.catalog.categories, ...item.catalog.tags].map((tag) => (
-                  <span key={tag}>{tag}</span>
+                {item.catalog.categories.map((category) => (
+                  <span key={category}>{category}</span>
+                ))}
+                {sortTagsByWeight(item.catalog.tags).map((tag) => (
+                  <span key={tag.id}>{getTagLabel(tag.id, t)}</span>
                 ))}
               </div>
             </div>
@@ -60,48 +76,52 @@ export function GameDetailView({ item }: { item: ContentView }) {
 
       <section className="detail-actions">
         {item.collectionStatus === "notAdded" && manifest && (
-          <button className="button button--primary" onClick={() => addItemToLibrary(item.catalog.id)} type="button">
+          <button
+            className="button button--primary"
+            onClick={() => addItemToLibrary(item.catalog.id)}
+            type="button"
+          >
             <Plus size={16} />
-            Add to Library
+            {t("common.actions.addToLibrary")}
           </button>
         )}
         {item.collectionStatus !== "notAdded" && item.installState === "notInstalled" && manifest && (
           <button className="button button--primary" onClick={() => setInstallOpen(true)} type="button">
             <Download size={16} />
-            Install
+            {t("common.actions.install")}
           </button>
         )}
         {item.installState === "installed" && (
           <button className="button button--primary" onClick={() => launchItem(item.catalog.id)} type="button">
             <Play size={16} />
-            Launch
+            {t("common.actions.launch")}
           </button>
         )}
         {item.installState === "updateAvailable" && (
           <button className="button button--primary" onClick={() => updateItem(item.catalog.id)} type="button">
             <RefreshCw size={16} />
-            Update
+            {t("common.actions.update")}
           </button>
         )}
         {item.installState === "error" && (
           <button className="button button--primary" onClick={() => repairItem(item.catalog.id)} type="button">
             <Wrench size={16} />
-            Repair
+            {t("common.actions.repair")}
           </button>
         )}
         {item.installed && (
           <>
             <button className="button button--secondary" onClick={() => repairItem(item.catalog.id)} type="button">
               <Wrench size={16} />
-              Verify / Repair
+              {t("common.actions.verifyRepair")}
             </button>
             <button className="button button--secondary" onClick={() => openInstallFolder(item.catalog.id)} type="button">
               <FolderOpen size={16} />
-              Show files
+              {t("common.actions.showFiles")}
             </button>
             <button className="button button--danger" onClick={() => uninstallItem(item.catalog.id)} type="button">
               <Trash2 size={16} />
-              Uninstall
+              {t("common.actions.uninstall")}
             </button>
           </>
         )}
@@ -110,8 +130,8 @@ export function GameDetailView({ item }: { item: ContentView }) {
       {item.activeJob && (
         <section className="install-panel">
           <div>
-            <p className="eyebrow">{item.activeJob.phase}</p>
-            <h2>{item.activeJob.message}</h2>
+            <p className="eyebrow">{t(`status.phase.${item.activeJob.phase}`)}</p>
+            <h2>{jobProgressLabel(item.activeJob, t)}</h2>
           </div>
           <ProgressBar value={item.activeJob.progress} />
         </section>
@@ -119,74 +139,91 @@ export function GameDetailView({ item }: { item: ContentView }) {
 
       <section className="detail-grid">
         <article className="detail-panel detail-panel--wide">
-          <h2>Overview</h2>
+          <h2>{t("common.labels.overview")}</h2>
           <p>{item.catalog.description}</p>
           <dl className="spec-list">
             <div>
-              <dt>Type</dt>
-              <dd>{itemTypeLabel(item.catalog.itemType)}</dd>
+              <dt>{t("common.labels.type")}</dt>
+              <dd>{itemTypeLabel(item.catalog.itemType, t)}</dd>
             </div>
             <div>
-              <dt>Version</dt>
-              <dd>{manifest ? `v${manifest.version}` : item.installed?.installedVersion ?? "Unavailable"}</dd>
+              <dt>{t("common.labels.version")}</dt>
+              <dd>{manifest ? `v${manifest.version}` : item.installed?.installedVersion ?? t("common.notAvailable")}</dd>
             </div>
             <div>
-              <dt>Install size</dt>
-              <dd>{formatBytes(manifest?.installSizeBytes ?? item.installed?.sizeOnDiskBytes ?? 0)}</dd>
+              <dt>{t("common.labels.installSize")}</dt>
+              <dd>{formatBytes(manifest?.installSizeBytes ?? item.installed?.sizeOnDiskBytes ?? 0, locale)}</dd>
             </div>
             <div>
-              <dt>Release</dt>
+              <dt>{t("common.labels.release")}</dt>
               <dd>{item.catalog.releaseDate}</dd>
             </div>
             <div>
-              <dt>Executable</dt>
-              <dd>{manifest?.executable ?? "Not currently available"}</dd>
+              <dt>{t("common.labels.executable")}</dt>
+              <dd>{manifest?.executable ?? t("detail.executableUnavailable")}</dd>
             </div>
             <div>
-              <dt>Discoverable</dt>
-              <dd>{item.state.discoverable ? "Available in Shop" : "Library only"}</dd>
+              <dt>{t("common.labels.discoverable")}</dt>
+              <dd>{item.state.discoverable ? t("detail.discoverable.yes") : t("detail.discoverable.no")}</dd>
             </div>
           </dl>
           {item.lastError && <p className="field-error">{item.lastError}</p>}
         </article>
 
         <article className="detail-panel">
-          <h2>Installed</h2>
+          <h2>{t("common.labels.installed")}</h2>
           {item.installed ? (
             <dl className="spec-list spec-list--stacked">
               <div>
-                <dt>Location</dt>
+                <dt>{t("common.labels.location")}</dt>
                 <dd>{item.installed.installPath}</dd>
               </div>
               <div>
-                <dt>Installed</dt>
-                <dd>{formatDate(item.installed.installedAt)}</dd>
+                <dt>{t("common.labels.installed")}</dt>
+                <dd>{formatDate(item.installed.installedAt, locale, t)}</dd>
               </div>
               <div>
-                <dt>Verified</dt>
-                <dd>{formatDate(item.installed.lastVerifiedAt)}</dd>
+                <dt>{t("common.labels.verified")}</dt>
+                <dd>{formatDate(item.installed.lastVerifiedAt, locale, t)}</dd>
               </div>
               <div>
-                <dt>Last opened</dt>
-                <dd>{formatDate(item.installed.lastLaunchedAt ?? item.collectionEntry?.lastUsedAt ?? null)}</dd>
+                <dt>{t("common.labels.lastOpened")}</dt>
+                <dd>
+                  {formatDate(
+                    item.installed.lastLaunchedAt ?? item.collectionEntry?.lastUsedAt ?? null,
+                    locale,
+                    t
+                  )}
+                </dd>
               </div>
             </dl>
           ) : (
             <p className="muted">
               {item.collectionStatus === "notAdded"
-                ? "Add this item to your Library before installing it."
+                ? t("detail.installedPanel.notAdded")
                 : manifest
-                  ? "Added to your Library, but not installed yet."
-                  : "This item is currently unavailable in the Shop and cannot be reinstalled right now."}
+                  ? t("detail.installedPanel.notInstalled")
+                  : t("detail.installedPanel.unavailable")}
             </p>
           )}
         </article>
       </section>
 
+      <RecommendationSection
+        eyebrow={t("detail.similar.eyebrow")}
+        title={t("detail.similar.title")}
+        description={t("detail.similar.body")}
+        entries={similarItems}
+        onOpen={(itemId) => {
+          window.scrollTo({ top: 0, behavior: "smooth" });
+          setRoute(`item:${itemId}`);
+        }}
+      />
+
       <section className="changelog">
         <div>
-          <p className="eyebrow">Release notes</p>
-          <h2>Changelog</h2>
+          <p className="eyebrow">{t("common.labels.releaseNotes")}</p>
+          <h2>{t("common.labels.changelog")}</h2>
         </div>
         {manifest?.changelog.length ? (
           manifest.changelog.map((entry) => (
@@ -201,7 +238,7 @@ export function GameDetailView({ item }: { item: ContentView }) {
             </article>
           ))
         ) : (
-          <p className="muted">No changelog is available for this item right now.</p>
+          <p className="muted">{t("detail.changelogEmpty")}</p>
         )}
       </section>
 

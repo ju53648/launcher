@@ -1,5 +1,6 @@
 import type {
   CatalogItemType,
+  InstallJob,
   InstallOperation,
   InstallPhase,
   ItemCollectionStatus,
@@ -7,87 +8,66 @@ import type {
   LibraryStatus
 } from "./types";
 
-export function formatBytes(bytes: number): string {
+export type Translate = (key: string, params?: Record<string, string | number | null | undefined>) => string;
+
+export function formatBytes(bytes: number, locale: string): string {
   if (!Number.isFinite(bytes) || bytes <= 0) return "0 B";
   const units = ["B", "KB", "MB", "GB", "TB"];
   const index = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
   const value = bytes / 1024 ** index;
-  return `${value.toFixed(value >= 10 || index === 0 ? 0 : 1)} ${units[index]}`;
+  const decimals = value >= 10 || index === 0 ? 0 : 1;
+  return `${new Intl.NumberFormat(locale, {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals
+  }).format(value)} ${units[index]}`;
 }
 
-export function formatDate(value: string | null): string {
-  if (!value) return "Never";
+export function formatDate(value: string | null, locale: string, t: Translate): string {
+  if (!value) return t("common.never");
   const normalizedValue = /^\d{4}-\d{2}-\d{2}$/.test(value) ? `${value}T12:00:00Z` : value;
   const date = new Date(normalizedValue);
   if (Number.isNaN(date.getTime())) return value;
-  return new Intl.DateTimeFormat("de-DE", {
+  return new Intl.DateTimeFormat(locale, {
     year: "numeric",
     month: "short",
     day: "2-digit"
   }).format(date);
 }
 
-export function installStateLabel(status: ItemInstallState): string {
-  const labels: Record<ItemInstallState, string> = {
-    notInstalled: "Not installed",
-    installing: "Installing",
-    installed: "Installed",
-    updateAvailable: "Update available",
-    error: "Needs repair"
-  };
-  return labels[status];
+export function installStateLabel(status: ItemInstallState, t: Translate): string {
+  return t(`status.install.${status}`);
 }
 
-export function collectionStatusLabel(status: ItemCollectionStatus): string {
-  const labels: Record<ItemCollectionStatus, string> = {
-    notAdded: "Not in library",
-    added: "In library",
-    installed: "Installed",
-    updateAvailable: "Update available",
-    error: "Needs repair"
-  };
-  return labels[status];
+export function collectionStatusLabel(status: ItemCollectionStatus, t: Translate): string {
+  return t(`status.collection.${status}`);
 }
 
-export function libraryStatusLabel(status: LibraryStatus): string {
-  const labels: Record<LibraryStatus, string> = {
-    available: "Available",
-    missing: "Missing drive",
-    inaccessible: "Inaccessible"
-  };
-  return labels[status];
+export function libraryStatusLabel(status: LibraryStatus, t: Translate): string {
+  return t(`status.library.${status}`);
 }
 
-export function phaseLabel(phase: InstallPhase): string {
-  const labels: Record<InstallPhase, string> = {
-    queued: "Queued",
-    preparing: "Preparing",
-    downloading: "Downloading",
-    verifying: "Verifying",
-    installing: "Installing",
-    finalizing: "Finalizing",
-    completed: "Completed",
-    cancelled: "Cancelled",
-    failed: "Failed"
-  };
-  return labels[phase];
+export function jobStatusLabel(status: InstallJob["status"], t: Translate): string {
+  return t(`status.job.${status}`);
 }
 
-export function operationLabel(operation: InstallOperation): string {
-  const labels: Record<InstallOperation, string> = {
-    install: "Install",
-    update: "Update",
-    repair: "Repair",
-    move: "Move"
-  };
-  return labels[operation];
+export function phaseLabel(phase: InstallPhase, t: Translate): string {
+  return t(`status.phase.${phase}`);
 }
 
-export function itemTypeLabel(itemType: CatalogItemType): string {
-  const labels: Record<CatalogItemType, string> = {
-    game: "Game",
-    tool: "Tool",
-    project: "Project"
-  };
-  return labels[itemType];
+export function operationLabel(operation: InstallOperation, t: Translate): string {
+  return t(`status.operation.${operation}`);
+}
+
+export function itemTypeLabel(itemType: CatalogItemType, t: Translate): string {
+  return t(`status.itemType.${itemType}`);
+}
+
+export function jobProgressLabel(
+  job: Pick<InstallJob, "operation" | "phase">,
+  t: Translate
+) {
+  return t("downloads.row.progress", {
+    operation: operationLabel(job.operation, t),
+    phase: phaseLabel(job.phase, t)
+  });
 }

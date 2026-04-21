@@ -9,9 +9,11 @@ import type {
   InstalledItem,
   ItemCollectionStatus,
   ItemInstallState,
+  LauncherLanguage,
   LauncherSnapshot,
   LibraryFolder
 } from "../domain/types";
+import { normalizeContentTags } from "../domain/tags";
 import { releaseInfo } from "../releaseInfo";
 
 const now = () => new Date().toISOString();
@@ -23,11 +25,16 @@ const catalog: ContentManifest[] = [
     name: "Lumorix DropDash",
     version: "1.0.0",
     description:
-      "A tiny offline arcade test title for validating installs, launches, repairs, and uninstall flows.",
+      "A compact offline arcade release for validating installs, launches, repairs, and uninstall flows across the launcher.",
     developer: "Lumorix",
     releaseDate: "2026-04-20",
     categories: ["Arcade", "Offline"],
-    tags: ["Arcade", "Offline", "Test Title"],
+    tags: [
+      { id: "arcade", weight: 3 },
+      { id: "offline", weight: 3 },
+      { id: "city", weight: 1 },
+      { id: "exploration", weight: 1 }
+    ],
     coverImage: "/assets/games/lumorix-dropdash-cover.svg",
     bannerImage: "/assets/games/lumorix-dropdash-banner.svg",
     iconImage: "/assets/games/lumorix-dropdash-icon.svg",
@@ -50,7 +57,7 @@ const catalog: ContentManifest[] = [
         version: "1.0.0",
         date: "2026-04-20",
         items: [
-          "Initial mock release.",
+          "Initial launcher-ready release.",
           "Offline arcade loop for install and launch validation."
         ]
       }
@@ -62,11 +69,17 @@ const catalog: ContentManifest[] = [
     name: "Signal Lab",
     version: "0.9.2",
     description:
-      "A compact local utility for testing Lumorix tool distribution, updates, and collection behavior.",
+      "A compact local utility sandbox for validating Lumorix tool distribution, lightweight build flows, and collection behavior.",
     developer: "Lumorix",
     releaseDate: "2026-04-18",
     categories: ["Creator Tools", "Utilities"],
-    tags: ["Tool", "Utility", "Local-first"],
+    tags: [
+      { id: "utility", weight: 3 },
+      { id: "local_first", weight: 3 },
+      { id: "lab", weight: 2 },
+      { id: "building", weight: 1 },
+      { id: "exploration", weight: 1 }
+    ],
     coverImage: "",
     bannerImage: "",
     iconImage: "",
@@ -76,7 +89,7 @@ const catalog: ContentManifest[] = [
     supportedActions: ["install", "launch", "repair", "uninstall", "openFolder"],
     installStrategy: {
       kind: "synthetic",
-      executableTemplate: "@echo off\necho Signal Lab mock tool\npause\n",
+      executableTemplate: "@echo off\necho Signal Lab utility shell\npause\n",
       contentFiles: []
     },
     download: {
@@ -87,7 +100,7 @@ const catalog: ContentManifest[] = [
       {
         version: "0.9.2",
         date: "2026-04-18",
-        items: ["Adds a lightweight local utility manifest for Shop and Library testing."]
+        items: ["Introduces a lightweight local utility package for Shop and Library workflows."]
       }
     ]
   },
@@ -97,11 +110,19 @@ const catalog: ContentManifest[] = [
     name: "Project Atlas",
     version: "0.4.0",
     description:
-      "A Lumorix project package placeholder that helps validate future non-game content in the same launcher shell.",
+      "A Lumorix project prototype that exercises future open-world survival packages inside the same launcher shell.",
     developer: "Lumorix",
     releaseDate: "2026-04-16",
     categories: ["Projects", "Prototype"],
-    tags: ["Project", "Prototype", "Narrative"],
+    tags: [
+      { id: "prototype", weight: 2 },
+      { id: "survival", weight: 3 },
+      { id: "open_world", weight: 3 },
+      { id: "forest", weight: 2 },
+      { id: "crafting", weight: 2 },
+      { id: "building", weight: 2 },
+      { id: "exploration", weight: 3 }
+    ],
     coverImage: "",
     bannerImage: "",
     iconImage: "",
@@ -111,7 +132,7 @@ const catalog: ContentManifest[] = [
     supportedActions: ["install", "launch", "repair", "uninstall", "openFolder"],
     installStrategy: {
       kind: "synthetic",
-      executableTemplate: "@echo off\necho Project Atlas mock package\npause\n",
+      executableTemplate: "@echo off\necho Project Atlas prototype package\npause\n",
       contentFiles: []
     },
     download: {
@@ -122,7 +143,7 @@ const catalog: ContentManifest[] = [
       {
         version: "0.4.0",
         date: "2026-04-16",
-        items: ["Adds a project-type package to exercise the future-proof content model."]
+        items: ["Introduces a project package centered on exploration, crafting, and worldbuilding."]
       }
     ]
   }
@@ -134,7 +155,15 @@ let state = loadState();
 
 function loadCollectionEntries(): CollectionEntry[] {
   const saved = localStorage.getItem("lumorix.mock.collectionEntries");
-  return saved ? (JSON.parse(saved) as CollectionEntry[]) : [];
+  if (!saved) return [];
+
+  return (JSON.parse(saved) as CollectionEntry[]).map((entry) => ({
+    ...entry,
+    catalog: {
+      ...entry.catalog,
+      tags: normalizeContentTags(entry.catalog.tags)
+    }
+  }));
 }
 
 function loadInstalledItems(): InstalledItem[] {
@@ -148,6 +177,10 @@ function loadState(): Omit<LauncherSnapshot, "items"> {
     const parsed = JSON.parse(saved) as Omit<LauncherSnapshot, "items">;
     return {
       ...parsed,
+      config: {
+        ...parsed.config,
+        language: parsed.config.language ?? null
+      },
       appVersion: releaseInfo.version,
       manifestErrors: parsed.manifestErrors ?? [],
       launcherUpdate: {
@@ -166,6 +199,7 @@ function loadState(): Omit<LauncherSnapshot, "items"> {
     manifestErrors: [],
     config: {
       onboardingCompleted: false,
+      language: null,
       libraries: [],
       defaultLibraryId: null,
       checkLauncherUpdatesOnStart: false,
@@ -236,28 +270,16 @@ function buildViews(): ContentView[] {
             job.itemId === itemId && (job.status === "queued" || job.status === "running")
         ) ?? null;
       const catalogRecord = manifest
-        ? {
-            id: manifest.id,
-            itemType: manifest.itemType,
-            name: manifest.name,
-            description: manifest.description,
-            developer: manifest.developer,
-            releaseDate: manifest.releaseDate,
-            categories: manifest.categories,
-            tags: manifest.tags,
-            coverImage: manifest.coverImage,
-            bannerImage: manifest.bannerImage,
-            iconImage: manifest.iconImage
-          }
+        ? catalogRecordFromManifest(manifest)
         : collectionEntry?.catalog ?? {
             id: itemId,
             itemType: "game",
             name: itemId,
-            description: "Unavailable item",
+            description: "This library entry is currently unavailable in the Shop.",
             developer: "Lumorix",
             releaseDate: "Unavailable",
             categories: ["Unavailable"],
-            tags: [],
+            tags: [{ id: "offline", weight: 1 }],
             coverImage: "",
             bannerImage: "",
             iconImage: ""
@@ -322,19 +344,7 @@ function ensureCollectionEntry(itemId: string) {
   const existing = collectionEntries.find((entry) => entry.itemId === itemId);
   if (existing) {
     existing.discoverable = true;
-    existing.catalog = {
-      id: manifest.id,
-      itemType: manifest.itemType,
-      name: manifest.name,
-      description: manifest.description,
-      developer: manifest.developer,
-      releaseDate: manifest.releaseDate,
-      categories: manifest.categories,
-      tags: manifest.tags,
-      coverImage: manifest.coverImage,
-      bannerImage: manifest.bannerImage,
-      iconImage: manifest.iconImage
-    };
+    existing.catalog = catalogRecordFromManifest(manifest);
     existing.lastError = null;
     existing.lastErrorAt = null;
     return existing;
@@ -347,19 +357,7 @@ function ensureCollectionEntry(itemId: string) {
     lastUsedAt: null,
     lastError: null,
     lastErrorAt: null,
-    catalog: {
-      id: manifest.id,
-      itemType: manifest.itemType,
-      name: manifest.name,
-      description: manifest.description,
-      developer: manifest.developer,
-      releaseDate: manifest.releaseDate,
-      categories: manifest.categories,
-      tags: manifest.tags,
-      coverImage: manifest.coverImage,
-      bannerImage: manifest.bannerImage,
-      iconImage: manifest.iconImage
-    }
+    catalog: catalogRecordFromManifest(manifest)
   };
   collectionEntries = [...collectionEntries, entry];
   return entry;
@@ -368,12 +366,39 @@ function ensureCollectionEntry(itemId: string) {
 function makeLibrary(path: string): LibraryFolder {
   return {
     id: crypto.randomUUID(),
-    name: "Main Library",
+    name: defaultLibraryName(state.config.language),
     path,
     isDefault: true,
     createdAt: now(),
     lastSeenAt: now(),
     status: "available"
+  };
+}
+
+function defaultLibraryName(language: LauncherLanguage | null) {
+  switch (language) {
+    case "de":
+      return "Hauptbibliothek";
+    case "pl":
+      return "Biblioteka glowna";
+    default:
+      return "Main Library";
+  }
+}
+
+function catalogRecordFromManifest(manifest: ContentManifest) {
+  return {
+    id: manifest.id,
+    itemType: manifest.itemType,
+    name: manifest.name,
+    description: manifest.description,
+    developer: manifest.developer,
+    releaseDate: manifest.releaseDate,
+    categories: manifest.categories,
+    tags: manifest.tags,
+    coverImage: manifest.coverImage,
+    bannerImage: manifest.bannerImage,
+    iconImage: manifest.iconImage
   };
 }
 
@@ -543,6 +568,11 @@ export const mockApi = {
     save();
     return buildSnapshot();
   },
+  async setLanguage(language: LauncherLanguage) {
+    state.config.language = language;
+    save();
+    return buildSnapshot();
+  },
   async startInstallItem(itemId: string, libraryId: string | null) {
     const selectedLibraryId = libraryId ?? state.config.defaultLibraryId;
     if (!selectedLibraryId) {
@@ -613,10 +643,10 @@ export const mockApi = {
       installed.lastError = null;
     }
     save();
-    return { message: "Mock item launch" };
+    return { message: "Item launched" };
   },
   async openInstallFolder(_itemId: string): Promise<CommandOk> {
-    return { message: "Mock folder open" };
+    return { message: "Install folder opened" };
   },
   async checkLauncherUpdates() {
     state.appVersion = releaseInfo.version;

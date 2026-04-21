@@ -3,12 +3,17 @@ import { Download, ExternalLink, ShieldCheck } from "lucide-react";
 import { LauncherUpdatePanel } from "../components/LauncherUpdatePanel";
 import { StatusBadge } from "../components/StatusBadge";
 import { formatDate } from "../domain/format";
+import { localizeReleaseInfo } from "../i18n/content";
+import { useI18n } from "../i18n";
 import { releaseInfo } from "../releaseInfo";
 import { useLauncher } from "../store/LauncherStore";
 
 export function AboutView() {
-  const { snapshot, busyAction, checkLauncherUpdates, installLauncherUpdate, updateProgress } = useLauncher();
+  const { locale, t } = useI18n();
+  const { snapshot, busyAction, checkLauncherUpdates, installLauncherUpdate, updateProgress } =
+    useLauncher();
   if (!snapshot) return null;
+  const localizedReleaseInfo = localizeReleaseInfo(releaseInfo, locale);
 
   return (
     <div className="about-layout">
@@ -16,31 +21,36 @@ export function AboutView() {
         <div className="brand about-hero__brand">
           <span className="brand__mark">LX</span>
           <span>
-            <strong>Lumorix</strong>
-            <small>Launcher v{snapshot.appVersion}</small>
+            <strong>{t("common.brandName")}</strong>
+            <small>{`${t("common.brandProduct")} v${snapshot.appVersion}`}</small>
           </span>
         </div>
-        <p>
-          A local-first Windows launcher foundation built for private installs, explicit updates,
-          and clean local ownership across Lumorix games, tools, and projects.
-        </p>
+        <p>{t("about.hero.body")}</p>
         <div className="action-row">
           <button
             className="button button--secondary"
-            disabled={busyAction === "check-launcher-update" || busyAction === "install-launcher-update"}
+            disabled={
+              busyAction === "check-launcher-update" || busyAction === "install-launcher-update"
+            }
             onClick={checkLauncherUpdates}
             type="button"
           >
-            {busyAction === "check-launcher-update" ? "Checking..." : "Check for updates"}
+            {busyAction === "check-launcher-update"
+              ? t("common.actions.checkingShort")
+              : t("common.actions.checkForUpdates")}
           </button>
           <button
             className="button button--primary"
-            disabled={busyAction === "check-launcher-update" || busyAction === "install-launcher-update"}
+            disabled={
+              busyAction === "check-launcher-update" || busyAction === "install-launcher-update"
+            }
             onClick={installLauncherUpdate}
             type="button"
           >
             <Download size={16} />
-            {busyAction === "install-launcher-update" ? "Updating..." : "Download and install"}
+            {busyAction === "install-launcher-update"
+              ? t("common.actions.updatingShort")
+              : t("common.actions.downloadAndInstall")}
           </button>
         </div>
       </section>
@@ -48,8 +58,8 @@ export function AboutView() {
       <section className="settings-section">
         <div className="section-toolbar">
           <div>
-            <p className="eyebrow">Launcher update state</p>
-            <h2>Version</h2>
+            <p className="eyebrow">{t("about.updateState.eyebrow")}</p>
+            <h2>{t("about.updateState.title")}</h2>
           </div>
           <StatusBadge
             status={snapshot.launcherUpdate.updateAvailable ? "updateAvailable" : "installed"}
@@ -57,39 +67,46 @@ export function AboutView() {
         </div>
         <dl className="spec-list">
           <div>
-            <dt>Current</dt>
+            <dt>{t("common.labels.current")}</dt>
             <dd>v{snapshot.launcherUpdate.currentVersion}</dd>
           </div>
           <div>
-            <dt>Latest</dt>
-            <dd>{snapshot.launcherUpdate.latestVersion ?? "No remote source"}</dd>
+            <dt>{t("common.labels.latest")}</dt>
+            <dd>{snapshot.launcherUpdate.latestVersion ?? t("common.noRemoteSource")}</dd>
           </div>
           <div>
-            <dt>Checked</dt>
-            <dd>{formatDate(snapshot.launcherUpdate.checkedAt)}</dd>
+            <dt>{t("common.labels.checked")}</dt>
+            <dd>{formatDate(snapshot.launcherUpdate.checkedAt, locale, t)}</dd>
           </div>
         </dl>
         {snapshot.launcherUpdate.releaseUrl && (
-          <a className="button button--secondary" href={snapshot.launcherUpdate.releaseUrl} target="_blank" rel="noreferrer">
+          <a
+            className="button button--secondary"
+            href={snapshot.launcherUpdate.releaseUrl}
+            target="_blank"
+            rel="noreferrer"
+          >
             <ExternalLink size={16} />
-            Release notes
+            {t("common.labels.releaseNotes")}
           </a>
         )}
-        {snapshot.launcherUpdate.error && <p className="field-error">{snapshot.launcherUpdate.error}</p>}
+        {snapshot.launcherUpdate.error && (
+          <p className="field-error">{snapshot.launcherUpdate.error}</p>
+        )}
         <LauncherUpdatePanel progress={updateProgress} />
       </section>
 
       <section className="settings-section">
         <div>
-          <p className="eyebrow">Product changelog</p>
-          <h2>v{releaseInfo.version}</h2>
+          <p className="eyebrow">{t("about.productChangelog.eyebrow")}</p>
+          <h2>v{localizedReleaseInfo.version}</h2>
         </div>
         <div className="changelog-entry">
-          <strong>{releaseInfo.title}</strong>
-          <span>{formatDate(releaseInfo.date)}</span>
+          <strong>{localizedReleaseInfo.title}</strong>
+          <span>{formatDate(localizedReleaseInfo.date, locale, t)}</span>
           <ul>
-            {releaseInfo.notes.map((note) => (
-              <li key={`${releaseInfo.version}-${note}`}>{note}</li>
+            {localizedReleaseInfo.notes.map((note) => (
+              <li key={`${localizedReleaseInfo.version}-${note}`}>{note}</li>
             ))}
           </ul>
         </div>
@@ -99,8 +116,8 @@ export function AboutView() {
         <div className="privacy-panel">
           <ShieldCheck size={24} />
           <div>
-            <strong>Privacy baseline</strong>
-            <p>No login system, no analytics package and no automatic data upload path.</p>
+            <strong>{t("about.privacy.title")}</strong>
+            <p>{t("about.privacy.body")}</p>
           </div>
         </div>
       </section>

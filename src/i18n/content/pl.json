@@ -1,0 +1,42 @@
+{
+  "items": {
+    "com.lumorix.dropdash": {
+      "description": "Kompaktowe wydanie arcade offline do sprawdzania instalacji, uruchamiania, odinstalowywania i przyszlych aktualizacji w Lumorix Launcherze.",
+      "categories": ["Arcade", "Offline"],
+      "changelog": {
+        "1.0.0": [
+          "Pierwsze wydanie gotowe do pracy z launcherem.",
+          "Dodaje grywalna petle arcade typu unikaj-i-zbieraj z restartem i lokalnym rekordem.",
+          "Wykorzystuje syntetyczny pakiet offline do niezawodnych testow instalacji, uruchamiania, naprawy i odinstalowywania."
+        ]
+      }
+    },
+    "com.lumorix.signal-lab": {
+      "description": "Kompaktowe lokalne narzedzie typu sandbox do sprawdzania dystrybucji narzedzi Lumorix, lekkich przeplywow buildow i zachowania kolekcji.",
+      "categories": ["Narzedzia tworcze", "Narzedzia"],
+      "changelog": {
+        "0.9.2": [
+          "Wprowadza lekki lokalny pakiet narzedziowy dla przeplywow Sklepu i Biblioteki."
+        ]
+      }
+    },
+    "com.lumorix.project-atlas": {
+      "description": "Prototyp projektu Lumorix skupiony na systemach survivalowych i otwartym swiecie w tym samym launcherze.",
+      "categories": ["Projekty", "Prototyp"],
+      "changelog": {
+        "0.4.0": [
+          "Wprowadza pakiet projektu skupiony na eksploracji, craftingu i budowaniu swiata."
+        ]
+      }
+    }
+  },
+  "releaseInfo": {
+    "title": "Refaktoryzacja Sklepu i Biblioteki",
+    "notes": [
+      "Dodano widok Sklepu",
+      "Rozdzielono Sklep i Biblioteke",
+      "Poprawiono widocznosc pobran",
+      "Przebudowano model stanu kolekcji"
+    ]
+  }
+}

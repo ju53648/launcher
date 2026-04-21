@@ -2,6 +2,15 @@ export type LibraryStatus = "available" | "missing" | "inaccessible";
 
 export type CatalogItemType = "game" | "tool" | "project";
 
+export type TagWeight = 1 | 2 | 3;
+
+export type TagCategoryId = "gameplay" | "world" | "systems";
+
+export interface ContentTag {
+  id: string;
+  weight: TagWeight;
+}
+
 export type ItemInstallState =
   | "notInstalled"
   | "installing"
@@ -40,8 +49,11 @@ export type ItemAction =
   | "openFolder"
   | "moveInstall";
 
+export type LauncherLanguage = "en" | "de" | "pl";
+
 export interface LauncherConfig {
   onboardingCompleted: boolean;
+  language: LauncherLanguage | null;
   libraries: LibraryFolder[];
   defaultLibraryId: string | null;
   checkLauncherUpdatesOnStart: boolean;
@@ -89,7 +101,7 @@ export interface CatalogItemRecord {
   developer: string;
   releaseDate: string;
   categories: string[];
-  tags: string[];
+  tags: ContentTag[];
   coverImage: string;
   bannerImage: string;
   iconImage: string;
@@ -114,7 +126,7 @@ export interface ContentManifest {
   developer: string;
   releaseDate: string;
   categories: string[];
-  tags: string[];
+  tags: ContentTag[];
   coverImage: string;
   bannerImage: string;
   iconImage: string;

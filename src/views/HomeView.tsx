@@ -1,6 +1,13 @@
 import { ArrowRight, Download, HardDrive, Library, RefreshCw, Sparkles } from "lucide-react";
 
 import type { AppRoute } from "../components/AppShell";
+import { LauncherUpdatePanel } from "../components/LauncherUpdatePanel";
+import { ProgressBar } from "../components/ProgressBar";
+import {
+  formatBytes,
+  formatDate,
+  jobProgressLabel
+} from "../domain/format";
 import {
   buildRecentActivity,
   getActiveJobs,
@@ -9,13 +16,13 @@ import {
   getRecentlyInstalledItems,
   getRecentlyUsedItems
 } from "../domain/selectors";
-import { formatBytes, formatDate } from "../domain/format";
-import { LauncherUpdatePanel } from "../components/LauncherUpdatePanel";
-import { ProgressBar } from "../components/ProgressBar";
 import type { ContentView } from "../domain/types";
+import { useI18n } from "../i18n";
+import { describeLauncherUpdateProgress } from "../services/appUpdater";
 import { useLauncher } from "../store/LauncherStore";
 
 export function HomeView({ setRoute }: { setRoute: (route: AppRoute) => void }) {
+  const { locale, t } = useI18n();
   const {
     snapshot,
     checkLauncherUpdates,
@@ -33,20 +40,19 @@ export function HomeView({ setRoute }: { setRoute: (route: AppRoute) => void }) 
   const recentlyUsed = getRecentlyUsedItems(snapshot, 4);
   const updateCount = libraryItems.filter((item) => item.state.updateAvailable).length;
   const installedSize = installedItems.reduce(
-    (total, item) => total + (item.installed?.sizeOnDiskBytes ?? item.manifest?.installSizeBytes ?? 0),
+    (total, item) =>
+      total + (item.installed?.sizeOnDiskBytes ?? item.manifest?.installSizeBytes ?? 0),
     0
   );
 
   const updateMessage =
-    updateProgress.status === "available"
-      ? `Update ${updateProgress.version ?? ""} is ready`
-      : updateProgress.status === "downloading" ||
-          updateProgress.status === "installing" ||
-          updateProgress.status === "relaunching"
-        ? updateProgress.message
-        : snapshot.launcherUpdate.updateAvailable
-          ? `Version ${snapshot.launcherUpdate.latestVersion} is available`
-          : `Running v${snapshot.appVersion}`;
+    updateProgress.status !== "idle"
+      ? describeLauncherUpdateProgress(updateProgress, t)
+      : snapshot.launcherUpdate.updateAvailable
+        ? t("home.updateCard.versionAvailable", {
+            version: snapshot.launcherUpdate.latestVersion ?? ""
+          })
+        : t("home.updateCard.runningVersion", { version: snapshot.appVersion });
   const showInstallAction =
     updateProgress.status === "available" ||
     updateProgress.status === "restartRequired" ||
@@ -56,47 +62,70 @@ export function HomeView({ setRoute }: { setRoute: (route: AppRoute) => void }) 
     <div className="view-stack">
       <section className="home-dashboard">
         <div className="home-dashboard__copy">
-          <p className="eyebrow">Home</p>
-          <h2>Your local Lumorix control center</h2>
-          <p>
-            Track your collection, pick up where you left off, and keep installs and launcher
-            updates under control without accounts, ads, or friction.
-          </p>
+          <p className="eyebrow">{t("home.hero.eyebrow")}</p>
+          <h2>{t("home.hero.title")}</h2>
+          <p>{t("home.hero.body")}</p>
           <div className="hero-actions">
-            <button className="button button--primary" onClick={() => setRoute("library")} type="button">
-              Open Library
+            <button
+              className="button button--primary"
+              onClick={() => setRoute("library")}
+              type="button"
+            >
+              {t("common.actions.openLibrary")}
             </button>
-            <button className="button button--ghost" onClick={() => setRoute("shop")} type="button">
-              Browse Shop
+            <button
+              className="button button--ghost"
+              onClick={() => setRoute("shop")}
+              type="button"
+            >
+              {t("common.actions.browseShop")}
             </button>
-            <button className="button button--ghost" onClick={() => setRoute("downloads")} type="button">
-              View Downloads
+            <button
+              className="button button--ghost"
+              onClick={() => setRoute("downloads")}
+              type="button"
+            >
+              {t("common.actions.viewDownloads")}
             </button>
           </div>
         </div>
 
         <div className="home-dashboard__update">
           <RefreshCw size={20} />
-          <span>Launcher state</span>
+          <span>{t("home.updateCard.label")}</span>
           <strong>{updateMessage}</strong>
-          <p>Last checked {formatDate(snapshot.launcherUpdate.checkedAt)}</p>
+          <p>
+            {t("home.updateCard.lastChecked", {
+              date: formatDate(snapshot.launcherUpdate.checkedAt, locale, t)
+            })}
+          </p>
           <div className="home-dashboard__actions">
             <button
               className="text-button"
-              disabled={busyAction === "check-launcher-update" || busyAction === "install-launcher-update"}
+              disabled={
+                busyAction === "check-launcher-update" ||
+                busyAction === "install-launcher-update"
+              }
               onClick={checkLauncherUpdates}
               type="button"
             >
-              {busyAction === "check-launcher-update" ? "Checking..." : "Check updates"}
+              {busyAction === "check-launcher-update"
+                ? t("common.actions.checkingShort")
+                : t("common.actions.checkUpdates")}
             </button>
             {showInstallAction && (
               <button
                 className="text-button"
-                disabled={busyAction === "check-launcher-update" || busyAction === "install-launcher-update"}
+                disabled={
+                  busyAction === "check-launcher-update" ||
+                  busyAction === "install-launcher-update"
+                }
                 onClick={installLauncherUpdate}
                 type="button"
               >
-                {busyAction === "install-launcher-update" ? "Installing..." : "Install update"}
+                {busyAction === "install-launcher-update"
+                  ? t("common.actions.installingShort")
+                  : t("common.actions.installUpdate")}
               </button>
             )}
           </div>
@@ -106,27 +135,27 @@ export function HomeView({ setRoute }: { setRoute: (route: AppRoute) => void }) 
       <section className="dashboard-grid">
         <article className="metric-panel">
           <Library size={22} />
-          <span>Collection</span>
+          <span>{t("home.metrics.collection")}</span>
           <strong>{libraryItems.length}</strong>
-          <p>{installedItems.length} installed locally</p>
+          <p>{t("home.metrics.collectionDescription", { count: installedItems.length })}</p>
         </article>
         <article className="metric-panel">
           <Download size={22} />
-          <span>Downloads</span>
+          <span>{t("home.metrics.downloads")}</span>
           <strong>{activeJobs.length}</strong>
-          <p>{activeJobs.length === 1 ? "active transfer" : "active transfers"}</p>
+          <p>{t("home.metrics.downloadsDescription", { count: activeJobs.length })}</p>
         </article>
         <article className="metric-panel">
           <HardDrive size={22} />
-          <span>Disk usage</span>
-          <strong>{formatBytes(installedSize)}</strong>
-          <p>{snapshot.config.libraries.length} registered libraries</p>
+          <span>{t("home.metrics.diskUsage")}</span>
+          <strong>{formatBytes(installedSize, locale)}</strong>
+          <p>{t("home.metrics.diskDescription", { count: snapshot.config.libraries.length })}</p>
         </article>
         <article className="metric-panel">
           <Sparkles size={22} />
-          <span>Updates</span>
+          <span>{t("home.metrics.updates")}</span>
           <strong>{updateCount}</strong>
-          <p>{updateCount === 1 ? "item needs updating" : "items need updating"}</p>
+          <p>{t("home.metrics.updatesDescription", { count: updateCount })}</p>
         </article>
       </section>
 
@@ -135,8 +164,8 @@ export function HomeView({ setRoute }: { setRoute: (route: AppRoute) => void }) 
       {activeJobs.length > 0 && (
         <section className="queue-strip">
           <div>
-            <p className="eyebrow">Downloads</p>
-            <h2>Active transfers</h2>
+            <p className="eyebrow">{t("home.activeTransfers.eyebrow")}</p>
+            <h2>{t("home.activeTransfers.title")}</h2>
           </div>
           <div className="queue-strip__stack">
             {activeJobs.slice(0, 3).map((job) => (
@@ -147,7 +176,7 @@ export function HomeView({ setRoute }: { setRoute: (route: AppRoute) => void }) 
                 type="button"
               >
                 <strong>{job.itemName}</strong>
-                <span>{job.message}</span>
+                <span>{jobProgressLabel(job, t)}</span>
                 <ProgressBar value={job.progress} compact />
               </button>
             ))}
@@ -159,15 +188,19 @@ export function HomeView({ setRoute }: { setRoute: (route: AppRoute) => void }) 
         <article className="activity-panel">
           <div className="section-toolbar">
             <div>
-              <p className="eyebrow">Recent activity</p>
-              <h2>What changed lately</h2>
+              <p className="eyebrow">{t("home.recentActivity.eyebrow")}</p>
+              <h2>{t("home.recentActivity.title")}</h2>
             </div>
-            <button className="button button--ghost" onClick={() => setRoute("library")} type="button">
-              Open collection
+            <button
+              className="button button--ghost"
+              onClick={() => setRoute("library")}
+              type="button"
+            >
+              {t("common.actions.openCollection")}
             </button>
           </div>
           {recentActivity.length === 0 ? (
-            <p className="muted">No recent activity yet. Add something from the Shop to get started.</p>
+            <p className="muted">{t("home.recentActivity.empty")}</p>
           ) : (
             <div className="activity-list">
               {recentActivity.map((event) => (
@@ -181,7 +214,7 @@ export function HomeView({ setRoute }: { setRoute: (route: AppRoute) => void }) 
                   <span>
                     <strong>{event.item.catalog.name}</strong>
                     <small>
-                      {event.label} · {formatDate(event.at)}
+                      {t(`home.recentActivity.${event.kind}`)} / {formatDate(event.at, locale, t)}
                     </small>
                   </span>
                   <ArrowRight size={16} />
@@ -194,15 +227,19 @@ export function HomeView({ setRoute }: { setRoute: (route: AppRoute) => void }) 
         <article className="activity-panel">
           <div className="section-toolbar">
             <div>
-              <p className="eyebrow">Recently used</p>
-              <h2>Jump back in</h2>
+              <p className="eyebrow">{t("home.recentlyUsed.eyebrow")}</p>
+              <h2>{t("home.recentlyUsed.title")}</h2>
             </div>
-            <button className="button button--ghost" onClick={() => setRoute("library")} type="button">
-              View library
+            <button
+              className="button button--ghost"
+              onClick={() => setRoute("library")}
+              type="button"
+            >
+              {t("common.actions.viewLibrary")}
             </button>
           </div>
           {recentlyUsed.length === 0 ? (
-            <p className="muted">Launch an installed item and it will appear here for quick access.</p>
+            <p className="muted">{t("home.recentlyUsed.empty")}</p>
           ) : (
             <div className="item-list">
               {recentlyUsed.map((item) => (
@@ -215,7 +252,15 @@ export function HomeView({ setRoute }: { setRoute: (route: AppRoute) => void }) 
                   <ItemThumb item={item} />
                   <span>
                     <strong>{item.catalog.name}</strong>
-                    <small>Used {formatDate(item.collectionEntry?.lastUsedAt ?? item.installed?.lastLaunchedAt ?? null)}</small>
+                    <small>
+                      {t("home.recentlyUsed.used", {
+                        date: formatDate(
+                          item.collectionEntry?.lastUsedAt ?? item.installed?.lastLaunchedAt ?? null,
+                          locale,
+                          t
+                        )
+                      })}
+                    </small>
                   </span>
                 </button>
               ))}
@@ -228,15 +273,19 @@ export function HomeView({ setRoute }: { setRoute: (route: AppRoute) => void }) 
         <article className="activity-panel">
           <div className="section-toolbar">
             <div>
-              <p className="eyebrow">Recent installs</p>
-              <h2>Ready on this machine</h2>
+              <p className="eyebrow">{t("home.recentInstalls.eyebrow")}</p>
+              <h2>{t("home.recentInstalls.title")}</h2>
             </div>
-            <button className="button button--ghost" onClick={() => setRoute("downloads")} type="button">
-              Open downloads
+            <button
+              className="button button--ghost"
+              onClick={() => setRoute("downloads")}
+              type="button"
+            >
+              {t("common.actions.openDownloads")}
             </button>
           </div>
           {recentInstalls.length === 0 ? (
-            <p className="muted">Installed items will show up here once a download or setup finishes.</p>
+            <p className="muted">{t("home.recentInstalls.empty")}</p>
           ) : (
             <div className="item-list">
               {recentInstalls.map((item) => (
@@ -249,7 +298,11 @@ export function HomeView({ setRoute }: { setRoute: (route: AppRoute) => void }) 
                   <ItemThumb item={item} />
                   <span>
                     <strong>{item.catalog.name}</strong>
-                    <small>Installed {formatDate(item.installed?.installedAt ?? null)}</small>
+                    <small>
+                      {t("home.recentInstalls.installed", {
+                        date: formatDate(item.installed?.installedAt ?? null, locale, t)
+                      })}
+                    </small>
                   </span>
                 </button>
               ))}
@@ -260,22 +313,22 @@ export function HomeView({ setRoute }: { setRoute: (route: AppRoute) => void }) 
         <article className="activity-panel">
           <div className="section-toolbar">
             <div>
-              <p className="eyebrow">Collection status</p>
-              <h2>Next steps</h2>
+              <p className="eyebrow">{t("home.nextSteps.eyebrow")}</p>
+              <h2>{t("home.nextSteps.title")}</h2>
             </div>
           </div>
           <div className="home-action-list">
             <button className="home-action-card" onClick={() => setRoute("shop")} type="button">
-              <strong>Discover more items</strong>
-              <span>Browse new content and add it to your Library.</span>
+              <strong>{t("home.nextSteps.discoverTitle")}</strong>
+              <span>{t("home.nextSteps.discoverBody")}</span>
             </button>
             <button className="home-action-card" onClick={() => setRoute("library")} type="button">
-              <strong>Manage installs</strong>
-              <span>Launch, update, repair, or uninstall from your collection.</span>
+              <strong>{t("home.nextSteps.manageTitle")}</strong>
+              <span>{t("home.nextSteps.manageBody")}</span>
             </button>
             <button className="home-action-card" onClick={() => setRoute("settings")} type="button">
-              <strong>Adjust local preferences</strong>
-              <span>Review library folders, privacy defaults, and update behavior.</span>
+              <strong>{t("home.nextSteps.settingsTitle")}</strong>
+              <span>{t("home.nextSteps.settingsBody")}</span>
             </button>
           </div>
         </article>
@@ -286,11 +339,23 @@ export function HomeView({ setRoute }: { setRoute: (route: AppRoute) => void }) 
 
 function ItemThumb({ item, compact = false }: { item: ContentView; compact?: boolean }) {
   if (item.catalog.iconImage) {
-    return <img className={compact ? "item-thumb item-thumb--compact" : "item-thumb"} src={item.catalog.iconImage} alt="" />;
+    return (
+      <img
+        className={compact ? "item-thumb item-thumb--compact" : "item-thumb"}
+        src={item.catalog.iconImage}
+        alt=""
+      />
+    );
   }
 
   return (
-    <div className={compact ? "item-thumb item-thumb--compact item-thumb--fallback" : "item-thumb item-thumb--fallback"}>
+    <div
+      className={
+        compact
+          ? "item-thumb item-thumb--compact item-thumb--fallback"
+          : "item-thumb item-thumb--fallback"
+      }
+    >
       <span>{item.catalog.name.slice(0, 2).toUpperCase()}</span>
     </div>
   );

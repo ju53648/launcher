@@ -5,10 +5,19 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState
 } from "react";
 
-import type { InstallJob, LauncherError, LauncherSnapshot } from "../domain/types";
+import { localizeSnapshotContent } from "../i18n/content";
+import { coerceLocale, useI18n } from "../i18n";
+import { normalizeLauncherSnapshot } from "../domain/normalize";
+import type {
+  InstallJob,
+  LauncherError,
+  LauncherLanguage,
+  LauncherSnapshot
+} from "../domain/types";
 import {
   checkLauncherUpdate,
   downloadAndInstallLauncherUpdate,
@@ -48,20 +57,26 @@ interface LauncherContextValue {
   checkItemUpdates: () => Promise<void>;
   cancelJob: (jobId: string) => Promise<void>;
   clearCompletedJobs: () => Promise<void>;
+  setLanguagePreference: (language: LauncherLanguage) => Promise<void>;
 }
 
 const LauncherContext = createContext<LauncherContextValue | undefined>(undefined);
 
 export function LauncherProvider({ children }: { children: ReactNode }) {
+  const { locale, setLocale } = useI18n();
+  const initialLocale = useRef(locale);
   const [snapshot, setSnapshot] = useState<LauncherSnapshot | null>(null);
   const [loading, setLoading] = useState(true);
   const [busyAction, setBusyAction] = useState<string | null>(null);
   const [error, setError] = useState<LauncherError | null>(null);
   const [updateProgress, setUpdateProgress] = useState<LauncherUpdateProgress>({
     status: "idle",
-    progress: 0,
-    message: "No update action running."
+    progress: 0
   });
+
+  const publishSnapshot = useCallback((next: LauncherSnapshot) => {
+    setSnapshot(normalizeLauncherSnapshot(next));
+  }, []);
 
   const runSnapshotAction = useCallback(
     async (label: string, action: () => Promise<LauncherSnapshot>) => {
@@ -69,24 +84,24 @@ export function LauncherProvider({ children }: { children: ReactNode }) {
       setError(null);
       try {
         const next = await action();
-        setSnapshot(next);
+        publishSnapshot(next);
       } catch (caught) {
         setError(normalizeError(caught));
       } finally {
         setBusyAction(null);
       }
     },
-    []
+    [publishSnapshot]
   );
 
   const refresh = useCallback(async () => {
     try {
       const next = await launcherApi.getSnapshot();
-      setSnapshot(next);
+      publishSnapshot(next);
     } catch (caught) {
       setError(normalizeError(caught));
     }
-  }, []);
+  }, [publishSnapshot]);
 
   useEffect(() => {
     let cancelled = false;
@@ -94,7 +109,28 @@ export function LauncherProvider({ children }: { children: ReactNode }) {
       setLoading(true);
       try {
         const next = await launcherApi.bootstrap();
-        if (!cancelled) setSnapshot(next);
+        const configuredLanguage = coerceLocale(next.config.language);
+
+        if (next.config.language) {
+          setLocale(configuredLanguage);
+          if (!cancelled) publishSnapshot(next);
+        } else {
+          try {
+            const persisted = await launcherApi.setLanguage(initialLocale.current);
+            if (!cancelled) publishSnapshot(persisted);
+          } catch (persistError) {
+            console.warn("[launcher] failed to persist initial language", persistError);
+            if (!cancelled) {
+              publishSnapshot({
+                ...next,
+                config: {
+                  ...next.config,
+                  language: initialLocale.current
+                }
+              });
+            }
+          }
+        }
       } catch (caught) {
         if (!cancelled) setError(normalizeError(caught));
       } finally {
@@ -118,19 +154,39 @@ export function LauncherProvider({ children }: { children: ReactNode }) {
   }, [refresh, snapshot?.jobs]);
 
   const publishUpdateProgress = useCallback((progress: LauncherUpdateProgress) => {
-    console.info("[updater]", progress.status, progress.message);
+    console.info("[updater]", progress.status, progress.version ?? progress.errorMessage ?? "");
     setUpdateProgress(progress);
   }, []);
 
+  const localizedSnapshot = useMemo(
+    () => localizeSnapshotContent(snapshot, locale),
+    [snapshot, locale]
+  );
+
   const value = useMemo<LauncherContextValue>(
     () => ({
-      snapshot,
+      snapshot: localizedSnapshot,
       loading,
       busyAction,
       error,
       updateProgress,
       clearError: () => setError(null),
       refresh,
+      setLanguagePreference: async (language) => {
+        const previousLocale = locale;
+      setLocale(language);
+      setBusyAction("set-language");
+      setError(null);
+      try {
+        const next = await launcherApi.setLanguage(language);
+        publishSnapshot(next);
+      } catch (caught) {
+        setLocale(previousLocale);
+        setError(normalizeError(caught));
+      } finally {
+          setBusyAction(null);
+        }
+      },
       completeOnboarding: (libraryPath) =>
         runSnapshotAction("complete-onboarding", () =>
           launcherApi.completeOnboarding(libraryPath)
@@ -188,7 +244,7 @@ export function LauncherProvider({ children }: { children: ReactNode }) {
           publishUpdateProgress({
             status: "error",
             progress: 0,
-            message: normalized.message
+            errorMessage: normalized.message
           });
           setError(normalized);
         } finally {
@@ -206,7 +262,7 @@ export function LauncherProvider({ children }: { children: ReactNode }) {
           publishUpdateProgress({
             status: "error",
             progress: 0,
-            message: normalized.message
+            errorMessage: normalized.message
           });
           setError(normalized);
         } finally {
@@ -226,8 +282,11 @@ export function LauncherProvider({ children }: { children: ReactNode }) {
       publishUpdateProgress,
       refresh,
       runSnapshotAction,
-      snapshot,
-      updateProgress
+      localizedSnapshot,
+      updateProgress,
+      locale,
+      publishSnapshot,
+      setLocale
     ]
   );
 

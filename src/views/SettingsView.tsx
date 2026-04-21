@@ -1,13 +1,23 @@
-import { FolderPlus, RefreshCw, Save, ShieldCheck, Trash2 } from "lucide-react";
-import { useMemo, useState } from "react";
+import {
+  Check,
+  FolderPlus,
+  Languages,
+  RefreshCw,
+  Save,
+  ShieldCheck,
+  Trash2
+} from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 
-import { LauncherUpdatePanel } from "../components/LauncherUpdatePanel";
 import { StatusBadge } from "../components/StatusBadge";
+import { LauncherUpdatePanel } from "../components/LauncherUpdatePanel";
 import { formatDate } from "../domain/format";
+import { SUPPORTED_LOCALES, useI18n } from "../i18n";
 import { chooseDirectory } from "../services/tauri";
 import { useLauncher } from "../store/LauncherStore";
 
 export function SettingsView() {
+  const { locale, t } = useI18n();
   const {
     snapshot,
     addLibrary,
@@ -15,13 +25,14 @@ export function SettingsView() {
     removeLibrary,
     setDefaultLibrary,
     updatePreferences,
+    setLanguagePreference,
     checkLauncherUpdates,
     installLauncherUpdate,
     checkItemUpdates,
     busyAction,
     updateProgress
   } = useLauncher();
-  const [newLibraryName, setNewLibraryName] = useState("Main");
+  const [newLibraryName, setNewLibraryName] = useState("");
   const [newLibraryPath, setNewLibraryPath] = useState("");
   const [libraryNames, setLibraryNames] = useState<Record<string, string>>({});
 
@@ -37,42 +48,94 @@ export function SettingsView() {
   }, [snapshot]);
   const [draftPreferences, setDraftPreferences] = useState(preferences);
 
-  if (!snapshot) return null;
+  useEffect(() => {
+    setDraftPreferences(preferences);
+  }, [preferences]);
 
-  const prefs = draftPreferences ?? preferences!;
+  if (!snapshot || !preferences) return null;
+
+  const prefs = draftPreferences ?? preferences;
+  const languageOptions = SUPPORTED_LOCALES.map((value) => ({
+    value,
+    label: t(`common.languages.${value}`)
+  }));
 
   return (
     <div className="settings-layout">
       <section className="settings-section">
         <div className="section-toolbar">
           <div>
-            <p className="eyebrow">Storage</p>
-            <h2>Libraries</h2>
+            <p className="eyebrow">{t("settings.language.eyebrow")}</p>
+            <h2>{t("settings.language.title")}</h2>
+            <p className="muted">{t("settings.language.description")}</p>
+          </div>
+          <Languages size={18} />
+        </div>
+
+        <div className="language-selector" role="radiogroup" aria-label={t("settings.language.title")}>
+          {languageOptions.map((option) => {
+            const active = locale === option.value;
+            return (
+              <button
+                key={option.value}
+                className={`language-option ${active ? "is-active" : ""}`}
+                onClick={() => setLanguagePreference(option.value)}
+                type="button"
+                role="radio"
+                aria-checked={active}
+                disabled={busyAction === "set-language"}
+              >
+                <div className="language-option__header">
+                  <strong>{option.label}</strong>
+                  {active && (
+                    <span className="language-option__check">
+                      <Check size={14} />
+                    </span>
+                  )}
+                </div>
+                <small>{active ? t("settings.language.active") : t("settings.language.switchNow")}</small>
+              </button>
+            );
+          })}
+        </div>
+
+        <p className="muted">{t("settings.language.helper")}</p>
+      </section>
+
+      <section className="settings-section">
+        <div className="section-toolbar">
+          <div>
+            <p className="eyebrow">{t("settings.storage.eyebrow")}</p>
+            <h2>{t("settings.storage.title")}</h2>
           </div>
           <button
             className="button button--secondary"
             onClick={async () => {
-              const path = await chooseDirectory();
+              const path = await chooseDirectory({
+                title: t("common.actions.chooseFolder"),
+                prompt: t("common.labels.path"),
+                defaultPath: snapshot.recommendedLibraryPath
+              });
               if (path) setNewLibraryPath(path);
             }}
             type="button"
           >
             <FolderPlus size={16} />
-            Choose folder
+            {t("common.actions.chooseFolder")}
           </button>
         </div>
 
         <div className="add-library">
           <label>
-            <span>Name</span>
+            <span>{t("common.labels.name")}</span>
             <input
               value={newLibraryName}
               onChange={(event) => setNewLibraryName(event.target.value)}
-              placeholder="Main"
+              placeholder={t("settings.storage.defaultNamePlaceholder")}
             />
           </label>
           <label>
-            <span>Path</span>
+            <span>{t("common.labels.path")}</span>
             <input
               value={newLibraryPath}
               onChange={(event) => setNewLibraryPath(event.target.value)}
@@ -83,12 +146,16 @@ export function SettingsView() {
             className="button button--primary"
             disabled={!newLibraryPath.trim()}
             onClick={async () => {
-              await addLibrary(newLibraryName, newLibraryPath);
+              await addLibrary(
+                newLibraryName.trim() || t("settings.storage.defaultNamePlaceholder"),
+                newLibraryPath
+              );
+              setNewLibraryName("");
               setNewLibraryPath("");
             }}
             type="button"
           >
-            Add library
+            {t("common.actions.addLibrary")}
           </button>
         </div>
 
@@ -106,11 +173,15 @@ export function SettingsView() {
                       }))
                     }
                   />
-                  {library.isDefault && <span className="default-chip">Default</span>}
+                  {library.isDefault && <span className="default-chip">{t("settings.storage.defaultChip")}</span>}
                   <StatusBadge status={library.status} type="library" />
                 </div>
                 <small>{library.path}</small>
-                <small>Last seen: {formatDate(library.lastSeenAt)}</small>
+                <small>
+                  {t("settings.storage.lastSeen", {
+                    date: formatDate(library.lastSeenAt, locale, t)
+                  })}
+                </small>
               </div>
               <div className="library-row__actions">
                 <button
@@ -118,14 +189,19 @@ export function SettingsView() {
                   onClick={() => renameLibrary(library.id, libraryNames[library.id] ?? library.name)}
                   type="button"
                 >
-                  Save
+                  {t("settings.storage.saveLibrary")}
                 </button>
                 {!library.isDefault && (
                   <button className="button button--ghost" onClick={() => setDefaultLibrary(library.id)} type="button">
-                    Make default
+                    {t("common.actions.makeDefault")}
                   </button>
                 )}
-                <button className="icon-button" onClick={() => removeLibrary(library.id)} type="button" aria-label="Remove library">
+                <button
+                  className="icon-button"
+                  onClick={() => removeLibrary(library.id)}
+                  type="button"
+                  aria-label={t("settings.storage.removeAria")}
+                >
                   <Trash2 size={16} />
                 </button>
               </div>
@@ -137,8 +213,8 @@ export function SettingsView() {
       <section className="settings-section">
         <div className="section-toolbar">
           <div>
-            <p className="eyebrow">Maintenance</p>
-            <h2>Updates and installs</h2>
+            <p className="eyebrow">{t("settings.maintenance.eyebrow")}</p>
+            <h2>{t("settings.maintenance.title")}</h2>
           </div>
           <button
             className="button button--primary"
@@ -154,30 +230,30 @@ export function SettingsView() {
             type="button"
           >
             <Save size={16} />
-            Save
+            {t("common.actions.save")}
           </button>
         </div>
 
         <div className="toggle-grid">
           {[
-            ["checkLauncherUpdatesOnStart", "Check launcher updates on start"],
-            ["checkGameUpdatesOnStart", "Check item updates on start"],
-            ["askForLibraryEachInstall", "Ask for library on every install"],
-            ["createDesktopShortcuts", "Create desktop shortcuts"],
-            ["keepDownloadCache", "Keep download cache"]
-          ].map(([key, label]) => (
+            "checkLauncherUpdatesOnStart",
+            "checkGameUpdatesOnStart",
+            "askForLibraryEachInstall",
+            "createDesktopShortcuts",
+            "keepDownloadCache"
+          ].map((key) => (
             <label key={key} className="toggle-row">
               <input
                 type="checkbox"
                 checked={Boolean(prefs[key as keyof typeof prefs])}
                 onChange={(event) =>
                   setDraftPreferences((current) => ({
-                    ...(current ?? preferences!),
+                    ...(current ?? preferences),
                     [key]: event.target.checked
                   }))
                 }
               />
-              <span>{label}</span>
+              <span>{t(`settings.maintenance.toggles.${key}`)}</span>
             </label>
           ))}
         </div>
@@ -190,7 +266,9 @@ export function SettingsView() {
             type="button"
           >
             <RefreshCw size={16} />
-            {busyAction === "check-launcher-update" ? "Checking launcher..." : "Check launcher"}
+            {busyAction === "check-launcher-update"
+              ? t("settings.maintenance.checkLauncherBusy")
+              : t("common.actions.checkLauncher")}
           </button>
           <button
             className="button button--primary"
@@ -199,11 +277,13 @@ export function SettingsView() {
             type="button"
           >
             <RefreshCw size={16} />
-            {busyAction === "install-launcher-update" ? "Updating launcher..." : "Update launcher"}
+            {busyAction === "install-launcher-update"
+              ? t("settings.maintenance.updateLauncherBusy")
+              : t("common.actions.updateLauncher")}
           </button>
           <button className="button button--secondary" onClick={checkItemUpdates} type="button">
             <RefreshCw size={16} />
-            Check library items
+            {t("common.actions.checkLibraryItems")}
           </button>
         </div>
         <LauncherUpdatePanel progress={updateProgress} />
@@ -211,27 +291,27 @@ export function SettingsView() {
 
       <section className="settings-section">
         <div>
-          <p className="eyebrow">Privacy</p>
-          <h2>No telemetry</h2>
+          <p className="eyebrow">{t("settings.privacy.eyebrow")}</p>
+          <h2>{t("settings.privacy.title")}</h2>
         </div>
         <div className="privacy-panel">
           <ShieldCheck size={24} />
           <div>
-            <strong>Accounts, analytics and crash uploads are disabled.</strong>
-            <p>{snapshot.config.privacy.networkAccessNote}</p>
+            <strong>{t("settings.privacy.headline")}</strong>
+            <p>{t("settings.privacy.body")}</p>
           </div>
         </div>
         <dl className="spec-list spec-list--stacked">
           <div>
-            <dt>Data</dt>
+            <dt>{t("common.labels.data")}</dt>
             <dd>{snapshot.dataDir}</dd>
           </div>
           <div>
-            <dt>Cache</dt>
+            <dt>{t("common.labels.cache")}</dt>
             <dd>{snapshot.cacheDir}</dd>
           </div>
           <div>
-            <dt>Logs</dt>
+            <dt>{t("common.labels.logs")}</dt>
             <dd>{snapshot.logsDir}</dd>
           </div>
         </dl>

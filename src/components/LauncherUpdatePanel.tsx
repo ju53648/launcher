@@ -1,3 +1,5 @@
+import { useI18n } from "../i18n";
+import { describeLauncherUpdateProgress } from "../services/appUpdater";
 import { ProgressBar } from "./ProgressBar";
 import type { LauncherUpdateProgress } from "../services/appUpdater";
 
@@ -6,6 +8,8 @@ export function LauncherUpdatePanel({
 }: {
   progress: LauncherUpdateProgress;
 }) {
+  const { t } = useI18n();
+
   if (progress.status === "idle") {
     return null;
   }
@@ -19,8 +23,8 @@ export function LauncherUpdatePanel({
       aria-live="polite"
     >
       <div className="install-panel__header">
-        <p className="eyebrow">Launcher update</p>
-        <h2>{progress.message}</h2>
+        <p className="eyebrow">{t("updater.title")}</p>
+        <h2>{describeLauncherUpdateProgress(progress, t)}</h2>
       </div>
       {!isError && <ProgressBar value={progress.progress} />}
     </div>

@@ -7,8 +7,10 @@ import type {
 import {
   collectionStatusLabel,
   installStateLabel,
+  jobStatusLabel,
   libraryStatusLabel
 } from "../domain/format";
+import { useI18n } from "../i18n";
 
 type BadgeTone = "neutral" | "good" | "warn" | "danger" | "active";
 
@@ -19,15 +21,16 @@ export function StatusBadge({
   status: ItemInstallState | ItemCollectionStatus | LibraryStatus | JobStatus;
   type?: "install" | "collection" | "library" | "job";
 }) {
+  const { t } = useI18n();
   const tone = getTone(status);
   const label =
     type === "library"
-      ? libraryStatusLabel(status as LibraryStatus)
+      ? libraryStatusLabel(status as LibraryStatus, t)
       : type === "collection"
-        ? collectionStatusLabel(status as ItemCollectionStatus)
+        ? collectionStatusLabel(status as ItemCollectionStatus, t)
       : type === "job"
-        ? status
-        : installStateLabel(status as ItemInstallState);
+        ? jobStatusLabel(status as JobStatus, t)
+        : installStateLabel(status as ItemInstallState, t);
 
   return <span className={`status-badge status-badge--${tone}`}>{label}</span>;
 }

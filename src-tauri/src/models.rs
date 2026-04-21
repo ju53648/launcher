@@ -1,10 +1,12 @@
 use chrono::{DateTime, Utc};
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Deserializer, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct LauncherConfig {
     pub onboarding_completed: bool,
+    #[serde(default)]
+    pub language: Option<AppLanguage>,
     pub libraries: Vec<LibraryFolder>,
     pub default_library_id: Option<String>,
     pub check_launcher_updates_on_start: bool,
@@ -12,6 +14,14 @@ pub struct LauncherConfig {
     pub install_behavior: InstallBehavior,
     pub manifest_sources: Vec<ManifestSourceConfig>,
     pub privacy: PrivacyConfig,
+}
+
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "lowercase")]
+pub enum AppLanguage {
+    En,
+    De,
+    Pl,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -79,6 +89,63 @@ pub enum CatalogItemType {
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
+pub struct ContentTag {
+    pub id: String,
+    #[serde(default = "default_tag_weight")]
+    pub weight: u8,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(untagged)]
+enum ContentTagSeed {
+    Structured(ContentTag),
+    Legacy(String),
+}
+
+fn deserialize_content_tags<'de, D>(deserializer: D) -> std::result::Result<Vec<ContentTag>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let tags = Vec::<ContentTagSeed>::deserialize(deserializer)?;
+    Ok(tags
+        .into_iter()
+        .filter_map(|tag| match tag {
+            ContentTagSeed::Structured(mut tag) => {
+                tag.id = normalize_tag_id(&tag.id);
+                (!tag.id.is_empty()).then_some(tag)
+            }
+            ContentTagSeed::Legacy(id) if !id.trim().is_empty() => Some(ContentTag {
+                id: normalize_tag_id(&id),
+                weight: 1,
+            }),
+            _ => None,
+        })
+        .collect())
+}
+
+fn default_tag_weight() -> u8 {
+    1
+}
+
+fn normalize_tag_id(value: &str) -> String {
+    let mut normalized = String::with_capacity(value.len());
+    let mut previous_was_separator = false;
+
+    for character in value.trim().chars() {
+        if character.is_ascii_alphanumeric() {
+            normalized.push(character.to_ascii_lowercase());
+            previous_was_separator = false;
+        } else if !normalized.is_empty() && !previous_was_separator {
+            normalized.push('_');
+            previous_was_separator = true;
+        }
+    }
+
+    normalized.trim_matches('_').to_string()
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
 pub struct CatalogItemRecord {
     pub id: String,
     #[serde(default)]
@@ -89,8 +156,8 @@ pub struct CatalogItemRecord {
     pub release_date: String,
     #[serde(default)]
     pub categories: Vec<String>,
-    #[serde(default)]
-    pub tags: Vec<String>,
+    #[serde(default, deserialize_with = "deserialize_content_tags")]
+    pub tags: Vec<ContentTag>,
     pub cover_image: String,
     pub banner_image: String,
     pub icon_image: String,
@@ -156,8 +223,8 @@ pub struct ContentManifest {
     pub release_date: String,
     #[serde(default)]
     pub categories: Vec<String>,
-    #[serde(default)]
-    pub tags: Vec<String>,
+    #[serde(default, deserialize_with = "deserialize_content_tags")]
+    pub tags: Vec<ContentTag>,
     pub cover_image: String,
     pub banner_image: String,
     pub icon_image: String,

@@ -1,11 +1,34 @@
-import type { ContentView, InstallJob, LauncherSnapshot } from "./types";
+import { getTagCategory, TAG_CATEGORY_ORDER } from "./tags";
+import type {
+  ContentView,
+  InstallJob,
+  LauncherSnapshot,
+  TagCategoryId
+} from "./types";
 
 export interface ActivityEvent {
   id: string;
   item: ContentView;
-  kind: "added" | "installed" | "launched" | "error";
-  label: string;
+  kind: "added" | "installed" | "updated" | "launched" | "error";
   at: string;
+}
+
+export interface RecommendationMatch {
+  id: string;
+  sourceWeight: number;
+  itemWeight: number;
+  score: number;
+}
+
+export interface RecommendationEntry {
+  item: ContentView;
+  score: number;
+  matches: RecommendationMatch[];
+}
+
+export interface ShopTagGroup {
+  category: TagCategoryId;
+  tags: string[];
 }
 
 export function getDiscoverableItems(snapshot: LauncherSnapshot) {
@@ -60,7 +83,6 @@ export function buildRecentActivity(snapshot: LauncherSnapshot, limit = 8): Acti
         id: `${item.catalog.id}:added:${item.collectionEntry.addedAt}`,
         item,
         kind: "added",
-        label: "Added to Library",
         at: item.collectionEntry.addedAt
       });
     }
@@ -68,11 +90,11 @@ export function buildRecentActivity(snapshot: LauncherSnapshot, limit = 8): Acti
       activity.push({
         id: `${item.catalog.id}:installed:${item.installed.installedAt}`,
         item,
-        kind: "installed",
-        label:
-          item.availableUpdate?.currentVersion && item.availableUpdate.currentVersion !== item.installed.installedVersion
-            ? "Updated locally"
-            : "Installed locally",
+        kind:
+          item.availableUpdate?.currentVersion &&
+          item.availableUpdate.currentVersion !== item.installed.installedVersion
+            ? "updated"
+            : "installed",
         at: item.installed.installedAt
       });
     }
@@ -82,7 +104,6 @@ export function buildRecentActivity(snapshot: LauncherSnapshot, limit = 8): Acti
         id: `${item.catalog.id}:launched:${usedAt}`,
         item,
         kind: "launched",
-        label: "Opened recently",
         at: usedAt
       });
     }
@@ -91,7 +112,6 @@ export function buildRecentActivity(snapshot: LauncherSnapshot, limit = 8): Acti
         id: `${item.catalog.id}:error:${item.collectionEntry.lastErrorAt}`,
         item,
         kind: "error",
-        label: "Needs attention",
         at: item.collectionEntry.lastErrorAt
       });
     }
@@ -111,63 +131,161 @@ export function getShopCategories(snapshot: LauncherSnapshot) {
   ).sort((left, right) => left.localeCompare(right));
 }
 
-export function getShopTags(snapshot: LauncherSnapshot, limit = 12) {
-  const frequencies = new Map<string, number>();
+export function getShopTagGroups(snapshot: LauncherSnapshot, limitPerGroup = 6) {
+  const grouped = new Map<TagCategoryId, Map<string, number>>();
+
+  for (const category of TAG_CATEGORY_ORDER) {
+    grouped.set(category, new Map<string, number>());
+  }
+
   for (const item of getDiscoverableItems(snapshot)) {
     for (const tag of item.catalog.tags) {
-      frequencies.set(tag, (frequencies.get(tag) ?? 0) + 1);
+      const category = getTagCategory(tag.id);
+      if (!category) continue;
+
+      const categoryTags = grouped.get(category);
+      if (!categoryTags) continue;
+      categoryTags.set(tag.id, (categoryTags.get(tag.id) ?? 0) + tag.weight);
     }
   }
 
-  return [...frequencies.entries()]
-    .sort((left, right) => right[1] - left[1] || left[0].localeCompare(right[0]))
-    .slice(0, limit)
-    .map(([tag]) => tag);
+  return TAG_CATEGORY_ORDER.map((category) => ({
+    category,
+    tags: [...(grouped.get(category)?.entries() ?? [])]
+      .sort((left, right) => right[1] - left[1] || left[0].localeCompare(right[0]))
+      .slice(0, limitPerGroup)
+      .map(([tag]) => tag)
+  })).filter((group) => group.tags.length > 0);
 }
 
-export function getRecommendedItems(snapshot: LauncherSnapshot, limit = 4) {
+export function getForYouRecommendations(snapshot: LauncherSnapshot, limit = 4) {
   const libraryItems = getLibraryItems(snapshot);
-  const discoverableItems = getDiscoverableItems(snapshot).filter((item) => !item.state.added);
   if (libraryItems.length === 0) {
     return [];
   }
 
-  const tagWeights = new Map<string, number>();
-  const categoryWeights = new Map<string, number>();
-  const ownedTypes = new Set(libraryItems.map((item) => item.catalog.itemType));
+  return recommendItems(
+    getDiscoverableItems(snapshot),
+    buildTagProfile(libraryItems),
+    new Set(libraryItems.map((item) => item.catalog.id)),
+    limit
+  );
+}
 
-  for (const item of libraryItems) {
-    for (const tag of item.catalog.tags) {
-      tagWeights.set(tag, (tagWeights.get(tag) ?? 0) + 1);
-    }
-    for (const category of item.catalog.categories) {
-      categoryWeights.set(category, (categoryWeights.get(category) ?? 0) + 1);
-    }
+export function getBecauseYouPlayedRecommendations(snapshot: LauncherSnapshot, limit = 3) {
+  const sourceItem = getRecentlyUsedItems(snapshot, 1)[0] ?? null;
+  if (!sourceItem) {
+    return { sourceItem: null, recommendations: [] as RecommendationEntry[] };
   }
 
-  return discoverableItems
-    .map((item) => ({
-      item,
-      score:
-        item.catalog.tags.reduce((total, tag) => total + (tagWeights.get(tag) ?? 0), 0) * 2 +
-        item.catalog.categories.reduce(
-          (total, category) => total + (categoryWeights.get(category) ?? 0),
-          0
-        ) +
-        (ownedTypes.has(item.catalog.itemType) ? 1 : 0)
-    }))
-    .filter((entry) => entry.score > 0)
+  const libraryIds = new Set(getLibraryItems(snapshot).map((item) => item.catalog.id));
+  return {
+    sourceItem,
+    recommendations: recommendItems(
+      getDiscoverableItems(snapshot),
+      buildTagProfile([sourceItem]),
+      libraryIds,
+      limit
+    )
+  };
+}
+
+export function getSimilarItems(snapshot: LauncherSnapshot, itemId: string, limit = 3) {
+  const sourceItem = snapshot.items.find((item) => item.catalog.id === itemId);
+  if (!sourceItem) {
+    return [];
+  }
+
+  return recommendItems(
+    getDiscoverableItems(snapshot),
+    buildTagProfile([sourceItem]),
+    new Set([itemId]),
+    limit
+  );
+}
+
+export function getRecommendedItems(snapshot: LauncherSnapshot, limit = 4) {
+  return getForYouRecommendations(snapshot, limit).map((entry) => entry.item);
+}
+
+export function getPrimaryDownload(snapshot: LauncherSnapshot): InstallJob | null {
+  return (
+    getActiveJobs(snapshot).sort((left, right) => toTime(left.startedAt) - toTime(right.startedAt))[0] ??
+    null
+  );
+}
+
+function recommendItems(
+  candidates: ContentView[],
+  profile: Map<string, number>,
+  excludedItemIds: Set<string>,
+  limit: number
+): RecommendationEntry[] {
+  if (profile.size === 0) {
+    return [];
+  }
+
+  return candidates
+    .filter((item) => !excludedItemIds.has(item.catalog.id))
+    .map((item) => scoreCandidate(item, profile))
+    .filter((entry): entry is RecommendationEntry => entry !== null)
     .sort(
       (left, right) =>
         right.score - left.score ||
         left.item.catalog.name.localeCompare(right.item.catalog.name)
     )
-    .slice(0, limit)
-    .map((entry) => entry.item);
+    .slice(0, limit);
 }
 
-export function getPrimaryDownload(snapshot: LauncherSnapshot): InstallJob | null {
-  return getActiveJobs(snapshot).sort((left, right) => toTime(left.startedAt) - toTime(right.startedAt))[0] ?? null;
+function buildTagProfile(items: ContentView[]) {
+  const profile = new Map<string, number>();
+
+  for (const item of items) {
+    for (const tag of item.catalog.tags) {
+      profile.set(tag.id, (profile.get(tag.id) ?? 0) + tag.weight);
+    }
+  }
+
+  return profile;
+}
+
+function scoreCandidate(
+  item: ContentView,
+  profile: Map<string, number>
+): RecommendationEntry | null {
+  const matches: RecommendationMatch[] = [];
+
+  for (const tag of item.catalog.tags) {
+    const sourceWeight = profile.get(tag.id) ?? 0;
+    if (sourceWeight <= 0) {
+      continue;
+    }
+
+    matches.push({
+      id: tag.id,
+      sourceWeight,
+      itemWeight: tag.weight,
+      score: sourceWeight * tag.weight
+    });
+  }
+
+  matches.sort(
+    (left, right) =>
+      right.score - left.score ||
+      right.itemWeight - left.itemWeight ||
+      left.id.localeCompare(right.id)
+  );
+
+  const score = matches.reduce((total, match) => total + match.score, 0);
+  if (score <= 0) {
+    return null;
+  }
+
+  return {
+    item,
+    score,
+    matches
+  };
 }
 
 function lastUsedAt(item: ContentView) {

@@ -14,9 +14,9 @@ use crate::{
     libraries::probe_libraries,
     manifest::load_all_manifests,
     models::{
-        CatalogItemRecord, CatalogItemType, CollectionEntry, CollectionStateDb,
-        ContentManifest, ContentStateFlags, ContentUpdateInfo, ContentView, InstallBehavior,
-        InstallJob, InstalledItem, InstalledItemsDb, InstalledStatus, ItemCollectionStatus,
+        CatalogItemRecord, CatalogItemType, CollectionEntry, CollectionStateDb, ContentManifest,
+        ContentStateFlags, ContentTag, ContentUpdateInfo, ContentView, InstallBehavior, InstallJob,
+        InstalledItem, InstalledItemsDb, InstalledStatus, ItemCollectionStatus,
         ItemInstallState, LauncherConfig, LauncherSnapshot, LauncherUpdateState,
         ManifestSourceConfig, ManifestSourceType, PrivacyConfig,
     },
@@ -663,11 +663,14 @@ fn placeholder_catalog_record(item_id: &str) -> CatalogItemRecord {
         id: item_id.into(),
         item_type: CatalogItemType::Game,
         name: fallback_item_name(item_id),
-        description: "This item is currently unavailable in the Shop, but it remains in your local collection.".into(),
+        description: "This library entry is currently unavailable in the Shop, but it remains in your local collection.".into(),
         developer: "Lumorix".into(),
         release_date: "Unavailable".into(),
         categories: vec!["Unavailable".into()],
-        tags: vec!["Offline".into()],
+        tags: vec![ContentTag {
+            id: "offline".into(),
+            weight: 1,
+        }],
         cover_image: String::new(),
         banner_image: String::new(),
         icon_image: String::new(),
@@ -744,6 +747,7 @@ fn default_installed_items_db() -> InstalledItemsDb {
 fn default_config() -> LauncherConfig {
     LauncherConfig {
         onboarding_completed: false,
+        language: None,
         libraries: vec![],
         default_library_id: None,
         check_launcher_updates_on_start: false,

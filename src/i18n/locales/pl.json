@@ -1,0 +1,525 @@
+{
+  "common": {
+    "brandName": "Lumorix",
+    "brandProduct": "Launcher",
+    "progress": "Postep",
+    "never": "Nigdy",
+    "notAvailable": "Niedostepne",
+    "noRemoteSource": "Brak zrodla zdalnego",
+    "languages": {
+      "en": "English",
+      "de": "Deutsch",
+      "pl": "Polski"
+    },
+    "messages": {
+      "noAccountNoAdsLocalFirst": "Bez konta. Bez reklam. Lokalnie.",
+      "applyImmediately": "Zmiany sa stosowane natychmiast i pozostaja aktywne po ponownym uruchomieniu.",
+      "restartNotRequired": "Restart nie jest wymagany."
+    },
+    "actions": {
+      "save": "Zapisz",
+      "cancel": "Anuluj",
+      "close": "Zamknij",
+      "details": "Szczegoly",
+      "install": "Instaluj",
+      "launch": "Uruchom",
+      "update": "Aktualizuj",
+      "repair": "Napraw",
+      "verifyRepair": "Sprawdz / Napraw",
+      "uninstall": "Odinstaluj",
+      "showFiles": "Pokaz pliki",
+      "chooseFolder": "Wybierz folder",
+      "useRecommended": "Uzyj zalecanej lokalizacji",
+      "addLibrary": "Dodaj biblioteke",
+      "addToLibrary": "Dodaj do biblioteki",
+      "addingToLibrary": "Dodawanie...",
+      "viewDownload": "Pokaz pobieranie",
+      "viewDownloads": "Pokaz pobrania",
+      "viewLibrary": "Pokaz biblioteke",
+      "openLibrary": "Otworz biblioteke",
+      "openCollection": "Otworz kolekcje",
+      "browseShop": "Przegladaj sklep",
+      "openDownloads": "Otworz pobrania",
+      "makeDefault": "Ustaw jako domyslna",
+      "checkUpdates": "Sprawdz aktualizacje",
+      "checkForUpdates": "Sprawdz aktualizacje",
+      "installUpdate": "Zainstaluj aktualizacje",
+      "downloadAndInstall": "Pobierz i zainstaluj",
+      "clearFinished": "Wyczysc zakonczone",
+      "checkLauncher": "Sprawdz launcher",
+      "updateLauncher": "Aktualizuj launcher",
+      "checkLibraryItems": "Sprawdz elementy biblioteki",
+      "enterLumorix": "Uruchom Lumorix",
+      "openShop": "Otworz sklep",
+      "installingShort": "Instalowanie...",
+      "checkingShort": "Sprawdzanie...",
+      "updatingShort": "Aktualizowanie..."
+    },
+    "labels": {
+      "name": "Nazwa",
+      "path": "Sciezka",
+      "current": "Obecna",
+      "latest": "Najnowsza",
+      "checked": "Sprawdzono",
+      "version": "Wersja",
+      "type": "Typ",
+      "installSize": "Rozmiar instalacji",
+      "release": "Wydanie",
+      "executable": "Plik wykonywalny",
+      "discoverable": "Widocznosc",
+      "location": "Lokalizacja",
+      "installed": "Zainstalowano",
+      "verified": "Sprawdzono",
+      "lastOpened": "Ostatnio otwarte",
+      "data": "Dane",
+      "cache": "Cache",
+      "logs": "Logi",
+      "lastSeen": "Ostatnio widziana",
+      "active": "Aktywne",
+      "queued": "W kolejce",
+      "history": "Historia",
+      "releaseNotes": "Informacje o wydaniu",
+      "changelog": "Dziennik zmian",
+      "overview": "Przeglad",
+      "primaryLibrary": "Biblioteka glowna",
+      "matchingTags": "Pasuje do {{tags}}"
+    }
+  },
+  "status": {
+    "itemType": {
+      "game": "Gra",
+      "tool": "Narzędzie",
+      "project": "Projekt"
+    },
+    "install": {
+      "notInstalled": "Nie zainstalowano",
+      "installing": "Instalowanie",
+      "installed": "Zainstalowano",
+      "updateAvailable": "Aktualizacja dostepna",
+      "error": "Wymaga naprawy"
+    },
+    "collection": {
+      "notAdded": "Poza biblioteka",
+      "added": "W bibliotece",
+      "installed": "Zainstalowano",
+      "updateAvailable": "Aktualizacja dostepna",
+      "error": "Wymaga naprawy"
+    },
+    "library": {
+      "available": "Dostepna",
+      "missing": "Brak dysku",
+      "inaccessible": "Brak dostepu"
+    },
+    "job": {
+      "queued": "W kolejce",
+      "running": "Trwa",
+      "completed": "Zakonczono",
+      "cancelled": "Anulowano",
+      "failed": "Nieudane"
+    },
+    "phase": {
+      "queued": "W kolejce",
+      "preparing": "Przygotowywanie",
+      "downloading": "Pobieranie",
+      "verifying": "Weryfikacja",
+      "installing": "Instalowanie",
+      "finalizing": "Finalizacja",
+      "completed": "Zakonczono",
+      "cancelled": "Anulowano",
+      "failed": "Nieudane"
+    },
+    "operation": {
+      "install": "Instalacja",
+      "update": "Aktualizacja",
+      "repair": "Naprawa",
+      "move": "Przenoszenie"
+    }
+  },
+  "errors": {
+    "title": "Blad launchera",
+    "dismiss": "Zamknij blad",
+    "codes": {
+      "validation": "Blad walidacji",
+      "storage": "Blad zapisu",
+      "manifest": "Blad manifestu",
+      "install": "Blad instalacji",
+      "network": "Blad sieci",
+      "process": "Blad procesu"
+    }
+  },
+  "app": {
+    "stateUnavailable": {
+      "title": "Stan launchera jest niedostepny",
+      "body": "Lumorix nie mogl zainicjalizowac lokalnego magazynu danych. Sprawdz uprawnienia folderu i uruchom aplikacje ponownie."
+    },
+    "itemNotFound": {
+      "title": "Nie znaleziono elementu",
+      "body": "Ten wpis katalogu nie jest juz dostepny."
+    },
+    "manifestWarning": {
+      "multiple": "{{message}} (laczenie {{count}} problemow z manifestem)"
+    }
+  },
+  "shell": {
+    "navigation": "Nawigacja glowna",
+    "nav": {
+      "home": "Start",
+      "shop": "Sklep",
+      "library": "Biblioteka",
+      "downloads": "Pobrania",
+      "settings": "Ustawienia",
+      "about": "O programie"
+    },
+    "subtitle": {
+      "home": "Osobisty pulpit",
+      "shop": "Odkrywaj",
+      "library": "Twoja kolekcja",
+      "downloads": "Instalacje i aktualizacje",
+      "settings": "Preferencje",
+      "about": "Lumorix Launcher",
+      "item": "Szczegoly elementu",
+      "fallback": "Lumorix"
+    },
+    "title": {
+      "home": "Start",
+      "shop": "Sklep",
+      "library": "Biblioteka",
+      "downloads": "Pobrania",
+      "settings": "Ustawienia",
+      "about": "O Lumorix",
+      "itemFallback": "Element",
+      "fallback": "Lumorix"
+    },
+    "meta": {
+      "shop": {
+        "one": "{{count}} dostepny element",
+        "few": "{{count}} dostepne elementy",
+        "many": "{{count}} dostepnych elementow",
+        "other": "{{count}} dostepnych elementow"
+      },
+      "library": {
+        "one": "{{count}} element w kolekcji",
+        "few": "{{count}} elementy w kolekcji",
+        "many": "{{count}} elementow w kolekcji",
+        "other": "{{count}} elementow w kolekcji"
+      },
+      "downloadsActive": {
+        "one": "{{count}} aktywne zadanie",
+        "few": "{{count}} aktywne zadania",
+        "many": "{{count}} aktywnych zadan",
+        "other": "{{count}} aktywnych zadan"
+      },
+      "downloadsClear": "Kolejka jest pusta",
+      "fallback": {
+        "one": "{{count}} odkrywalny element",
+        "few": "{{count}} odkrywalne elementy",
+        "many": "{{count}} odkrywalnych elementow",
+        "other": "{{count}} odkrywalnych elementow"
+      }
+    }
+  },
+  "home": {
+    "hero": {
+      "eyebrow": "Start",
+      "title": "Twoje lokalne centrum kontroli Lumorix",
+      "body": "Sledz swoja kolekcje, wracaj tam, gdzie skonczylas lub skonczyles, i zarzadzaj instalacjami oraz aktualizacjami launchera bez kont, reklam i zbednych przeszkod."
+    },
+    "updateCard": {
+      "label": "Stan launchera",
+      "lastChecked": "Ostatnio sprawdzono {{date}}",
+      "updateReady": "Aktualizacja {{version}} jest gotowa",
+      "versionAvailable": "Wersja {{version}} jest dostepna",
+      "runningVersion": "Uruchomiona v{{version}}"
+    },
+    "metrics": {
+      "collection": "Kolekcja",
+      "collectionDescription": {
+        "one": "{{count}} lokalnie zainstalowany",
+        "few": "{{count}} lokalnie zainstalowane",
+        "many": "{{count}} lokalnie zainstalowanych",
+        "other": "{{count}} lokalnie zainstalowanych"
+      },
+      "downloads": "Pobrania",
+      "downloadsDescription": {
+        "one": "{{count}} aktywny transfer",
+        "few": "{{count}} aktywne transfery",
+        "many": "{{count}} aktywnych transferow",
+        "other": "{{count}} aktywnych transferow"
+      },
+      "diskUsage": "Uzycie dysku",
+      "diskDescription": {
+        "one": "{{count}} zarejestrowana biblioteka",
+        "few": "{{count}} zarejestrowane biblioteki",
+        "many": "{{count}} zarejestrowanych bibliotek",
+        "other": "{{count}} zarejestrowanych bibliotek"
+      },
+      "updates": "Aktualizacje",
+      "updatesDescription": {
+        "one": "{{count}} element wymaga aktualizacji",
+        "few": "{{count}} elementy wymagaja aktualizacji",
+        "many": "{{count}} elementow wymaga aktualizacji",
+        "other": "{{count}} elementow wymaga aktualizacji"
+      }
+    },
+    "activeTransfers": {
+      "eyebrow": "Pobrania",
+      "title": "Aktywne transfery"
+    },
+    "recentActivity": {
+      "eyebrow": "Ostatnia aktywnosc",
+      "title": "Co zmienilo sie ostatnio",
+      "empty": "Na razie brak aktywnosci. Dodaj cos ze Sklepu, aby zaczac.",
+      "added": "Dodano do biblioteki",
+      "installed": "Zainstalowano lokalnie",
+      "updated": "Zaktualizowano lokalnie",
+      "launched": "Otwierano niedawno",
+      "error": "Wymaga uwagi"
+    },
+    "recentlyUsed": {
+      "eyebrow": "Ostatnio uzywane",
+      "title": "Wroc od razu",
+      "empty": "Uruchom zainstalowany element, a pojawi sie tutaj do szybkiego dostepu.",
+      "used": "Uzyto {{date}}"
+    },
+    "recentInstalls": {
+      "eyebrow": "Ostatnie instalacje",
+      "title": "Gotowe na tym urzadzeniu",
+      "empty": "Zainstalowane elementy pojawia sie tutaj po zakonczeniu pobierania lub konfiguracji.",
+      "installed": "Zainstalowano {{date}}"
+    },
+    "nextSteps": {
+      "eyebrow": "Stan kolekcji",
+      "title": "Nastepne kroki",
+      "discoverTitle": "Odkryj wiecej elementow",
+      "discoverBody": "Przegladaj nowe tresci i dodawaj je do biblioteki.",
+      "manageTitle": "Zarzadzaj instalacjami",
+      "manageBody": "Uruchamiaj, aktualizuj, naprawiaj lub odinstalowuj bezposrednio ze swojej kolekcji.",
+      "settingsTitle": "Dostosuj ustawienia lokalne",
+      "settingsBody": "Sprawdz foldery bibliotek, ustawienia prywatnosci i zachowanie aktualizacji."
+    }
+  },
+  "shop": {
+    "intro": {
+      "eyebrow": "Odkrywaj",
+      "title": "Znajdz tresci Lumorix warte zachowania lokalnie",
+      "body": "Sklep to warstwa odkrywania. Dodaj to, czego chcesz, do biblioteki, a potem instaluj lub aktualizuj na swoich zasadach."
+    },
+    "discoverableCount": {
+      "one": "{{count}} odkrywalny element",
+      "few": "{{count}} odkrywalne elementy",
+      "many": "{{count}} odkrywalnych elementow",
+      "other": "{{count}} odkrywalnych elementow"
+    },
+    "recommendations": {
+      "forYouEyebrow": "Dla ciebie",
+      "forYouTitle": "Dopasowane do twojej biblioteki",
+      "forYouBody": "Wazone nakladanie tagow z biblioteki ksztaltuje te propozycje.",
+      "becausePlayedEyebrow": "Ostatnia sesja",
+      "becausePlayedTitle": "Poniewaz grales w {{name}}",
+      "becausePlayedBody": "Te propozycje dziela najmocniejsze ustrukturyzowane tagi z twoja ostatnia sesja."
+    },
+    "filters": {
+      "searchPlaceholder": "Szukaj po nazwie, tworcach, tagu lub kategorii",
+      "allTypes": "Wszystkie typy",
+      "categories": "Kategorie",
+      "tags": "Tagi",
+      "all": "Wszystkie"
+    },
+    "emptyState": {
+      "emptyTitle": "Sklep jest pusty",
+      "emptyBody": "Wlacz zrodlo manifestow albo dodaj manifesty katalogu, aby udostepnic tutaj tresci.",
+      "filteredTitle": "Zaden element nie pasuje do tych filtrow",
+      "filteredBody": "Sprobuj innego wyszukiwania, wyczysc filtr lub wybierz inna kategorie."
+    },
+    "results": {
+      "eyebrow": "Wyniki",
+      "shown": "{{count}} pokazano"
+    },
+    "card": {
+      "unavailable": "Niedostepne",
+      "viewInLibrary": "Pokaz w bibliotece"
+    }
+  },
+  "library": {
+    "filters": {
+      "all": "Wszystkie",
+      "installed": "Zainstalowane",
+      "added": "Gotowe do instalacji",
+      "updateAvailable": "Aktualizacje",
+      "error": "Wymaga naprawy"
+    },
+    "emptyState": {
+      "emptyTitle": "Twoja biblioteka jest pusta",
+      "emptyBody": "Dodaj cos ze Sklepu, aby zaczac budowac kolekcje Lumorix. Po dodaniu element pozostanie tutaj do instalacji, uruchamiania, aktualizacji i naprawy.",
+      "filteredTitle": "Brak elementow dla tego filtra",
+      "filteredBody": "Sprobuj innego filtra albo wroc do Sklepu, aby dodac wiecej tresci."
+    }
+  },
+  "downloads": {
+    "emptyState": {
+      "title": "Pobrania sa teraz spokojne",
+      "body": "Instalacje, aktualizacje, naprawy i przenosiny pojawia sie tutaj wraz z postepem na zywo i historia."
+    },
+    "summary": {
+      "active": "Aktywne",
+      "activeDescription": {
+        "one": "{{count}} zadanie w toku",
+        "few": "{{count}} zadania w toku",
+        "many": "{{count}} zadan w toku",
+        "other": "{{count}} zadan w toku"
+      },
+      "queued": "W kolejce",
+      "queuedDescription": "Czeka na swoja kolej",
+      "history": "Historia",
+      "historyDescription": "Zakonczone, anulowane lub nieudane"
+    },
+    "toolbar": {
+      "eyebrow": "Transfery i instalacje",
+      "title": "{{count}} zadan lacznie"
+    },
+    "sections": {
+      "activeEyebrow": "Aktywne teraz",
+      "activeTitle": "Prace w toku",
+      "historyEyebrow": "Najnowsza historia",
+      "historyTitle": "Zakonczone zadania"
+    },
+    "row": {
+      "progress": "{{operation}} / {{phase}}"
+    }
+  },
+  "about": {
+    "hero": {
+      "body": "Lokalna podstawa launchera Windows przygotowana z mysla o prywatnych instalacjach, swiadomych aktualizacjach i pelnej lokalnej kontroli nad grami, narzedziami i projektami Lumorix."
+    },
+    "updateState": {
+      "eyebrow": "Stan aktualizacji launchera",
+      "title": "Wersja"
+    },
+    "productChangelog": {
+      "eyebrow": "Dziennik zmian produktu"
+    },
+    "privacy": {
+      "title": "Podstawa prywatnosci",
+      "body": "Brak systemu logowania, brak pakietu analitycznego i brak automatycznej sciezki wysylania danych."
+    }
+  },
+  "onboarding": {
+    "eyebrow": "Pierwsza konfiguracja",
+    "title": "Twoje tresci Lumorix pozostaja na twoim komputerze.",
+    "body": "Wybierz miejsce instalacji tresci Lumorix. Bez konta, bez uzaleznienia od chmury, bez ukrytej analityki. Dostep do sieci jest zarezerwowany dla manifestow, pobran i jawnie uruchamianych sprawdzen aktualizacji.",
+    "privacyPoints": {
+      "config": "Lokalna konfiguracja i metadane instalacji",
+      "libraries": "Pozniej mozna dodac wiele bibliotek",
+      "updates": "Opcjonalne sprawdzanie aktualizacji uruchamiane przez uzytkownika"
+    }
+  },
+  "settings": {
+    "language": {
+      "eyebrow": "Jezyk",
+      "title": "Jezyk launchera",
+      "description": "Wybierz jezyk launchera. Mozesz go zmienic w dowolnym momencie.",
+      "helper": "Zmiany sa stosowane natychmiast i zapisywane lokalnie na tym urzadzeniu.",
+      "active": "Aktywny",
+      "switchNow": "Zmien teraz"
+    },
+    "storage": {
+      "eyebrow": "Magazyn",
+      "title": "Biblioteki",
+      "defaultNamePlaceholder": "Glowna",
+      "defaultChip": "Domyslna",
+      "saveLibrary": "Zapisz",
+      "lastSeen": "Ostatnio widziana: {{date}}",
+      "removeAria": "Usun biblioteke"
+    },
+    "maintenance": {
+      "eyebrow": "Konserwacja",
+      "title": "Aktualizacje i instalacje",
+      "toggles": {
+        "checkLauncherUpdatesOnStart": "Sprawdzaj aktualizacje launchera przy starcie",
+        "checkGameUpdatesOnStart": "Sprawdzaj aktualizacje elementow przy starcie",
+        "askForLibraryEachInstall": "Pytaj o biblioteke przy kazdej instalacji",
+        "createDesktopShortcuts": "Tworz skroty na pulpicie",
+        "keepDownloadCache": "Zachowaj cache pobran"
+      },
+      "checkLauncherBusy": "Sprawdzanie launchera...",
+      "updateLauncherBusy": "Aktualizowanie launchera..."
+    },
+    "privacy": {
+      "eyebrow": "Prywatnosc",
+      "title": "Brak telemetrii",
+      "headline": "Konta, analityka i wysylka raportow o awariach sa wylaczone.",
+      "body": "Siec jest uzywana tylko do sprawdzania manifestow, pobran oraz jawnie uruchamianych sprawdzen aktualizacji."
+    }
+  },
+  "detail": {
+    "phaseLabel": "{{operation}} / {{phase}}",
+    "discoverable": {
+      "yes": "Dostepne w Sklepie",
+      "no": "Tylko biblioteka"
+    },
+    "executableUnavailable": "Obecnie niedostepne",
+    "installedPanel": {
+      "notAdded": "Dodaj ten element do biblioteki przed instalacja.",
+      "notInstalled": "Dodano do biblioteki, ale jeszcze nie zainstalowano.",
+      "unavailable": "Ten element jest obecnie niedostepny w Sklepie i teraz nie mozna go ponownie zainstalowac."
+    },
+    "changelogEmpty": "Dla tego elementu nie ma obecnie dostepnego dziennika zmian.",
+    "similar": {
+      "eyebrow": "Podobne tytuly",
+      "title": "Wiecej takich",
+      "body": "Te rekomendacje wypadaja najwyzej przy wazonym nakladaniu tagow."
+    }
+  },
+  "installDialog": {
+    "eyebrow": "Pakiet instalacyjny",
+    "targetLabel": "Cel instalacji",
+    "noLibrariesTitle": "Brak dostepnych folderow bibliotek",
+    "noLibrariesBody": "Dodaj biblioteke w Ustawieniach albo przywroc jej dostepnosc przed instalacja tego elementu."
+  },
+  "updater": {
+    "title": "Aktualizacja launchera",
+    "statuses": {
+      "checking": "Sprawdzanie podpisanej wersji launchera...",
+      "available": "Aktualizacja {{version}} jest dostepna.",
+      "downloading": "Pobieranie podpisanej aktualizacji...",
+      "installing": "Instalowanie aktualizacji...",
+      "installed": "Aktualizacja zainstalowana. Przygotowywanie ponownego uruchomienia...",
+      "relaunching": "Ponowne uruchamianie Lumorix...",
+      "restartRequired": "Aktualizacja zostala zainstalowana, ale ponowne uruchomienie sie nie powiodlo. Uruchom Lumorix ponownie recznie.",
+      "none": "Brak dostepnej aktualizacji. Lumorix jest aktualny.",
+      "desktopOnly": "Aktualizacje w aplikacji sa dostepne tylko w wersji desktopowej.",
+      "error": "Aktualizator zakonczyl sie bledem: {{message}}"
+    }
+  },
+  "accessibility": {
+    "closeModal": "Zamknij",
+    "coverImage": "Okaldka {{name}}"
+  },
+  "taxonomy": {
+    "categories": {
+      "gameplay": "Rozgrywka",
+      "world": "Swiat",
+      "systems": "Systemy"
+    },
+    "tags": {
+      "arcade": "Arcade",
+      "survival": "Survival",
+      "horror": "Horror",
+      "shooter": "Strzelanka",
+      "sandbox": "Sandbox",
+      "open_world": "Otwarty swiat",
+      "island": "Wyspa",
+      "forest": "Las",
+      "city": "Miasto",
+      "lab": "Laboratorium",
+      "crafting": "Wytwarzanie",
+      "building": "Budowanie",
+      "exploration": "Eksploracja",
+      "utility": "Narzedzie",
+      "narrative": "Narracja",
+      "prototype": "Prototyp",
+      "offline": "Offline",
+      "local_first": "Lokalnie najpierw"
+    }
+  }
+}
