@@ -4,6 +4,7 @@ import {
   Home,
   Info,
   Library,
+  MessageSquare,
   ShoppingBag,
   Settings,
   ShieldCheck
@@ -18,6 +19,7 @@ export type AppRoute =
   | "shop"
   | "library"
   | "downloads"
+  | "socials"
   | "settings"
   | "about"
   | `item:${string}`;
@@ -30,6 +32,7 @@ const navItems: Array<{
   { route: "shop", icon: ShoppingBag },
   { route: "library", icon: Library },
   { route: "downloads", icon: Download },
+  { route: "socials", icon: MessageSquare },
   { route: "settings", icon: Settings },
   { route: "about", icon: Info }
 ];
@@ -130,6 +133,9 @@ function metaForRoute(
   if (route === "downloads") {
     return activeJobs > 0 ? t("shell.meta.downloadsActive", { count: activeJobs }) : t("shell.meta.downloadsClear");
   }
+  if (route === "socials") {
+    return t("shell.meta.socials");
+  }
   return t("shell.meta.fallback", { count: discoverableCount });
 }
 
@@ -147,6 +153,8 @@ function subtitleForRoute(
       return t("shell.subtitle.library");
     case "downloads":
       return t("shell.subtitle.downloads");
+    case "socials":
+      return t("shell.subtitle.socials");
     case "settings":
       return t("shell.subtitle.settings");
     case "about":
@@ -175,6 +183,8 @@ function titleForRoute(
       return t("shell.title.library");
     case "downloads":
       return t("shell.title.downloads");
+    case "socials":
+      return t("shell.title.socials");
     case "settings":
       return t("shell.title.settings");
     case "about":

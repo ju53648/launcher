@@ -1,15 +1,13 @@
 {
-  "version": "0.4.2",
-  "title": "Shop & Discovery Update",
-  "date": "2026-04-21",
+  "version": "0.4.3",
+  "title": "Shop Experience Upgrade",
+  "date": "2026-04-22",
   "notes": [
-    "New Shop system for discovering games and Lumorix projects",
-    "Clear separation between Shop and Library",
-    "Smart local recommendations based on your installed content",
-    "Structured tag system for better discovery and future scaling",
-    "Refactored core platform to support more than just games",
-    "Improved download, install, and update flows",
-    "More stable updater with better error handling",
-    "Cleaner and more consistent launcher UI"
+    "New featured section for highlighted Lumorix content",
+    "Improved Shop layout with better visual hierarchy",
+    "Enhanced GameCard UI and clearer status indicators",
+    "Reduced empty-state feeling with smarter layout",
+    "Improved hover effects and UI responsiveness",
+    "General polish and stability improvements"
   ]
 }

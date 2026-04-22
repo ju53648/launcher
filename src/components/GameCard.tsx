@@ -1,6 +1,7 @@
 import { Download, Play, Trash2, Wrench } from "lucide-react";
 
 import { formatBytes, formatDate, itemTypeLabel, jobProgressLabel } from "../domain/format";
+import { getGameStatus, getPrimaryGameAction } from "../domain/selectors";
 import { getTagLabel, sortTagsByWeight } from "../domain/tags";
 import type { ContentView } from "../domain/types";
 import { useI18n } from "../i18n";
@@ -28,7 +29,9 @@ export function GameCard({
 }) {
   const { locale, t } = useI18n();
   const manifest = item.manifest;
-  const isInstalled = Boolean(item.installed);
+  const gameStatus = getGameStatus(item);
+  const primaryAction = getPrimaryGameAction(item);
+  const isInstalled = gameStatus !== "notInstalled";
   const hasActiveJob = Boolean(item.activeJob);
   const canRemove = Boolean(item.collectionEntry) && !isInstalled && !hasActiveJob;
   const canUninstall = isInstalled && !hasActiveJob;
@@ -58,8 +61,7 @@ export function GameCard({
             </p>
           </div>
           <div className="game-card__badges">
-            <StatusBadge status={item.collectionStatus} type="collection" />
-            <StatusBadge status={item.installState} type="install" />
+            <StatusBadge status={gameStatus} type="game" />
           </div>
         </div>
 
@@ -116,25 +118,25 @@ export function GameCard({
 
         <div className="game-card__actions">
           <div className="game-card__primary-actions">
-            {isInstalled && (
+            {primaryAction === "launch" && (
               <button className="button button--primary" onClick={onLaunch} type="button">
                 <Play size={16} />
                 {t("common.actions.launch")}
               </button>
             )}
-            {item.installState === "notInstalled" && manifest && (
+            {primaryAction === "install" && manifest && (
               <button className="button button--primary" onClick={onInstall} type="button">
                 <Download size={16} />
                 {t("common.actions.install")}
               </button>
             )}
-            {item.installState === "updateAvailable" && (
+            {primaryAction === "update" && (
               <button className="button button--primary" onClick={onUpdate} type="button">
                 <Download size={16} />
                 {t("common.actions.update")}
               </button>
             )}
-            {item.installState === "error" && (
+            {primaryAction === "repair" && (
               <button className="button button--primary" onClick={onRepair} type="button">
                 <Wrench size={16} />
                 {t("common.actions.repair")}

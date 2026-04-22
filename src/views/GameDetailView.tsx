@@ -1,4 +1,4 @@
-import { Download, FolderOpen, Play, Plus, RefreshCw, Trash2, Wrench } from "lucide-react";
+import { ArrowLeft, Download, FolderOpen, Play, Plus, RefreshCw, Trash2, Wrench } from "lucide-react";
 import { useState } from "react";
 
 import { ConfirmDialog } from "../components/ConfirmDialog";
@@ -7,7 +7,7 @@ import { ProgressBar } from "../components/ProgressBar";
 import { RecommendationSection } from "../components/RecommendationSection";
 import { StatusBadge } from "../components/StatusBadge";
 import { formatBytes, formatDate, itemTypeLabel, jobProgressLabel } from "../domain/format";
-import { getSimilarItems } from "../domain/selectors";
+import { getGameStatus, getPrimaryGameAction, getSimilarItems } from "../domain/selectors";
 import { getTagLabel, sortTagsByWeight } from "../domain/tags";
 import type { ContentView } from "../domain/types";
 import { useI18n } from "../i18n";
@@ -42,6 +42,11 @@ export function GameDetailView({
   const manifest = item.manifest;
   const similarItems = getSimilarItems(snapshot, item.catalog.id, 3);
   const hasActiveJob = Boolean(item.activeJob);
+  const gameStatus = getGameStatus(item);
+  const primaryAction = getPrimaryGameAction(item);
+  const isInstalled = gameStatus !== "notInstalled";
+  const preferredReturnRoute: AppRoute =
+    item.collectionStatus === "notAdded" ? "shop" : "library";
 
   return (
     <div className="view-stack">
@@ -61,10 +66,19 @@ export function GameDetailView({
               </div>
             )}
             <div>
+              <button
+                className="button button--ghost detail-back"
+                onClick={() => setRoute(preferredReturnRoute)}
+                type="button"
+              >
+                <ArrowLeft size={16} />
+                {t("common.actions.back")}
+              </button>
               <p className="eyebrow">
                 {item.catalog.developer} / {itemTypeLabel(item.catalog.itemType, t)}
               </p>
               <h2>{item.catalog.name}</h2>
+              <p className="detail-hero__tagline">{item.catalog.description}</p>
               <div className="tag-row">
                 {item.catalog.categories.map((category) => (
                   <span key={category}>{category}</span>
@@ -76,8 +90,7 @@ export function GameDetailView({
             </div>
           </div>
           <div className="detail-hero__badges">
-            <StatusBadge status={item.collectionStatus} type="collection" />
-            <StatusBadge status={item.installState} type="install" />
+            <StatusBadge status={gameStatus} type="game" />
           </div>
         </div>
       </section>
@@ -93,31 +106,31 @@ export function GameDetailView({
             {t("common.actions.addToLibrary")}
           </button>
         )}
-        {item.collectionStatus !== "notAdded" && item.installState === "notInstalled" && manifest && (
+        {item.collectionStatus !== "notAdded" && primaryAction === "install" && manifest && (
           <button className="button button--primary" onClick={() => setInstallOpen(true)} type="button">
             <Download size={16} />
             {t("common.actions.install")}
           </button>
         )}
-        {item.installState === "installed" && (
+        {primaryAction === "launch" && (
           <button className="button button--primary" onClick={() => launchItem(item.catalog.id)} type="button">
             <Play size={16} />
             {t("common.actions.launch")}
           </button>
         )}
-        {item.installState === "updateAvailable" && (
+        {primaryAction === "update" && (
           <button className="button button--primary" onClick={() => updateItem(item.catalog.id)} type="button">
             <RefreshCw size={16} />
             {t("common.actions.update")}
           </button>
         )}
-        {item.installState === "error" && (
+        {primaryAction === "repair" && (
           <button className="button button--primary" onClick={() => repairItem(item.catalog.id)} type="button">
             <Wrench size={16} />
             {t("common.actions.repair")}
           </button>
         )}
-        {item.installed && (
+        {isInstalled && (
           <>
             <button className="button button--secondary" onClick={() => repairItem(item.catalog.id)} type="button">
               <Wrench size={16} />
@@ -141,7 +154,7 @@ export function GameDetailView({
         {item.collectionStatus !== "notAdded" && (
           <button
             className="button button--ghost"
-            disabled={Boolean(item.installed) || hasActiveJob}
+            disabled={isInstalled || hasActiveJob}
             onClick={() => setRemoveOpen(true)}
             type="button"
           >

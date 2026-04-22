@@ -19,7 +19,9 @@
     },
     "actions": {
       "save": "Speichern",
+      "back": "Zuruck",
       "cancel": "Abbrechen",
+      "open": "Offnen",
       "close": "Schliessen",
       "details": "Details",
       "install": "Installieren",
@@ -101,6 +103,12 @@
       "updateAvailable": "Update verfugbar",
       "error": "Reparatur erforderlich"
     },
+    "game": {
+      "notInstalled": "Nicht installiert",
+      "installed": "Installiert",
+      "updateAvailable": "Update verfugbar",
+      "broken": "Defekt"
+    },
     "collection": {
       "notAdded": "Nicht in der Bibliothek",
       "added": "In der Bibliothek",
@@ -170,6 +178,7 @@
       "shop": "Shop",
       "library": "Bibliothek",
       "downloads": "Downloads",
+      "socials": "Socials",
       "settings": "Einstellungen",
       "about": "Info"
     },
@@ -178,6 +187,7 @@
       "shop": "Entdecken",
       "library": "Deine Sammlung",
       "downloads": "Installationen und Updates",
+      "socials": "Community und Content",
       "settings": "Einstellungen",
       "about": "Lumorix Launcher",
       "item": "Eintragsdetails",
@@ -188,6 +198,7 @@
       "shop": "Shop",
       "library": "Bibliothek",
       "downloads": "Downloads",
+      "socials": "Socials",
       "settings": "Einstellungen",
       "about": "Uber Lumorix",
       "itemFallback": "Eintrag",
@@ -207,6 +218,7 @@
         "other": "{{count}} aktive Jobs"
       },
       "downloadsClear": "Warteschlange ist leer",
+      "socials": "2 offizielle Plattformen",
       "fallback": {
         "one": "{{count}} entdeckbarer Eintrag",
         "other": "{{count}} entdeckbare Eintrage"
@@ -320,6 +332,14 @@
       "eyebrow": "Ergebnisse",
       "shown": "{{count}} angezeigt"
     },
+    "featured": {
+      "eyebrow": "Im Fokus"
+    },
+    "sparseState": {
+      "eyebrow": "Plattform-Update",
+      "title": "Mehr Inhalte folgen bald",
+      "body": "Starte mit deiner ersten Installation und schaue bald wieder vorbei fur neue Lumorix-Releases."
+    },
     "card": {
       "unavailable": "Nicht verfugbar",
       "viewInLibrary": "In Bibliothek anzeigen"
@@ -415,6 +435,22 @@
     },
     "row": {
       "progress": "{{operation}} / {{phase}}"
+    }
+  },
+  "socials": {
+    "header": {
+      "title": "Socials",
+      "subtitle": "Verbinde dich mit Lumorix und bleibe zu Projekten und Entwicklung auf dem Laufenden"
+    },
+    "sections": {
+      "community": {
+        "eyebrow": "Community",
+        "title": "Community"
+      },
+      "content": {
+        "eyebrow": "Content",
+        "title": "Content"
+      }
     }
   },
   "about": {

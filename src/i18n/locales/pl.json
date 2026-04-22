@@ -19,7 +19,9 @@
     },
     "actions": {
       "save": "Zapisz",
+      "back": "Wroc",
       "cancel": "Anuluj",
+      "open": "Otworz",
       "close": "Zamknij",
       "details": "Szczegoly",
       "install": "Instaluj",
@@ -101,6 +103,12 @@
       "updateAvailable": "Aktualizacja dostepna",
       "error": "Wymaga naprawy"
     },
+    "game": {
+      "notInstalled": "Nie zainstalowano",
+      "installed": "Zainstalowano",
+      "updateAvailable": "Aktualizacja dostepna",
+      "broken": "Uszkodzone"
+    },
     "collection": {
       "notAdded": "Poza biblioteka",
       "added": "W bibliotece",
@@ -170,6 +178,7 @@
       "shop": "Sklep",
       "library": "Biblioteka",
       "downloads": "Pobrania",
+      "socials": "Socials",
       "settings": "Ustawienia",
       "about": "O programie"
     },
@@ -178,6 +187,7 @@
       "shop": "Odkrywaj",
       "library": "Twoja kolekcja",
       "downloads": "Instalacje i aktualizacje",
+      "socials": "Spolecznosc i content",
       "settings": "Preferencje",
       "about": "Lumorix Launcher",
       "item": "Szczegoly elementu",
@@ -188,6 +198,7 @@
       "shop": "Sklep",
       "library": "Biblioteka",
       "downloads": "Pobrania",
+      "socials": "Socials",
       "settings": "Ustawienia",
       "about": "O Lumorix",
       "itemFallback": "Element",
@@ -213,6 +224,7 @@
         "other": "{{count}} aktywnych zadan"
       },
       "downloadsClear": "Kolejka jest pusta",
+      "socials": "2 oficjalne platformy",
       "fallback": {
         "one": "{{count}} odkrywalny element",
         "few": "{{count}} odkrywalne elementy",
@@ -338,6 +350,14 @@
       "eyebrow": "Wyniki",
       "shown": "{{count}} pokazano"
     },
+    "featured": {
+      "eyebrow": "Wyroznione"
+    },
+    "sparseState": {
+      "eyebrow": "Aktualizacja platformy",
+      "title": "Wiecej tresci juz wkrotce",
+      "body": "Zacznij od instalacji swojej pierwszej gry i zajrzyj ponownie po nowe wydania Lumorix."
+    },
     "card": {
       "unavailable": "Niedostepne",
       "viewInLibrary": "Pokaz w bibliotece"
@@ -435,6 +455,22 @@
     },
     "row": {
       "progress": "{{operation}} / {{phase}}"
+    }
+  },
+  "socials": {
+    "header": {
+      "title": "Socials",
+      "subtitle": "Polacz sie z Lumorix i badz na biezaco z projektami oraz postepem prac"
+    },
+    "sections": {
+      "community": {
+        "eyebrow": "Community",
+        "title": "Community"
+      },
+      "content": {
+        "eyebrow": "Content",
+        "title": "Content"
+      }
     }
   },
   "about": {

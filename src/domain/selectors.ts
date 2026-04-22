@@ -2,9 +2,12 @@ import { getTagCategory, TAG_CATEGORY_ORDER } from "./tags";
 import type {
   ContentView,
   InstallJob,
+  ItemAction,
   LauncherSnapshot,
   TagCategoryId
 } from "./types";
+
+export type GameStatus = "notInstalled" | "installed" | "updateAvailable" | "broken";
 
 export interface ActivityEvent {
   id: string;
@@ -215,6 +218,40 @@ export function getPrimaryDownload(snapshot: LauncherSnapshot): InstallJob | nul
   );
 }
 
+export function getGameStatus(item: ContentView): GameStatus {
+  if (isBrokenState(item)) {
+    return "broken";
+  }
+
+  if (!item.installed) {
+    return "notInstalled";
+  }
+
+  if (hasUpdateAvailable(item)) {
+    return "updateAvailable";
+  }
+
+  return "installed";
+}
+
+export function getPrimaryGameAction(item: ContentView): Extract<
+  ItemAction,
+  "install" | "launch" | "update" | "repair"
+> {
+  const status = getGameStatus(item);
+
+  if (status === "broken") {
+    return "repair";
+  }
+  if (status === "updateAvailable") {
+    return "update";
+  }
+  if (status === "installed") {
+    return "launch";
+  }
+  return "install";
+}
+
 function recommendItems(
   candidates: ContentView[],
   profile: Map<string, number>,
@@ -290,6 +327,32 @@ function scoreCandidate(
 
 function lastUsedAt(item: ContentView) {
   return item.collectionEntry?.lastUsedAt ?? item.installed?.lastLaunchedAt ?? null;
+}
+
+function hasUpdateAvailable(item: ContentView) {
+  if (!item.installed) {
+    return false;
+  }
+
+  const installedVersion = item.installed.installedVersion;
+  const available = item.availableUpdate;
+
+  return (
+    item.installState === "updateAvailable" ||
+    item.state.updateAvailable ||
+    (available !== null &&
+      (available.currentVersion !== installedVersion ||
+        available.availableVersion !== installedVersion))
+  );
+}
+
+function isBrokenState(item: ContentView) {
+  return (
+    item.installState === "error" ||
+    item.state.error ||
+    item.installed?.status === "broken" ||
+    Boolean(item.installed?.lastError)
+  );
 }
 
 function toTime(value: string | null | undefined) {

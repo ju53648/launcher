@@ -19,7 +19,9 @@
     },
     "actions": {
       "save": "Save",
+      "back": "Back",
       "cancel": "Cancel",
+      "open": "Open",
       "close": "Close",
       "details": "Details",
       "install": "Install",
@@ -101,6 +103,12 @@
       "updateAvailable": "Update available",
       "error": "Needs repair"
     },
+    "game": {
+      "notInstalled": "Not installed",
+      "installed": "Installed",
+      "updateAvailable": "Update available",
+      "broken": "Broken"
+    },
     "collection": {
       "notAdded": "Not in library",
       "added": "In library",
@@ -170,6 +178,7 @@
       "shop": "Shop",
       "library": "Library",
       "downloads": "Downloads",
+      "socials": "Socials",
       "settings": "Settings",
       "about": "About"
     },
@@ -178,6 +187,7 @@
       "shop": "Discovery",
       "library": "Your collection",
       "downloads": "Installs and updates",
+      "socials": "Community and content",
       "settings": "Preferences",
       "about": "Lumorix Launcher",
       "item": "Item details",
@@ -188,6 +198,7 @@
       "shop": "Shop",
       "library": "Library",
       "downloads": "Downloads",
+      "socials": "Socials",
       "settings": "Settings",
       "about": "About Lumorix",
       "itemFallback": "Item",
@@ -207,6 +218,7 @@
         "other": "{{count}} active jobs"
       },
       "downloadsClear": "Queue is clear",
+      "socials": "2 official platforms",
       "fallback": {
         "one": "{{count}} discoverable item",
         "other": "{{count}} discoverable items"
@@ -320,6 +332,14 @@
       "eyebrow": "Results",
       "shown": "{{count}} shown"
     },
+    "featured": {
+      "eyebrow": "Featured"
+    },
+    "sparseState": {
+      "eyebrow": "Platform update",
+      "title": "More content coming soon",
+      "body": "Start by installing your first game and check back soon for new Lumorix releases."
+    },
     "card": {
       "unavailable": "Unavailable",
       "viewInLibrary": "View in Library"
@@ -415,6 +435,22 @@
     },
     "row": {
       "progress": "{{operation}} / {{phase}}"
+    }
+  },
+  "socials": {
+    "header": {
+      "title": "Socials",
+      "subtitle": "Connect with Lumorix and stay updated on projects and development"
+    },
+    "sections": {
+      "community": {
+        "eyebrow": "Community",
+        "title": "Community"
+      },
+      "content": {
+        "eyebrow": "Content",
+        "title": "Content"
+      }
     }
   },
   "about": {

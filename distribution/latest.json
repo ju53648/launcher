@@ -1,5 +1,5 @@
 {
-  "version": "0.4.1",
+  "version": "0.4.3",
   "title": "Shop & Discovery Update",
   "notes": "Shop & Discovery Update\n\n- New Shop system for discovering games and Lumorix projects\n- Clear separation between Shop and Library\n- Smart local recommendations based on your installed content\n- Structured tag system for better discovery and future scaling\n- Refactored core platform to support more than just games\n- Improved download, install, and update flows\n- More stable updater with better error handling\n- Cleaner and more consistent launcher UI",
   "notesList": [

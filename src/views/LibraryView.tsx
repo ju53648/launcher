@@ -7,7 +7,7 @@ import { EmptyState } from "../components/EmptyState";
 import { GameCard } from "../components/GameCard";
 import { InstallDialog } from "../components/InstallDialog";
 import { formatDate, resolveIntlLocale } from "../domain/format";
-import { getLibraryItems } from "../domain/selectors";
+import { getGameStatus, getLibraryItems } from "../domain/selectors";
 import { getTagLabel, sortTagsByWeight } from "../domain/tags";
 import type { ContentView } from "../domain/types";
 import { useI18n } from "../i18n";
@@ -85,9 +85,10 @@ export function LibraryView({ setRoute }: { setRoute: (route: AppRoute) => void 
 
     return [...libraryItems]
       .filter((item) => {
-        if (preferences.installFilter === "installed" && !item.installed) return false;
-        if (preferences.installFilter === "notInstalled" && item.installed) return false;
-        if (preferences.updateFilter === "updates" && !item.availableUpdate) return false;
+        const status = getGameStatus(item);
+        if (preferences.installFilter === "installed" && status === "notInstalled") return false;
+        if (preferences.installFilter === "notInstalled" && status !== "notInstalled") return false;
+        if (preferences.updateFilter === "updates" && status !== "updateAvailable") return false;
         if (
           preferences.category !== "all" &&
           !item.catalog.categories.includes(preferences.category)
@@ -114,9 +115,9 @@ export function LibraryView({ setRoute }: { setRoute: (route: AppRoute) => void 
       .sort((left, right) => compareLibraryItems(left, right, preferences.sortBy, collator));
   }, [collator, libraryItems, locale, preferences, snapshot, t]);
 
-  const installedCount = libraryItems.filter((item) => item.installed).length;
-  const updatesCount = libraryItems.filter((item) => item.availableUpdate).length;
-  const readyToInstallCount = libraryItems.filter((item) => !item.installed).length;
+  const installedCount = libraryItems.filter((item) => getGameStatus(item) !== "notInstalled").length;
+  const updatesCount = libraryItems.filter((item) => getGameStatus(item) === "updateAvailable").length;
+  const readyToInstallCount = libraryItems.filter((item) => getGameStatus(item) === "notInstalled").length;
   const hasActiveFilters =
     preferences.search.length > 0 ||
     preferences.installFilter !== "all" ||
@@ -420,9 +421,11 @@ function compareLibraryItems(
 }
 
 function installedRank(item: ContentView) {
-  if (item.availableUpdate) return 0;
-  if (item.installed) return 1;
-  return 2;
+  const status = getGameStatus(item);
+  if (status === "updateAvailable") return 0;
+  if (status === "installed") return 1;
+  if (status === "broken") return 2;
+  return 3;
 }
 
 function toTime(value: string | null | undefined) {

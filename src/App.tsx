@@ -11,6 +11,7 @@ import { HomeView } from "./views/HomeView";
 import { LibraryView } from "./views/LibraryView";
 import { OnboardingView } from "./views/OnboardingView";
 import { SettingsView } from "./views/SettingsView";
+import { SocialsView } from "./views/SocialsView";
 import { ShopView } from "./views/ShopView";
 import { useLauncher } from "./store/LauncherStore";
 import type { LauncherSnapshot } from "./domain/types";
@@ -111,6 +112,8 @@ function renderRoute(
       return <LibraryView setRoute={setRoute} />;
     case "downloads":
       return <DownloadsView />;
+    case "socials":
+      return <SocialsView />;
     case "settings":
       return <SettingsView />;
     case "about":

@@ -7,6 +7,7 @@ import type {
   ItemInstallState,
   LibraryStatus
 } from "./types";
+import type { GameStatus } from "./selectors";
 
 export type Translate = (key: string, params?: Record<string, string | number | null | undefined>) => string;
 
@@ -46,6 +47,10 @@ export function formatDate(value: string | null, locale: string, t: Translate): 
 
 export function installStateLabel(status: ItemInstallState, t: Translate): string {
   return t(`status.install.${status}`);
+}
+
+export function gameStatusLabel(status: GameStatus, t: Translate): string {
+  return t(`status.game.${status}`);
 }
 
 export function collectionStatusLabel(status: ItemCollectionStatus, t: Translate): string {

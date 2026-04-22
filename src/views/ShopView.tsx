@@ -1,4 +1,4 @@
-import { Check, Download, Filter, Plus, Search, Sparkles } from "lucide-react";
+import { ArrowRight, Check, Download, Filter, Play, Plus, Search, Sparkles } from "lucide-react";
 import { useDeferredValue, useMemo, useState } from "react";
 
 import type { AppRoute } from "../components/AppShell";
@@ -10,6 +10,7 @@ import {
   getBecauseYouPlayedRecommendations,
   getDiscoverableItems,
   getForYouRecommendations,
+  getGameStatus,
   getShopCategories,
   getShopTagGroups
 } from "../domain/selectors";
@@ -22,7 +23,7 @@ type TypeFilter = "all" | CatalogItemType;
 
 export function ShopView({ setRoute }: { setRoute: (route: AppRoute) => void }) {
   const { locale, t } = useI18n();
-  const { snapshot, addItemToLibrary, busyAction } = useLauncher();
+  const { snapshot, addItemToLibrary, busyAction, installItem, launchItem } = useLauncher();
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
@@ -39,6 +40,7 @@ export function ShopView({ setRoute }: { setRoute: (route: AppRoute) => void }) 
   ];
 
   const discoverableItems = getDiscoverableItems(snapshot);
+  const featuredItem = selectFeaturedItem(discoverableItems);
   const categories = getShopCategories(snapshot);
   const tagGroups = getShopTagGroups(snapshot);
   const forYouRecommendations = getForYouRecommendations(snapshot, 3);
@@ -64,6 +66,8 @@ export function ShopView({ setRoute }: { setRoute: (route: AppRoute) => void }) 
     });
   }, [categoryFilter, deferredSearch, discoverableItems, tagFilter, t, typeFilter]);
 
+  const hasSparseCatalog = discoverableItems.length <= 2;
+
   return (
     <div className="view-stack">
       <section className="shop-intro">
@@ -78,6 +82,30 @@ export function ShopView({ setRoute }: { setRoute: (route: AppRoute) => void }) 
           <span>{t("shop.discoverableCount", { count: discoverableItems.length })}</span>
         </div>
       </section>
+
+      {featuredItem && (
+        <FeaturedShopCard
+          item={featuredItem}
+          busy={Boolean(busyAction)}
+          onOpen={() => setRoute(`item:${featuredItem.catalog.id}`)}
+          onInstall={async () => {
+            if (!featuredItem.state.added) {
+              await addItemToLibrary(featuredItem.catalog.id);
+            }
+
+            const defaultLibraryId = snapshot.config.defaultLibraryId;
+            if (!defaultLibraryId) {
+              setRoute(`item:${featuredItem.catalog.id}`);
+              return;
+            }
+
+            await installItem(featuredItem.catalog.id, defaultLibraryId);
+          }}
+          onPlay={async () => {
+            await launchItem(featuredItem.catalog.id);
+          }}
+        />
+      )}
 
       <RecommendationSection
         eyebrow={t("shop.recommendations.forYouEyebrow")}
@@ -220,11 +248,88 @@ export function ShopView({ setRoute }: { setRoute: (route: AppRoute) => void }) 
               />
             ))}
           </section>
+
+            {hasSparseCatalog && (
+              <section className="shop-sparse-state">
+                <p className="eyebrow">{t("shop.sparseState.eyebrow")}</p>
+                <h3>{t("shop.sparseState.title")}</h3>
+                <p>{t("shop.sparseState.body")}</p>
+                <div className="shop-sparse-state__actions">
+                  <button className="button button--secondary" onClick={() => setRoute("library")} type="button">
+                    {t("common.actions.viewLibrary")}
+                  </button>
+                  {featuredItem && (
+                    <button className="button button--ghost" onClick={() => setRoute(`item:${featuredItem.catalog.id}`)} type="button">
+                      {t("common.actions.details")}
+                    </button>
+                  )}
+                </div>
+              </section>
+            )}
         </>
       )}
     </div>
   );
 }
+
+  function FeaturedShopCard({
+    item,
+    busy,
+    onOpen,
+    onInstall,
+    onPlay
+  }: {
+    item: ContentView;
+    busy: boolean;
+    onOpen: () => void;
+    onInstall: () => Promise<void>;
+    onPlay: () => Promise<void>;
+  }) {
+    const { t } = useI18n();
+    const gameStatus = getGameStatus(item);
+    const isInstalled = gameStatus === "installed" || gameStatus === "updateAvailable";
+    const actionBusy = busy;
+
+    return (
+      <section className="shop-featured">
+        <div className="shop-featured__media" aria-hidden>
+          {item.catalog.bannerImage ? (
+            <img src={item.catalog.bannerImage} alt="" />
+          ) : item.catalog.coverImage ? (
+            <img src={item.catalog.coverImage} alt="" />
+          ) : (
+            <div className="media-placeholder media-placeholder--hero" />
+          )}
+        </div>
+        <div className="shop-featured__content">
+          <p className="eyebrow">{t("shop.featured.eyebrow")}</p>
+          <h2>{item.catalog.name}</h2>
+          <p>{item.catalog.description}</p>
+          <div className="shop-featured__meta">
+            <StatusBadge status={gameStatus} type="game" />
+            <span>{item.catalog.developer}</span>
+          </div>
+          <div className="shop-featured__actions">
+            {isInstalled ? (
+              <button className="button button--primary" disabled={actionBusy} onClick={() => void onPlay()} type="button">
+                <Play size={16} />
+                {t("common.actions.launch")}
+              </button>
+            ) : (
+              <button className="button button--primary" disabled={actionBusy} onClick={() => void onInstall()} type="button">
+                <Download size={16} />
+                {t("common.actions.install")}
+              </button>
+            )}
+            <button className="button button--ghost" onClick={onOpen} type="button">
+              {t("common.actions.details")}
+              <ArrowRight size={16} />
+            </button>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
 function ShopCard({
   item,
@@ -245,6 +350,7 @@ function ShopCard({
 }) {
   const { t } = useI18n();
   const manifest = item.manifest;
+  const gameStatus = getGameStatus(item);
 
   return (
     <article className="shop-card">
@@ -268,7 +374,9 @@ function ShopCard({
             </p>
             <h3>{item.catalog.name}</h3>
           </div>
-          <StatusBadge status={item.collectionStatus} type="collection" />
+          <div className="shop-card__status">
+            <StatusBadge status={gameStatus} type="game" />
+          </div>
         </div>
 
         <p className="shop-card__description">{item.catalog.description}</p>
@@ -313,4 +421,16 @@ function ShopCard({
       </div>
     </article>
   );
+}
+
+function selectFeaturedItem(items: ContentView[]): ContentView | null {
+  if (items.length === 0) return null;
+
+  const dropDash = items.find((item) => item.catalog.id === "com.lumorix.dropdash");
+  if (dropDash) return dropDash;
+
+  const namedDropDash = items.find((item) => item.catalog.name.toLowerCase().includes("dropdash"));
+  if (namedDropDash) return namedDropDash;
+
+  return items[0];
 }
