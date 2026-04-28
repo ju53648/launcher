@@ -112,6 +112,7 @@ export interface CollectionEntry {
   discoverable: boolean;
   addedAt: string;
   lastUsedAt: string | null;
+  totalPlaytimeMinutes: number;
   lastError: string | null;
   lastErrorAt: string | null;
   catalog: CatalogItemRecord;
@@ -144,6 +145,10 @@ export type InstallStrategy =
       kind: "synthetic";
       executableTemplate: string;
       contentFiles: SyntheticFile[];
+    }
+  | {
+      kind: "directFolder";
+      sourcePath: string;
     }
   | {
       kind: "zipArchive";
@@ -236,6 +241,7 @@ export interface ContentView {
   installed: InstalledItem | null;
   collectionEntry: CollectionEntry | null;
   activeJob: InstallJob | null;
+  isRunning: boolean;
   availableUpdate: ContentUpdateInfo | null;
   lastError: string | null;
 }

@@ -1,0 +1,44 @@
+{
+  "id": "com.lumorix.my-game",
+  "name": "My Game",
+  "version": "1.0.0",
+  "description": "A short description of your game",
+  "developer": "Your Name or Studio",
+  "releaseDate": "2026-04-24",
+  "tags": ["Action", "Arcade", "Offline"],
+  "coverImage": "/assets/games/my-game-cover.svg",
+  "bannerImage": "/assets/games/my-game-banner.svg",
+  "iconImage": "/assets/games/my-game-icon.svg",
+  "executable": "index.html",
+  "installSizeBytes": 1048576,
+  "defaultInstallFolder": "My Game",
+  "supportedActions": [
+    "install",
+    "launch",
+    "update",
+    "repair",
+    "uninstall",
+    "openFolder"
+  ],
+  "installStrategy": {
+    "kind": "zipArchive",
+    "rootFolder": "."
+  },
+  "download": {
+    "kind": "httpArchive",
+    "url": "https://github.com/username/my-game/releases/download/v1.0.0/game.zip",
+    "sha256": "abc123def456...",
+    "sizeBytes": 1048576
+  },
+  "changelog": [
+    {
+      "version": "1.0.0",
+      "date": "2026-04-24",
+      "items": [
+        "Initial release",
+        "Core gameplay mechanics",
+        "Settings panel"
+      ]
+    }
+  ]
+}

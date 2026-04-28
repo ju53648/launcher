@@ -18,6 +18,7 @@ export function normalizeLauncherSnapshot(snapshot: LauncherSnapshot): LauncherS
 function normalizeContentView(item: ContentView): ContentView {
   return {
     ...item,
+    isRunning: Boolean(item.isRunning),
     catalog: normalizeCatalogItemRecord(item.catalog),
     collectionEntry: item.collectionEntry ? normalizeCollectionEntry(item.collectionEntry) : null,
     manifest: item.manifest ? normalizeContentManifest(item.manifest) : null,

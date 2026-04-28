@@ -26,6 +26,7 @@
       "details": "Details",
       "install": "Installieren",
       "launch": "Starten",
+      "closeGame": "Schliessen",
       "update": "Aktualisieren",
       "repair": "Reparieren",
       "verifyRepair": "Prufen / Reparieren",
@@ -318,9 +319,23 @@
     "filters": {
       "searchPlaceholder": "Nach Name, Entwickler, Tag oder Kategorie suchen",
       "allTypes": "Alle Typen",
+      "status": "Status",
+      "statusAll": "Alle Status",
+      "statusNotAdded": "Nicht in Bibliothek",
+      "statusInLibrary": "In Bibliothek",
+      "statusInstalled": "Installiert",
+      "statusUpdates": "Update verfugbar",
       "categories": "Kategorien",
       "tags": "Tags",
       "all": "Alle"
+    },
+    "sort": {
+      "label": "Sortieren nach",
+      "relevance": "Relevanz",
+      "name": "Name (A-Z)",
+      "releaseDate": "Neueste Veroffentlichung",
+      "installSize": "Installationsgrosse",
+      "status": "Status"
     },
     "emptyState": {
       "emptyTitle": "Derzeit sind keine Eintrage verfugbar",
@@ -336,9 +351,9 @@
       "eyebrow": "Im Fokus"
     },
     "sparseState": {
-      "eyebrow": "Plattform-Update",
-      "title": "Mehr Inhalte folgen bald",
-      "body": "Starte mit deiner ersten Installation und schaue bald wieder vorbei fur neue Lumorix-Releases."
+      "eyebrow": "Geheimes Signal",
+      "title": "Ein neues Spiel rollt an",
+      "body": "Ein mysterioeses Zug-Game ist auf dem Weg. Noch ohne Fahrplan, noch ohne Details. Ankunft: Mitte 2027."
     },
     "card": {
       "unavailable": "Nicht verfugbar",
@@ -348,6 +363,8 @@
   "library": {
     "filters": {
       "searchPlaceholder": "Bibliothek nach Name, Entwickler, Tag oder Kategorie durchsuchen",
+      "type": "Typ",
+      "allTypes": "Alle Typen",
       "installState": "Installationsstatus",
       "installAll": "Alle Eintrage",
       "installInstalled": "Nur installiert",
@@ -365,7 +382,8 @@
       "name": "Name (A-Z)",
       "lastPlayed": "Zuletzt gespielt",
       "installed": "Installationsstatus",
-      "recentlyAdded": "Zuletzt hinzugefugt"
+      "recentlyAdded": "Zuletzt hinzugefugt",
+      "playtime": "Spielzeit"
     },
     "toolbar": {
       "eyebrow": "Bibliothek",
@@ -381,6 +399,7 @@
     },
     "card": {
       "lastPlayed": "Zuletzt gespielt",
+      "playtime": "Spielzeit",
       "recentlyAdded": "Hinzugefugt",
       "removeHint": "Installierte Eintrage konnen erst nach der Deinstallation ihrer lokalen Dateien entfernt werden.",
       "transferHint": "Warte, bis der aktive Transfer abgeschlossen ist, bevor du diesen Eintrag deinstallierst oder entfernst."
@@ -509,7 +528,22 @@
         "keepDownloadCache": "Download-Cache behalten"
       },
       "checkLauncherBusy": "Launcher wird gepruft...",
-      "updateLauncherBusy": "Launcher wird aktualisiert..."
+      "updateLauncherBusy": "Launcher wird aktualisiert...",
+      "gameRefresh": {
+        "eyebrow": "Spiele-Refresh",
+        "checkingTitle": "Spiele werden gepruft",
+        "checkingBody": "Katalogdaten werden aktualisiert, Installationen gepruft und Spielstatus neu berechnet.",
+        "completedTitle": "Spielprufung abgeschlossen",
+        "summaryCheckedAt": "Letzte Prufung: {{date}}",
+        "errorTitle": "Spielprufung fehlgeschlagen",
+        "errorBody": "Spiele-Refresh konnte nicht abgeschlossen werden: {{message}}",
+        "metrics": {
+          "gamesChecked": "Geprufte Spiele",
+          "updatesFound": "Gefundene Updates",
+          "brokenInstallsDetected": "Defekte Installationen",
+          "newContentFound": "Neue Inhalte"
+        }
+      }
     },
     "privacy": {
       "eyebrow": "Datenschutz",

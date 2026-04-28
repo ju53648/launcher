@@ -11,6 +11,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import { StatusBadge } from "../components/StatusBadge";
 import { LauncherUpdatePanel } from "../components/LauncherUpdatePanel";
+import { GameRefreshPanel } from "../components/GameRefreshPanel";
 import { formatDate } from "../domain/format";
 import { SUPPORTED_LOCALES, useI18n } from "../i18n";
 import { chooseDirectory } from "../services/tauri";
@@ -30,7 +31,8 @@ export function SettingsView() {
     installLauncherUpdate,
     checkItemUpdates,
     busyAction,
-    updateProgress
+    updateProgress,
+    gameRefreshFeedback
   } = useLauncher();
   const [newLibraryName, setNewLibraryName] = useState("");
   const [newLibraryPath, setNewLibraryPath] = useState("");
@@ -285,11 +287,19 @@ export function SettingsView() {
               ? t("settings.maintenance.updateLauncherBusy")
               : t("common.actions.updateLauncher")}
           </button>
-          <button className="button button--secondary" onClick={checkItemUpdates} type="button">
+          <button
+            className="button button--secondary"
+            disabled={busyAction === "item-update-check"}
+            onClick={checkItemUpdates}
+            type="button"
+          >
             <RefreshCw size={16} />
-            {t("common.actions.checkLibraryItems")}
+            {busyAction === "item-update-check"
+              ? t("common.actions.checkingShort")
+              : t("common.actions.checkLibraryItems")}
           </button>
         </div>
+        <GameRefreshPanel feedback={gameRefreshFeedback} />
         <LauncherUpdatePanel progress={updateProgress} />
       </section>
 

@@ -63,12 +63,58 @@ const catalog: ContentManifest[] = [
         ]
       }
     ]
+  },
+  {
+    id: "com.lumorix.echo-protocol",
+    itemType: "game",
+    name: "Echo Protocol",
+    version: "0.1.0",
+    description:
+      "A psychological mystery game where choices rewrite memory, facts and identity.",
+    developer: "Lumorix",
+    releaseDate: "2026-04-28",
+    categories: ["Mystery", "Thriller", "Story"],
+    tags: [
+      { id: "horror", weight: 3 },
+      { id: "narrative", weight: 3 },
+      { id: "offline", weight: 3 },
+      { id: "exploration", weight: 2 }
+    ],
+    coverImage: "/assets/games/echo-protocol-cover.svg",
+    bannerImage: "/assets/games/echo-protocol-banner.svg",
+    iconImage: "/assets/games/echo-protocol-icon.svg",
+    executable: "bin\\launch.cmd",
+    installSizeBytes: 32768,
+    defaultInstallFolder: "Echo Protocol",
+    supportedActions: ["install", "launch", "repair", "uninstall", "openFolder"],
+    installStrategy: {
+      kind: "synthetic",
+      executableTemplate:
+        "@echo off\nsetlocal\nset \"GAME_ROOT=%~dp0..\"\nstart \"\" \"%GAME_ROOT%\\index.html\"\n",
+      contentFiles: []
+    },
+    download: {
+      kind: "localSynthetic",
+      integrity: "embedded-echo-protocol-0.1.0"
+    },
+    changelog: [
+      {
+        version: "0.1.0",
+        date: "2026-04-28",
+        items: [
+          "Initial launcher-ready release of Echo Protocol.",
+          "Adds branching scenes, choices and multiple endings.",
+          "Implements local save/continue and reality-shift text changes."
+        ]
+      }
+    ]
   }
 ];
 
 let collectionEntries = loadCollectionEntries();
 let installedItems = loadInstalledItems();
 let state = loadState();
+const runningItemIds = new Set<string>();
 
 function loadCollectionEntries(): CollectionEntry[] {
   const saved = localStorage.getItem("lumorix.mock.collectionEntries");
@@ -78,6 +124,7 @@ function loadCollectionEntries(): CollectionEntry[] {
     .filter((entry) => !RETIRED_ITEM_IDS.has(entry.itemId))
     .map((entry) => ({
       ...entry,
+      totalPlaytimeMinutes: entry.totalPlaytimeMinutes ?? 0,
       catalog: {
         ...entry.catalog,
         tags: normalizeContentTags(entry.catalog.tags)
@@ -249,6 +296,7 @@ function buildViews(): ContentView[] {
         installed,
         collectionEntry,
         activeJob,
+        isRunning: runningItemIds.has(itemId),
         availableUpdate,
         lastError: installed?.lastError ?? collectionEntry?.lastError ?? null
       };
@@ -276,6 +324,7 @@ function ensureCollectionEntry(itemId: string) {
     discoverable: true,
     addedAt: now(),
     lastUsedAt: null,
+    totalPlaytimeMinutes: 0,
     lastError: null,
     lastErrorAt: null,
     catalog: catalogRecordFromManifest(manifest)
@@ -585,6 +634,10 @@ export const mockApi = {
     } satisfies InstallJob;
   },
   async uninstallItem(itemId: string) {
+    if (runningItemIds.has(itemId)) {
+      throw { message: "Close the running item before uninstalling it" };
+    }
+
     if (hasActiveJob(itemId)) {
       throw { message: "Wait for the active transfer to finish before uninstalling this item" };
     }
@@ -594,9 +647,14 @@ export const mockApi = {
     return buildSnapshot();
   },
   async launchItem(itemId: string): Promise<CommandOk> {
+    if (runningItemIds.has(itemId)) {
+      throw { message: "Item is already running" };
+    }
+
     const entry = collectionEntries.find((item) => item.itemId === itemId);
     if (entry) {
       entry.lastUsedAt = now();
+      entry.totalPlaytimeMinutes += 1;
       entry.lastError = null;
       entry.lastErrorAt = null;
     }
@@ -605,8 +663,18 @@ export const mockApi = {
       installed.lastLaunchedAt = now();
       installed.lastError = null;
     }
+    runningItemIds.add(itemId);
     save();
     return { message: "Item launched" };
+  },
+  async closeItem(itemId: string): Promise<CommandOk> {
+    if (!runningItemIds.has(itemId)) {
+      save();
+      return { message: "Item already closed" };
+    }
+    runningItemIds.delete(itemId);
+    save();
+    return { message: "Item closed" };
   },
   async openInstallFolder(_itemId: string): Promise<CommandOk> {
     return { message: "Install folder opened" };
@@ -623,6 +691,29 @@ export const mockApi = {
     return buildSnapshot();
   },
   async checkItemUpdates() {
+    const catalogById = new Map(catalog.map((entry) => [entry.id, entry]));
+    const checkedAt = now();
+
+    for (const installed of installedItems) {
+      installed.lastVerifiedAt = checkedAt;
+
+      const manifest = catalogById.get(installed.itemId);
+      if (!manifest) {
+        installed.status = "broken";
+        installed.lastError = "Catalog entry is missing for this installed item.";
+        continue;
+      }
+
+      if (installed.status === "broken" && !installed.lastError) {
+        installed.lastError = "Item requires repair.";
+      }
+
+      if (installed.status !== "broken") {
+        installed.status = "installed";
+        installed.lastError = null;
+      }
+    }
+
     save();
     return buildSnapshot();
   },

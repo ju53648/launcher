@@ -26,6 +26,7 @@
       "details": "Szczegoly",
       "install": "Instaluj",
       "launch": "Uruchom",
+      "closeGame": "Zamknij",
       "update": "Aktualizuj",
       "repair": "Napraw",
       "verifyRepair": "Sprawdz / Napraw",
@@ -336,9 +337,23 @@
     "filters": {
       "searchPlaceholder": "Szukaj po nazwie, tworcach, tagu lub kategorii",
       "allTypes": "Wszystkie typy",
+      "status": "Status",
+      "statusAll": "Wszystkie statusy",
+      "statusNotAdded": "Poza biblioteka",
+      "statusInLibrary": "W bibliotece",
+      "statusInstalled": "Zainstalowane",
+      "statusUpdates": "Dostepna aktualizacja",
       "categories": "Kategorie",
       "tags": "Tagi",
       "all": "Wszystkie"
+    },
+    "sort": {
+      "label": "Sortuj wedlug",
+      "relevance": "Trafnosc",
+      "name": "Nazwa (A-Z)",
+      "releaseDate": "Najnowsza premiera",
+      "installSize": "Rozmiar instalacji",
+      "status": "Status"
     },
     "emptyState": {
       "emptyTitle": "Brak dostepnych elementow",
@@ -354,9 +369,9 @@
       "eyebrow": "Wyroznione"
     },
     "sparseState": {
-      "eyebrow": "Aktualizacja platformy",
-      "title": "Wiecej tresci juz wkrotce",
-      "body": "Zacznij od instalacji swojej pierwszej gry i zajrzyj ponownie po nowe wydania Lumorix."
+      "eyebrow": "Nieznany sygnal",
+      "title": "Nadjezdza nowa gra",
+      "body": "Tajemnicza gra o pociagach jest w drodze. Bez rozkladu, bez szczegolow. Premiera: polowa 2027."
     },
     "card": {
       "unavailable": "Niedostepne",
@@ -366,6 +381,8 @@
   "library": {
     "filters": {
       "searchPlaceholder": "Szukaj w bibliotece po nazwie, tworcach, tagu lub kategorii",
+      "type": "Typ",
+      "allTypes": "Wszystkie typy",
       "installState": "Stan instalacji",
       "installAll": "Wszystkie elementy",
       "installInstalled": "Tylko zainstalowane",
@@ -383,7 +400,8 @@
       "name": "Nazwa (A-Z)",
       "lastPlayed": "Ostatnio uruchamiane",
       "installed": "Stan instalacji",
-      "recentlyAdded": "Ostatnio dodane"
+      "recentlyAdded": "Ostatnio dodane",
+      "playtime": "Czas gry"
     },
     "toolbar": {
       "eyebrow": "Biblioteka",
@@ -399,6 +417,7 @@
     },
     "card": {
       "lastPlayed": "Ostatnio uruchamiane",
+      "playtime": "Czas gry",
       "recentlyAdded": "Dodano",
       "removeHint": "Zainstalowane wpisy mozna usunac z biblioteki dopiero po odinstalowaniu lokalnych plikow.",
       "transferHint": "Poczekaj, az aktywny transfer sie zakonczy, zanim odinstalujesz lub usuniesz ten element."
@@ -529,7 +548,22 @@
         "keepDownloadCache": "Zachowaj cache pobran"
       },
       "checkLauncherBusy": "Sprawdzanie launchera...",
-      "updateLauncherBusy": "Aktualizowanie launchera..."
+      "updateLauncherBusy": "Aktualizowanie launchera...",
+      "gameRefresh": {
+        "eyebrow": "Odswiezanie gier",
+        "checkingTitle": "Sprawdzanie gier",
+        "checkingBody": "Odswiezanie katalogu, weryfikacja instalacji i ponowne przeliczanie statusow gier.",
+        "completedTitle": "Sprawdzanie gier zakonczone",
+        "summaryCheckedAt": "Ostatnie sprawdzenie: {{date}}",
+        "errorTitle": "Sprawdzanie gier nie powiodlo sie",
+        "errorBody": "Nie udalo sie zakonczyc odswiezania gier: {{message}}",
+        "metrics": {
+          "gamesChecked": "Sprawdzone gry",
+          "updatesFound": "Znalezione aktualizacje",
+          "brokenInstallsDetected": "Uszkodzone instalacje",
+          "newContentFound": "Nowa zawartosc"
+        }
+      }
     },
     "privacy": {
       "eyebrow": "Prywatnosc",

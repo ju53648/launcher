@@ -29,12 +29,27 @@ import {
 } from "../services/appUpdater";
 import { launcherApi } from "../services/launcherApi";
 
+export interface GameRefreshSummary {
+  gamesChecked: number;
+  updatesFound: number;
+  brokenInstallsDetected: number;
+  newContentFound: number;
+}
+
+export interface GameRefreshFeedback {
+  phase: "idle" | "checking" | "completed" | "error";
+  checkedAt: string | null;
+  summary: GameRefreshSummary | null;
+  errorMessage: string | null;
+}
+
 interface LauncherContextValue {
   snapshot: LauncherSnapshot | null;
   loading: boolean;
   busyAction: string | null;
   error: LauncherError | null;
   updateProgress: LauncherUpdateProgress;
+  gameRefreshFeedback: GameRefreshFeedback;
   clearError: () => void;
   refresh: () => Promise<void>;
   completeOnboarding: (libraryPath: string | null) => Promise<void>;
@@ -56,6 +71,7 @@ interface LauncherContextValue {
   repairItem: (itemId: string) => Promise<InstallJob | null>;
   uninstallItem: (itemId: string) => Promise<void>;
   launchItem: (itemId: string) => Promise<void>;
+  closeItem: (itemId: string) => Promise<void>;
   openInstallFolder: (itemId: string) => Promise<void>;
   checkLauncherUpdates: () => Promise<void>;
   installLauncherUpdate: () => Promise<void>;
@@ -77,6 +93,12 @@ export function LauncherProvider({ children }: { children: ReactNode }) {
   const [updateProgress, setUpdateProgress] = useState<LauncherUpdateProgress>({
     status: "idle",
     progress: 0
+  });
+  const [gameRefreshFeedback, setGameRefreshFeedback] = useState<GameRefreshFeedback>({
+    phase: "idle",
+    checkedAt: null,
+    summary: null,
+    errorMessage: null
   });
 
   const publishSnapshot = useCallback((next: LauncherSnapshot) => {
@@ -163,6 +185,18 @@ export function LauncherProvider({ children }: { children: ReactNode }) {
     return () => window.clearInterval(timer);
   }, [refresh, snapshot?.jobs]);
 
+  useEffect(() => {
+    if (!snapshot?.items.some((item) => item.isRunning)) {
+      return;
+    }
+
+    const timer = window.setInterval(() => {
+      void refresh();
+    }, 2000);
+
+    return () => window.clearInterval(timer);
+  }, [refresh, snapshot?.items]);
+
   const publishUpdateProgress = useCallback((progress: LauncherUpdateProgress) => {
     console.info("[updater]", progress.status, progress.version ?? progress.errorMessage ?? "");
     setUpdateProgress(progress);
@@ -180,6 +214,7 @@ export function LauncherProvider({ children }: { children: ReactNode }) {
       busyAction,
       error,
       updateProgress,
+      gameRefreshFeedback,
       clearError: () => setError(null),
       refresh,
       setLanguagePreference: async (language) => {
@@ -238,6 +273,7 @@ export function LauncherProvider({ children }: { children: ReactNode }) {
       uninstallItem: (itemId) =>
         runSnapshotAction("uninstall-item", () => launcherApi.uninstallItem(itemId)),
       launchItem: (itemId) => runCommandAction("launch-item", () => launcherApi.launchItem(itemId)),
+      closeItem: (itemId) => runCommandAction("close-item", () => launcherApi.closeItem(itemId)),
       openInstallFolder: (itemId) =>
         runCommandAction("open-folder", () => launcherApi.openInstallFolder(itemId)),
       checkLauncherUpdates: async () => {
@@ -281,8 +317,41 @@ export function LauncherProvider({ children }: { children: ReactNode }) {
           setBusyAction(null);
         }
       },
-      checkItemUpdates: () =>
-        runSnapshotAction("item-update-check", () => launcherApi.checkItemUpdates()),
+      checkItemUpdates: async () => {
+        const previousSnapshot = snapshot;
+        setBusyAction("item-update-check");
+        setError(null);
+        setGameRefreshFeedback({
+          phase: "checking",
+          checkedAt: null,
+          summary: null,
+          errorMessage: null
+        });
+
+        try {
+          const next = await launcherApi.checkItemUpdates();
+          const normalizedNext = normalizeLauncherSnapshot(next);
+          publishSnapshot(next);
+
+          setGameRefreshFeedback({
+            phase: "completed",
+            checkedAt: new Date().toISOString(),
+            summary: summarizeGameRefresh(previousSnapshot, normalizedNext),
+            errorMessage: null
+          });
+        } catch (caught) {
+          const normalized = normalizeError(caught);
+          setError(normalized);
+          setGameRefreshFeedback({
+            phase: "error",
+            checkedAt: new Date().toISOString(),
+            summary: null,
+            errorMessage: normalized.message
+          });
+        } finally {
+          setBusyAction(null);
+        }
+      },
       cancelJob: (jobId) => runSnapshotAction("cancel-job", () => launcherApi.cancelJob(jobId)),
       clearCompletedJobs: () =>
         runSnapshotAction("clear-completed-jobs", () => launcherApi.clearCompletedJobs())
@@ -295,8 +364,10 @@ export function LauncherProvider({ children }: { children: ReactNode }) {
       refresh,
       runSnapshotAction,
       localizedSnapshot,
+      gameRefreshFeedback,
       updateProgress,
       locale,
+      snapshot,
       publishSnapshot,
       setLocale
     ]
@@ -325,6 +396,11 @@ export function LauncherProvider({ children }: { children: ReactNode }) {
       await refresh();
     } catch (caught) {
       setError(normalizeError(caught));
+      try {
+        await refresh();
+      } catch {
+        // Keep original command error as primary feedback.
+      }
     } finally {
       setBusyAction(null);
     }
@@ -349,4 +425,29 @@ function normalizeError(caught: unknown): LauncherError {
     return { message: caught };
   }
   return { message: "Unknown launcher error" };
+}
+
+function summarizeGameRefresh(
+  previousSnapshot: LauncherSnapshot | null,
+  nextSnapshot: LauncherSnapshot
+): GameRefreshSummary {
+  const discoverableItems = nextSnapshot.items.filter((item) => item.state.discoverable);
+  const previousDiscoverableIds = new Set(
+    previousSnapshot?.items
+      .filter((item) => item.state.discoverable)
+      .map((item) => item.catalog.id) ?? []
+  );
+
+  const newContentFound = discoverableItems.filter(
+    (item) => !previousDiscoverableIds.has(item.catalog.id)
+  ).length;
+
+  return {
+    gamesChecked: discoverableItems.length,
+    updatesFound: nextSnapshot.items.filter((item) => item.state.updateAvailable).length,
+    brokenInstallsDetected: nextSnapshot.items.filter(
+      (item) => item.state.installed && item.installState === "error"
+    ).length,
+    newContentFound
+  };
 }

@@ -1,18 +1,16 @@
 {
-  "version": "0.4.3",
-  "title": "Shop & Discovery Update",
-  "notes": "Shop & Discovery Update\n\n- New Shop system for discovering games and Lumorix projects\n- Clear separation between Shop and Library\n- Smart local recommendations based on your installed content\n- Structured tag system for better discovery and future scaling\n- Refactored core platform to support more than just games\n- Improved download, install, and update flows\n- More stable updater with better error handling\n- Cleaner and more consistent launcher UI",
+  "version": "0.5.0",
+  "title": "Native Games & Library Upgrade",
+  "notes": "Native Games & Library Upgrade\n\n- Library cards now show playtime and support stronger sorting and filtering.\n- Shop and library views gained clearer discovery filters, improved ranking, and better status actions.\n- Running games can now be closed directly from the launcher, with live state refresh every 2 seconds.\n- Echo Protocol startup stability was fixed for the native desktop build.\n- Lumorix DropDash was migrated from a browser launch flow to a standalone native Tauri desktop runtime.\n- Release metadata, updater payload metadata, and package versions were synchronized for shipping.",
   "notesList": [
-    "New Shop system for discovering games and Lumorix projects",
-    "Clear separation between Shop and Library",
-    "Smart local recommendations based on your installed content",
-    "Structured tag system for better discovery and future scaling",
-    "Refactored core platform to support more than just games",
-    "Improved download, install, and update flows",
-    "More stable updater with better error handling",
-    "Cleaner and more consistent launcher UI"
+    "Library cards now show playtime and support stronger sorting and filtering.",
+    "Shop and library views gained clearer discovery filters, improved ranking, and better status actions.",
+    "Running games can now be closed directly from the launcher, with live state refresh every 2 seconds.",
+    "Echo Protocol startup stability was fixed for the native desktop build.",
+    "Lumorix DropDash was migrated from a browser launch flow to a standalone native Tauri desktop runtime.",
+    "Release metadata, updater payload metadata, and package versions were synchronized for shipping."
   ],
-  "pub_date": "2026-04-21T00:00:00Z",
+  "pub_date": "2026-04-28T00:00:00Z",
   "platforms": {
     "windows-x86_64": {
       "url": "__GENERATED_IN_CI__",

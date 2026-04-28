@@ -26,6 +26,7 @@
       "details": "Details",
       "install": "Install",
       "launch": "Launch",
+      "closeGame": "Close",
       "update": "Update",
       "repair": "Repair",
       "verifyRepair": "Verify / Repair",
@@ -318,9 +319,23 @@
     "filters": {
       "searchPlaceholder": "Search by name, developer, tag, or category",
       "allTypes": "All types",
+      "status": "Status",
+      "statusAll": "All statuses",
+      "statusNotAdded": "Not in library",
+      "statusInLibrary": "In library",
+      "statusInstalled": "Installed",
+      "statusUpdates": "Update available",
       "categories": "Categories",
       "tags": "Tags",
       "all": "All"
+    },
+    "sort": {
+      "label": "Sort by",
+      "relevance": "Relevance",
+      "name": "Name (A-Z)",
+      "releaseDate": "Newest release",
+      "installSize": "Install size",
+      "status": "Status"
     },
     "emptyState": {
       "emptyTitle": "No items available right now",
@@ -336,9 +351,9 @@
       "eyebrow": "Featured"
     },
     "sparseState": {
-      "eyebrow": "Platform update",
-      "title": "More content coming soon",
-      "body": "Start by installing your first game and check back soon for new Lumorix releases."
+      "eyebrow": "Unknown signal",
+      "title": "A new game is rolling in",
+      "body": "A mysterious train game is on the way. No timetable, no details yet. Arrival: mid 2027."
     },
     "card": {
       "unavailable": "Unavailable",
@@ -348,6 +363,8 @@
   "library": {
     "filters": {
       "searchPlaceholder": "Search your library by name, developer, tag, or category",
+      "type": "Type",
+      "allTypes": "All types",
       "installState": "Install state",
       "installAll": "All items",
       "installInstalled": "Installed only",
@@ -365,7 +382,8 @@
       "name": "Name (A-Z)",
       "lastPlayed": "Last played",
       "installed": "Installed status",
-      "recentlyAdded": "Recently added"
+      "recentlyAdded": "Recently added",
+      "playtime": "Playtime"
     },
     "toolbar": {
       "eyebrow": "Library",
@@ -381,6 +399,7 @@
     },
     "card": {
       "lastPlayed": "Last played",
+      "playtime": "Playtime",
       "recentlyAdded": "Added",
       "removeHint": "Installed entries stay removable only after uninstalling their local files first.",
       "transferHint": "Wait for the active transfer to finish before uninstalling or removing this item."
@@ -509,7 +528,22 @@
         "keepDownloadCache": "Keep download cache"
       },
       "checkLauncherBusy": "Checking launcher...",
-      "updateLauncherBusy": "Updating launcher..."
+      "updateLauncherBusy": "Updating launcher...",
+      "gameRefresh": {
+        "eyebrow": "Game refresh",
+        "checkingTitle": "Checking games",
+        "checkingBody": "Refreshing catalog data, verifying installs, and recalculating game status.",
+        "completedTitle": "Game check completed",
+        "summaryCheckedAt": "Last check: {{date}}",
+        "errorTitle": "Game check failed",
+        "errorBody": "Could not complete game refresh: {{message}}",
+        "metrics": {
+          "gamesChecked": "Games checked",
+          "updatesFound": "Updates found",
+          "brokenInstallsDetected": "Broken installs",
+          "newContentFound": "New content"
+        }
+      }
     },
     "privacy": {
       "eyebrow": "Privacy",

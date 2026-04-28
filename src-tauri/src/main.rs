@@ -1,6 +1,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 mod commands;
+mod game_catalog;
 mod installer;
 mod launcher_update;
 mod libraries;
@@ -12,8 +13,8 @@ mod storage;
 
 use commands::{
     add_item_to_library, add_library, bootstrap, cancel_job, check_item_updates,
-    check_launcher_updates, clear_completed_jobs, complete_onboarding, get_snapshot, launch_item,
-    move_install_item, open_install_folder, remove_item_from_library, remove_library,
+    check_launcher_updates, clear_completed_jobs, close_item, complete_onboarding, get_snapshot,
+    launch_item, move_install_item, open_install_folder, remove_item_from_library, remove_library,
     rename_library, repair_item, set_default_library, set_language, start_install_item,
     start_update_item, uninstall_item, update_preferences,
 };
@@ -44,6 +45,7 @@ fn main() {
             uninstall_item,
             move_install_item,
             launch_item,
+            close_item,
             open_install_folder,
             check_launcher_updates,
             check_item_updates,

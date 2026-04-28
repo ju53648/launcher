@@ -45,6 +45,24 @@ export function formatDate(value: string | null, locale: string, t: Translate): 
   }).format(date);
 }
 
+export function formatPlaytime(minutes: number | null | undefined, locale: string, t: Translate): string {
+  if (!minutes || minutes <= 0) return t("common.never");
+
+  const safeLocale = resolveIntlLocale(locale);
+  const hours = Math.floor(minutes / 60);
+  const remainingMinutes = minutes % 60;
+
+  if (hours <= 0) {
+    return `${new Intl.NumberFormat(safeLocale).format(remainingMinutes)}m`;
+  }
+
+  if (remainingMinutes === 0) {
+    return `${new Intl.NumberFormat(safeLocale).format(hours)}h`;
+  }
+
+  return `${new Intl.NumberFormat(safeLocale).format(hours)}h ${new Intl.NumberFormat(safeLocale).format(remainingMinutes)}m`;
+}
+
 export function installStateLabel(status: ItemInstallState, t: Translate): string {
   return t(`status.install.${status}`);
 }

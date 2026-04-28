@@ -20,14 +20,18 @@ import { useI18n } from "../i18n";
 import { useLauncher } from "../store/LauncherStore";
 
 type TypeFilter = "all" | CatalogItemType;
+type ShopStatusFilter = "all" | "notAdded" | "inLibrary" | "installed" | "updates";
+type ShopSortKey = "relevance" | "name" | "releaseDate" | "installSize" | "status";
 
 export function ShopView({ setRoute }: { setRoute: (route: AppRoute) => void }) {
   const { locale, t } = useI18n();
-  const { snapshot, addItemToLibrary, busyAction, installItem, launchItem } = useLauncher();
+  const { snapshot, addItemToLibrary, busyAction, installItem, launchItem, closeItem } = useLauncher();
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [tagFilter, setTagFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState<ShopStatusFilter>("all");
+  const [sortBy, setSortBy] = useState<ShopSortKey>("relevance");
   const deferredSearch = useDeferredValue(search.trim().toLowerCase());
 
   if (!snapshot) return null;
@@ -39,6 +43,14 @@ export function ShopView({ setRoute }: { setRoute: (route: AppRoute) => void }) 
     { value: "project", label: t("status.itemType.project") }
   ];
 
+  const statusFilters: Array<{ value: ShopStatusFilter; label: string }> = [
+    { value: "all", label: t("shop.filters.statusAll") },
+    { value: "notAdded", label: t("shop.filters.statusNotAdded") },
+    { value: "inLibrary", label: t("shop.filters.statusInLibrary") },
+    { value: "installed", label: t("shop.filters.statusInstalled") },
+    { value: "updates", label: t("shop.filters.statusUpdates") }
+  ];
+
   const discoverableItems = getDiscoverableItems(snapshot);
   const featuredItem = selectFeaturedItem(discoverableItems);
   const categories = getShopCategories(snapshot);
@@ -47,24 +59,34 @@ export function ShopView({ setRoute }: { setRoute: (route: AppRoute) => void }) 
   const becausePlayed = getBecauseYouPlayedRecommendations(snapshot, 3);
 
   const filteredItems = useMemo(() => {
-    return discoverableItems.filter((item) => {
-      if (typeFilter !== "all" && item.catalog.itemType !== typeFilter) return false;
-      if (categoryFilter !== "all" && !item.catalog.categories.includes(categoryFilter)) return false;
-      if (tagFilter !== "all" && !item.catalog.tags.some((tag) => tag.id === tagFilter)) return false;
-      if (!deferredSearch) return true;
+    const collator = new Intl.Collator(locale, { sensitivity: "base" });
+    return discoverableItems
+      .filter((item) => {
+        if (typeFilter !== "all" && item.catalog.itemType !== typeFilter) return false;
+        if (categoryFilter !== "all" && !item.catalog.categories.includes(categoryFilter)) return false;
+        if (tagFilter !== "all" && !item.catalog.tags.some((tag) => tag.id === tagFilter)) return false;
+        if (statusFilter === "notAdded" && item.state.added) return false;
+        if (statusFilter === "inLibrary" && !item.state.added) return false;
 
-      const haystack = [
-        item.catalog.name,
-        item.catalog.developer,
-        item.catalog.description,
-        ...item.catalog.categories,
-        ...item.catalog.tags.map((tag) => getTagLabel(tag.id, t))
-      ]
-        .join(" ")
-        .toLowerCase();
-      return haystack.includes(deferredSearch);
-    });
-  }, [categoryFilter, deferredSearch, discoverableItems, tagFilter, t, typeFilter]);
+        const status = getGameStatus(item);
+        if (statusFilter === "installed" && status === "notInstalled") return false;
+        if (statusFilter === "updates" && status !== "updateAvailable") return false;
+
+        if (!deferredSearch) return true;
+
+        const haystack = [
+          item.catalog.name,
+          item.catalog.developer,
+          item.catalog.description,
+          ...item.catalog.categories,
+          ...item.catalog.tags.map((tag) => getTagLabel(tag.id, t))
+        ]
+          .join(" ")
+          .toLowerCase();
+        return haystack.includes(deferredSearch);
+      })
+      .sort((left, right) => compareShopItems(left, right, sortBy, deferredSearch, collator, t));
+  }, [categoryFilter, deferredSearch, discoverableItems, locale, sortBy, statusFilter, t, tagFilter, typeFilter]);
 
   const hasSparseCatalog = discoverableItems.length <= 2;
 
@@ -102,6 +124,10 @@ export function ShopView({ setRoute }: { setRoute: (route: AppRoute) => void }) 
             await installItem(featuredItem.catalog.id, defaultLibraryId);
           }}
           onPlay={async () => {
+            if (featuredItem.isRunning) {
+              await closeItem(featuredItem.catalog.id);
+              return;
+            }
             await launchItem(featuredItem.catalog.id);
           }}
         />
@@ -153,6 +179,25 @@ export function ShopView({ setRoute }: { setRoute: (route: AppRoute) => void }) 
         </div>
 
         <div className="shop-filter-groups">
+          <div className="shop-filter-group">
+            <span>
+              <Filter size={14} />
+              {t("shop.filters.status")}
+            </span>
+            <div className="filter-row">
+              {statusFilters.map((filter) => (
+                <button
+                  key={filter.value}
+                  className={`filter-pill ${statusFilter === filter.value ? "is-active" : ""}`}
+                  onClick={() => setStatusFilter(filter.value)}
+                  type="button"
+                >
+                  {filter.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div className="shop-filter-group">
             <span>
               <Filter size={14} />
@@ -214,6 +259,19 @@ export function ShopView({ setRoute }: { setRoute: (route: AppRoute) => void }) 
             </div>
           </div>
         </div>
+
+        <div className="library-toolbar__grid">
+          <label>
+            <span>{t("shop.sort.label")}</span>
+            <select value={sortBy} onChange={(event) => setSortBy(event.target.value as ShopSortKey)}>
+              <option value="relevance">{t("shop.sort.relevance")}</option>
+              <option value="name">{t("shop.sort.name")}</option>
+              <option value="releaseDate">{t("shop.sort.releaseDate")}</option>
+              <option value="installSize">{t("shop.sort.installSize")}</option>
+              <option value="status">{t("shop.sort.status")}</option>
+            </select>
+          </label>
+        </div>
       </section>
 
       {discoverableItems.length === 0 ? (
@@ -272,6 +330,78 @@ export function ShopView({ setRoute }: { setRoute: (route: AppRoute) => void }) 
   );
 }
 
+function compareShopItems(
+  left: ContentView,
+  right: ContentView,
+  sortBy: ShopSortKey,
+  search: string,
+  collator: Intl.Collator,
+  t: ReturnType<typeof useI18n>["t"]
+) {
+  if (sortBy === "name") {
+    return collator.compare(left.catalog.name, right.catalog.name);
+  }
+
+  if (sortBy === "releaseDate") {
+    return (
+      toDateScore(right.catalog.releaseDate) - toDateScore(left.catalog.releaseDate) ||
+      collator.compare(left.catalog.name, right.catalog.name)
+    );
+  }
+
+  if (sortBy === "installSize") {
+    return (
+      (right.manifest?.installSizeBytes ?? 0) - (left.manifest?.installSizeBytes ?? 0) ||
+      collator.compare(left.catalog.name, right.catalog.name)
+    );
+  }
+
+  if (sortBy === "status") {
+    return shopStatusRank(left) - shopStatusRank(right) || collator.compare(left.catalog.name, right.catalog.name);
+  }
+
+  return (
+    relevanceScore(right, search, t) - relevanceScore(left, search, t) ||
+    collator.compare(left.catalog.name, right.catalog.name)
+  );
+}
+
+function shopStatusRank(item: ContentView) {
+  const status = getGameStatus(item);
+  if (status === "updateAvailable") return 0;
+  if (status === "installed") return 1;
+  if (item.state.added) return 2;
+  return 3;
+}
+
+function toDateScore(value: string) {
+  const parsed = new Date(value).getTime();
+  return Number.isNaN(parsed) ? 0 : parsed;
+}
+
+function relevanceScore(item: ContentView, search: string, t: ReturnType<typeof useI18n>["t"]) {
+  if (!search) return 0;
+
+  let score = 0;
+  const name = item.catalog.name.toLowerCase();
+  const developer = item.catalog.developer.toLowerCase();
+  const categories = item.catalog.categories.map((entry) => entry.toLowerCase());
+  const tags = item.catalog.tags.map((tag) => getTagLabel(tag.id, t).toLowerCase());
+  const description = item.catalog.description.toLowerCase();
+
+  if (name === search) score += 120;
+  else if (name.startsWith(search)) score += 80;
+  else if (name.includes(search)) score += 50;
+
+  if (developer.includes(search)) score += 20;
+  if (categories.some((entry) => entry.includes(search))) score += 16;
+  if (tags.some((entry) => entry.includes(search))) score += 16;
+  if (description.includes(search)) score += 8;
+  if (item.state.added) score += 3;
+
+  return score;
+}
+
   function FeaturedShopCard({
     item,
     busy,
@@ -311,9 +441,20 @@ export function ShopView({ setRoute }: { setRoute: (route: AppRoute) => void }) 
           </div>
           <div className="shop-featured__actions">
             {isInstalled ? (
-              <button className="button button--primary" disabled={actionBusy} onClick={() => void onPlay()} type="button">
-                <Play size={16} />
-                {t("common.actions.launch")}
+              <button
+                className={`button ${item.isRunning ? "button--danger" : "button--primary"}`}
+                disabled={actionBusy}
+                onClick={() => void onPlay()}
+                type="button"
+              >
+                {item.isRunning ? (
+                  t("common.actions.closeGame")
+                ) : (
+                  <>
+                    <Play size={16} />
+                    {t("common.actions.launch")}
+                  </>
+                )}
               </button>
             ) : (
               <button className="button button--primary" disabled={actionBusy} onClick={() => void onInstall()} type="button">

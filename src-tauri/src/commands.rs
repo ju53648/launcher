@@ -1,6 +1,7 @@
 use tauri::State;
 
 use crate::{
+    game_catalog::{refresh_game_catalog, verify_installed_game_health},
     installer::{
         cancel_job as cancel_install_job, clear_completed_jobs as clear_finished_jobs,
         move_install_item as move_install, start_install_job,
@@ -14,7 +15,10 @@ use crate::{
     manifest::find_manifest,
     models::{AppLanguage, CommandOk, InstallJob, LauncherSnapshot},
     paths::recommended_library_path,
-    process::{launch_item as spawn_item_process, open_install_folder as open_folder},
+    process::{
+        close_item as stop_item_process, launch_item as spawn_item_process,
+        open_install_folder as open_folder,
+    },
     storage::{CommandError, LauncherRuntime, Result},
 };
 
@@ -262,6 +266,14 @@ pub fn launch_item(state: State<'_, LauncherRuntime>, item_id: String) -> Result
 }
 
 #[tauri::command]
+pub fn close_item(state: State<'_, LauncherRuntime>, item_id: String) -> Result<CommandOk> {
+    stop_item_process(&state, &item_id)?;
+    Ok(CommandOk {
+        message: "Item closed".into(),
+    })
+}
+
+#[tauri::command]
 pub fn open_install_folder(
     state: State<'_, LauncherRuntime>,
     item_id: String,
@@ -290,8 +302,30 @@ pub async fn check_launcher_updates(
 }
 
 #[tauri::command]
-pub fn check_item_updates(state: State<'_, LauncherRuntime>) -> Result<LauncherSnapshot> {
-    state.append_log("INFO", "Item update check requested");
+pub async fn check_item_updates(state: State<'_, LauncherRuntime>) -> Result<LauncherSnapshot> {
+    state.append_log("INFO", "Game catalog refresh requested");
+
+    let refresh_report = refresh_game_catalog(&state).await?;
+    if refresh_report.sources_checked > 0 {
+        state.append_log(
+            "INFO",
+            &format!(
+                "Checked {} remote game catalog source(s); wrote {} manifest(s)",
+                refresh_report.sources_checked, refresh_report.manifests_written
+            ),
+        );
+    }
+
+    for error in refresh_report.source_errors {
+        state.append_log("WARN", &error);
+    }
+
+    let changed = verify_installed_game_health(&state)?;
+    state.append_log(
+        "INFO",
+        &format!("Verified installed game health; {} item(s) changed status", changed),
+    );
+
     state.build_snapshot()
 }
 

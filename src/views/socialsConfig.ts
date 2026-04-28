@@ -13,7 +13,7 @@ export const socialPlatforms: SocialPlatform[] = [
     name: "Discord",
     description:
       "Join the Lumorix community, chat with others, and stay connected.",
-    url: "https://discord.gg/mBDAuWywBf"
+    url: "https://discord.gg/zWZzDpu6bu"
   },
   {
     id: "youtube",

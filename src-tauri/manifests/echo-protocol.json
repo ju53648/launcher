@@ -1,0 +1,54 @@
+﻿{
+  "id": "com.lumorix.echo-protocol",
+  "itemType": "game",
+  "name": "Echo Protocol",
+  "version": "0.2.1",
+  "description": "You don’t remember this case.\nBut it remembers you.\n\nInvestigate a missing person mystery where reality begins to break apart. Files change. Memories shift. People recognize you… even when you’ve never met them.\n\nThe deeper you go, the less you can trust.\n\nNot the evidence.\nNot the people.\n\nNot even yourself.",
+  "developer": "Lumorix",
+  "releaseDate": "2026-04-28",
+  "categories": [
+  "Mystery",
+  "Psychological",
+  "Story"
+  ],
+  "tags": [
+  { "id": "psychological", "weight": 3 },
+  { "id": "story-rich", "weight": 3 },
+  { "id": "choices-matter", "weight": 3 },
+  { "id": "mystery", "weight": 3 },
+  { "id": "horror", "weight": 2 },
+  { "id": "exploration", "weight": 2 }
+  ],
+  "coverImage": "/assets/games/echo-protocol-cover.svg",
+  "bannerImage": "/assets/games/echo-protocol-banner.svg",
+  "iconImage": "/assets/games/echo-protocol-icon.svg",
+  "executable": "EchoProtocol.exe",
+  "installSizeBytes": 131072,
+  "defaultInstallFolder": "Echo Protocol",
+  "supportedActions": [
+    "install",
+    "launch",
+    "repair",
+    "uninstall",
+    "openFolder"
+  ],
+  "installStrategy": {
+    "kind": "directFolder",
+    "sourcePath": "C:\\Users\\julia\\Desktop\\Lumorix Launcher\\distribution\\games\\echo-protocol"
+  },
+  "download": {
+    "kind": "localSynthetic",
+    "integrity": "embedded-echo-protocol-0.2.1"
+  },
+  "changelog": [
+    {
+      "version": "0.2.1",
+      "date": "2026-04-28",
+      "items": [
+        "Introduced direct executable launch.",
+        "Improved installation workflow for faster updates.",
+        "Enhanced launcher integration and stability."
+      ]
+    }
+  ]
+}

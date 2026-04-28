@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" role="img" aria-label="Echo Protocol cover">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#07090d" />
+      <stop offset="55%" stop-color="#131b2b" />
+      <stop offset="100%" stop-color="#23121a" />
+    </linearGradient>
+  </defs>
+  <rect width="960" height="540" fill="url(#bg)" />
+  <circle cx="190" cy="120" r="180" fill="#7eceff" opacity="0.2" />
+  <circle cx="820" cy="470" r="220" fill="#b3162d" opacity="0.22" />
+  <text x="80" y="160" fill="#90d5ff" font-size="22" font-family="Segoe UI, sans-serif" letter-spacing="3">PSYCHOLOGICAL MYSTERY</text>
+  <text x="80" y="250" fill="#f4f7ff" font-size="74" font-weight="700" font-family="Segoe UI, sans-serif">ECHO PROTOCOL</text>
+  <text x="80" y="320" fill="#d8e2f8" font-size="28" font-family="Segoe UI, sans-serif">Reality rewrites itself after every choice.</text>
+</svg>

@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 480" role="img" aria-label="Echo Protocol banner">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#05070b" />
+      <stop offset="50%" stop-color="#121a2d" />
+      <stop offset="100%" stop-color="#260f19" />
+    </linearGradient>
+  </defs>
+  <rect width="1440" height="480" fill="url(#g)" />
+  <rect x="0" y="0" width="1440" height="480" fill="url(#g)" opacity="0.55" />
+  <circle cx="1210" cy="150" r="220" fill="#b3162d" opacity="0.25" />
+  <circle cx="210" cy="360" r="260" fill="#7eceff" opacity="0.15" />
+  <text x="90" y="190" fill="#8fd8ff" font-size="24" font-family="Segoe UI, sans-serif" letter-spacing="4">CASE FILE: MIRA</text>
+  <text x="90" y="280" fill="#f5f8ff" font-size="82" font-weight="700" font-family="Segoe UI, sans-serif">ECHO PROTOCOL</text>
+  <text x="90" y="340" fill="#d7e3ff" font-size="30" font-family="Segoe UI, sans-serif">Remember nothing. Trust no version of truth.</text>
+</svg>

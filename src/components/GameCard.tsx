@@ -1,6 +1,6 @@
 import { Download, Play, Trash2, Wrench } from "lucide-react";
 
-import { formatBytes, formatDate, itemTypeLabel, jobProgressLabel } from "../domain/format";
+import { formatBytes, formatDate, formatPlaytime, itemTypeLabel, jobProgressLabel } from "../domain/format";
 import { getGameStatus, getPrimaryGameAction } from "../domain/selectors";
 import { getTagLabel, sortTagsByWeight } from "../domain/tags";
 import type { ContentView } from "../domain/types";
@@ -13,6 +13,7 @@ export function GameCard({
   onOpen,
   onInstall,
   onLaunch,
+  onClose,
   onUpdate,
   onRepair,
   onUninstall,
@@ -22,6 +23,7 @@ export function GameCard({
   onOpen: () => void;
   onInstall: () => void;
   onLaunch: () => void;
+  onClose: () => void;
   onUpdate: () => void;
   onRepair: () => void;
   onUninstall: () => void;
@@ -33,10 +35,11 @@ export function GameCard({
   const primaryAction = getPrimaryGameAction(item);
   const isInstalled = gameStatus !== "notInstalled";
   const hasActiveJob = Boolean(item.activeJob);
-  const canRemove = Boolean(item.collectionEntry) && !isInstalled && !hasActiveJob;
-  const canUninstall = isInstalled && !hasActiveJob;
+  const canRemove = Boolean(item.collectionEntry) && !isInstalled && !hasActiveJob && !item.isRunning;
+  const canUninstall = isInstalled && !hasActiveJob && !item.isRunning;
   const lastPlayedAt = item.collectionEntry?.lastUsedAt ?? item.installed?.lastLaunchedAt ?? null;
   const addedAt = item.collectionEntry?.addedAt ?? null;
+  const totalPlaytimeMinutes = item.collectionEntry?.totalPlaytimeMinutes ?? 0;
 
   return (
     <article className="game-card">
@@ -103,6 +106,10 @@ export function GameCard({
               <strong>{formatDate(lastPlayedAt, locale, t)}</strong>
             </div>
             <div className="game-card__meta">
+              <span>{t("library.card.playtime")}</span>
+              <strong>{formatPlaytime(totalPlaytimeMinutes, locale, t)}</strong>
+            </div>
+            <div className="game-card__meta">
               <span>{t("library.card.recentlyAdded")}</span>
               <strong>{formatDate(addedAt, locale, t)}</strong>
             </div>
@@ -118,12 +125,17 @@ export function GameCard({
 
         <div className="game-card__actions">
           <div className="game-card__primary-actions">
-            {primaryAction === "launch" && (
-              <button className="button button--primary" onClick={onLaunch} type="button">
-                <Play size={16} />
-                {t("common.actions.launch")}
-              </button>
-            )}
+            {primaryAction === "launch" &&
+              (item.isRunning ? (
+                <button className="button button--danger" onClick={onClose} type="button">
+                  {t("common.actions.closeGame")}
+                </button>
+              ) : (
+                <button className="button button--primary" onClick={onLaunch} type="button">
+                  <Play size={16} />
+                  {t("common.actions.launch")}
+                </button>
+              ))}
             {primaryAction === "install" && manifest && (
               <button className="button button--primary" onClick={onInstall} type="button">
                 <Download size={16} />

@@ -1,36 +1,36 @@
 # Lumorix DropDash
 
-Lumorix DropDash is a tiny local HTML game used to test the Lumorix Launcher install, launch, uninstall, and future update flows.
+Lumorix DropDash is a standalone desktop game package for Lumorix Launcher.
+The gameplay, visuals, controls, and scoring logic are unchanged.
 
 ## Package Contents
 
 ```text
 lumorix-dropdash/
+  runtime/
+    LumorixDropDash.exe
   index.html
   styles.css
   script.js
+  build-tauri.ps1
+  web-dist/
+  tauri-app/
   README.md
 ```
 
 ## Launcher Start Target
 
-The installed launcher target is:
+The launcher starts:
 
 ```text
-bin\launch.cmd
+runtime\LumorixDropDash.exe
 ```
 
-The launch script opens:
-
-```text
-index.html
-```
-
-The launcher should set the game install folder as the working directory. The command file resolves the HTML file relative to itself, so it stays stable if the library folder changes.
+No browser launch script is used anymore.
 
 ## Local Run
 
-Open `index.html` directly in a browser. No server or backend is required.
+Run `LumorixDropDash.exe`.
 
 Controls:
 
@@ -39,8 +39,24 @@ Controls:
 - `Space`: pulse shield
 - `P`: pause
 
-High score is stored in browser `localStorage`.
+## Rebuild Desktop Binary
 
-## Integration Notes
+If you change `index.html`, `styles.css`, or `script.js`, rebuild the desktop binary:
 
-For local launcher testing, this game uses the launcher's `synthetic` install strategy. The manifest writes the game files into the selected Lumorix library and creates `bin\launch.cmd`. Uninstall removes the installed game folder through the normal launcher uninstall path.
+```powershell
+powershell -ExecutionPolicy Bypass -File .\build-tauri.ps1
+```
+
+This updates `LumorixDropDash.exe` in the game root.
+It also publishes the launcher runtime binary to `runtime\LumorixDropDash.exe`.
+
+## Release Upload Artifact
+
+The same build script now also prepares the upload package in:
+
+```text
+release\lumorix-dropdash-win64.zip
+release\lumorix-dropdash-win64.zip.sha256
+```
+
+Upload both files beside the production manifest for the public launcher catalog entry.

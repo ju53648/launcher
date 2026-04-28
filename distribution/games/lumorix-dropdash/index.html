@@ -3,6 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#05070d">
     <title>Lumorix DropDash</title>
     <link rel="stylesheet" href="styles.css">
   </head>
@@ -13,43 +14,43 @@
 
         <div class="hud" aria-live="polite">
           <div>
-            <span class="hud-label">Score</span>
+            <span class="hud-label" id="scoreLabel">Score</span>
             <strong id="score">0</strong>
           </div>
           <div>
-            <span class="hud-label">Best</span>
+            <span class="hud-label" id="bestLabel">Best</span>
             <strong id="bestScore">0</strong>
           </div>
           <div>
-            <span class="hud-label">Shield</span>
+            <span class="hud-label" id="shieldLabel">Shield</span>
             <strong id="shieldStatus">Ready</strong>
           </div>
         </div>
 
         <section id="titleScreen" class="overlay">
-          <p class="eyebrow">Lumorix Test Title</p>
+          <p class="eyebrow" id="titleEyebrow">Lumorix Test Title</p>
           <h1>Lumorix DropDash</h1>
-          <p class="intro">Slip between falling shards, grab bright cores, and keep the dash lane alive.</p>
+          <p class="intro" id="titleIntro">Slip between falling shards, grab bright cores, and keep the dash lane alive.</p>
           <div class="control-grid">
-            <span>A / Left</span>
-            <span>D / Right</span>
-            <span>Space to pulse</span>
+            <span id="controlLeft">A / Left</span>
+            <span id="controlRight">D / Right</span>
+            <span id="controlPulse">Space to pulse</span>
           </div>
           <button id="startButton" type="button">Start Run</button>
         </section>
 
         <section id="gameOverScreen" class="overlay hidden">
-          <p class="eyebrow">Run Complete</p>
-          <h2>Crash Detected</h2>
+          <p class="eyebrow" id="gameOverEyebrow">Run Complete</p>
+          <h2 id="gameOverTitle">Crash Detected</h2>
           <p id="finalScore" class="intro">Score 0</p>
           <button id="restartButton" type="button">Restart</button>
         </section>
       </section>
 
       <footer>
-        <span>Dodge red shards.</span>
-        <span>Collect cyan cores.</span>
-        <span>Press P to pause.</span>
+        <span id="footerAvoid">Dodge red shards.</span>
+        <span id="footerCollect">Collect cyan cores.</span>
+        <span id="footerPause">Press P to pause.</span>
       </footer>
     </main>
 

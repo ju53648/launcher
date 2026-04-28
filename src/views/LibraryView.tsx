@@ -9,19 +9,21 @@ import { InstallDialog } from "../components/InstallDialog";
 import { formatDate, resolveIntlLocale } from "../domain/format";
 import { getGameStatus, getLibraryItems } from "../domain/selectors";
 import { getTagLabel, sortTagsByWeight } from "../domain/tags";
-import type { ContentView } from "../domain/types";
+import type { CatalogItemType, ContentView } from "../domain/types";
 import { useI18n } from "../i18n";
 import { useLauncher } from "../store/LauncherStore";
 
-type LibrarySortKey = "name" | "lastPlayed" | "installed" | "recentlyAdded";
+type LibrarySortKey = "name" | "lastPlayed" | "installed" | "recentlyAdded" | "playtime";
 type InstallFilter = "all" | "installed" | "notInstalled";
 type UpdateFilter = "all" | "updates";
+type TypeFilter = "all" | CatalogItemType;
 
 interface LibraryPreferences {
   search: string;
   sortBy: LibrarySortKey;
   installFilter: InstallFilter;
   updateFilter: UpdateFilter;
+  typeFilter: TypeFilter;
   category: string;
   tag: string;
 }
@@ -32,6 +34,7 @@ const DEFAULT_PREFERENCES: LibraryPreferences = {
   sortBy: "installed",
   installFilter: "all",
   updateFilter: "all",
+  typeFilter: "all",
   category: "all",
   tag: "all"
 };
@@ -42,6 +45,7 @@ export function LibraryView({ setRoute }: { setRoute: (route: AppRoute) => void 
     snapshot,
     installItem,
     launchItem,
+    closeItem,
     updateItem,
     repairItem,
     uninstallItem,
@@ -89,6 +93,9 @@ export function LibraryView({ setRoute }: { setRoute: (route: AppRoute) => void 
         if (preferences.installFilter === "installed" && status === "notInstalled") return false;
         if (preferences.installFilter === "notInstalled" && status !== "notInstalled") return false;
         if (preferences.updateFilter === "updates" && status !== "updateAvailable") return false;
+        if (preferences.typeFilter !== "all" && item.catalog.itemType !== preferences.typeFilter) {
+          return false;
+        }
         if (
           preferences.category !== "all" &&
           !item.catalog.categories.includes(preferences.category)
@@ -122,6 +129,7 @@ export function LibraryView({ setRoute }: { setRoute: (route: AppRoute) => void 
     preferences.search.length > 0 ||
     preferences.installFilter !== "all" ||
     preferences.updateFilter !== "all" ||
+    preferences.typeFilter !== "all" ||
     preferences.category !== "all" ||
     preferences.tag !== "all";
 
@@ -185,6 +193,25 @@ export function LibraryView({ setRoute }: { setRoute: (route: AppRoute) => void 
                 <option value="lastPlayed">{t("library.sort.lastPlayed")}</option>
                 <option value="installed">{t("library.sort.installed")}</option>
                 <option value="recentlyAdded">{t("library.sort.recentlyAdded")}</option>
+                <option value="playtime">{t("library.sort.playtime")}</option>
+              </select>
+            </label>
+
+            <label>
+              <span>{t("library.filters.type")}</span>
+              <select
+                value={preferences.typeFilter}
+                onChange={(event) =>
+                  setPreferences((current) => ({
+                    ...current,
+                    typeFilter: event.target.value as TypeFilter
+                  }))
+                }
+              >
+                <option value="all">{t("library.filters.allTypes")}</option>
+                <option value="game">{t("status.itemType.game")}</option>
+                <option value="tool">{t("status.itemType.tool")}</option>
+                <option value="project">{t("status.itemType.project")}</option>
               </select>
             </label>
 
@@ -314,6 +341,7 @@ export function LibraryView({ setRoute }: { setRoute: (route: AppRoute) => void 
               onOpen={() => setRoute(`item:${item.catalog.id}`)}
               onInstall={() => setInstallTarget(item)}
               onLaunch={() => launchItem(item.catalog.id)}
+              onClose={() => closeItem(item.catalog.id)}
               onUpdate={() => updateItem(item.catalog.id)}
               onRepair={() => repairItem(item.catalog.id)}
               onUninstall={() => setUninstallTarget(item)}
@@ -408,6 +436,14 @@ function compareLibraryItems(
   if (sortBy === "recentlyAdded") {
     return (
       toTime(right.collectionEntry?.addedAt ?? null) - toTime(left.collectionEntry?.addedAt ?? null) ||
+      collator.compare(left.catalog.name, right.catalog.name)
+    );
+  }
+
+  if (sortBy === "playtime") {
+    return (
+      (right.collectionEntry?.totalPlaytimeMinutes ?? 0) -
+        (left.collectionEntry?.totalPlaytimeMinutes ?? 0) ||
       collator.compare(left.catalog.name, right.catalog.name)
     );
   }

@@ -89,6 +89,7 @@ pub struct LauncherRuntime {
     pub installed_items_path: PathBuf,
     pub legacy_installed_db_path: PathBuf,
     pub jobs: Arc<Mutex<Vec<InstallJob>>>,
+    pub running_item_processes: Arc<Mutex<BTreeMap<String, u32>>>,
     pub launcher_update: Arc<Mutex<LauncherUpdateState>>,
 }
 
@@ -120,6 +121,7 @@ impl LauncherRuntime {
             logs_dir,
             manifests_dir,
             jobs: Arc::new(Mutex::new(Vec::new())),
+            running_item_processes: Arc::new(Mutex::new(BTreeMap::new())),
             launcher_update: Arc::new(Mutex::new(LauncherUpdateState {
                 current_version: env!("CARGO_PKG_VERSION").into(),
                 latest_version: None,
@@ -294,6 +296,7 @@ impl LauncherRuntime {
                 discoverable: catalog.is_some(),
                 added_at: Utc::now(),
                 last_used_at: None,
+                total_playtime_minutes: 0,
                 last_error: Some(error.into()),
                 last_error_at: Some(Utc::now()),
                 catalog: catalog.cloned().unwrap_or_else(|| placeholder_catalog_record(item_id)),
@@ -337,6 +340,19 @@ impl LauncherRuntime {
         self.clear_item_error(item_id)
     }
 
+    pub fn add_playtime_minutes(&self, item_id: &str, minutes: u64) -> Result<()> {
+        if minutes == 0 {
+            return Ok(());
+        }
+
+        let mut db = self.load_collection_db()?;
+        if let Some(entry) = db.entries.iter_mut().find(|entry| entry.item_id == item_id) {
+            entry.total_playtime_minutes = entry.total_playtime_minutes.saturating_add(minutes);
+            self.save_collection_db(&db)?;
+        }
+        Ok(())
+    }
+
     pub fn append_log(&self, level: &str, message: &str) {
         let file_name = format!("lumorix-{}.log", Utc::now().format("%Y-%m-%d"));
         let path = self.logs_dir.join(file_name);
@@ -344,6 +360,40 @@ impl LauncherRuntime {
         if let Ok(mut file) = fs::OpenOptions::new().append(true).create(true).open(path) {
             let _ = file.write_all(line.as_bytes());
         }
+    }
+
+    pub fn register_running_item_process(&self, item_id: &str, pid: u32) -> Result<()> {
+        let mut running = self
+            .running_item_processes
+            .lock()
+            .map_err(|_| CommandError::Storage("Running process state is locked".into()))?;
+        running.insert(item_id.to_string(), pid);
+        Ok(())
+    }
+
+    pub fn unregister_running_item_process(&self, item_id: &str) -> Result<()> {
+        let mut running = self
+            .running_item_processes
+            .lock()
+            .map_err(|_| CommandError::Storage("Running process state is locked".into()))?;
+        running.remove(item_id);
+        Ok(())
+    }
+
+    pub fn is_item_process_running(&self, item_id: &str) -> Result<bool> {
+        let running = self
+            .running_item_processes
+            .lock()
+            .map_err(|_| CommandError::Storage("Running process state is locked".into()))?;
+        Ok(running.contains_key(item_id))
+    }
+
+    pub fn running_item_pid(&self, item_id: &str) -> Result<Option<u32>> {
+        let running = self
+            .running_item_processes
+            .lock()
+            .map_err(|_| CommandError::Storage("Running process state is locked".into()))?;
+        Ok(running.get(item_id).copied())
     }
 
     pub fn build_snapshot(&self) -> Result<LauncherSnapshot> {
@@ -383,6 +433,7 @@ impl LauncherRuntime {
                 discoverable: manifest.is_some(),
                 added_at: installed.installed_at,
                 last_used_at: installed.last_launched_at,
+                total_playtime_minutes: 0,
                 last_error: installed.last_error.clone(),
                 last_error_at: installed
                     .last_error
@@ -528,6 +579,7 @@ impl LauncherRuntime {
                     installed,
                     collection_entry,
                     active_job,
+                    is_running: self.is_item_process_running(&item_id).unwrap_or(false),
                     available_update,
                     last_error,
                 }
@@ -577,6 +629,7 @@ impl LauncherRuntime {
                 discoverable: true,
                 added_at: Utc::now(),
                 last_used_at: None,
+                total_playtime_minutes: 0,
                 last_error: None,
                 last_error_at: None,
                 catalog: next_catalog,
@@ -626,6 +679,7 @@ impl LauncherRuntime {
                     discoverable: manifest.is_some(),
                     added_at: entry.added_at,
                     last_used_at: None,
+                    total_playtime_minutes: 0,
                     last_error: None,
                     last_error_at: None,
                     catalog: manifest
@@ -667,6 +721,7 @@ impl LauncherRuntime {
                 discoverable: manifest.is_some(),
                 added_at: item.installed_at,
                 last_used_at: None,
+                total_playtime_minutes: 0,
                 last_error: item.last_error.clone(),
                 last_error_at: item
                     .last_error

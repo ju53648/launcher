@@ -1,0 +1,94 @@
+name: Release Game
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: windows-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build and package game
+        run: npm run package
+
+      - name: Get SHA256
+        id: sha256
+        run: |
+          $sha = Get-Content 'game.zip.sha256'
+          echo "hash=$sha" | Out-String | Add-Content $env:GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            game.zip
+            game.zip.sha256
+          body: |
+            🎮 Game Release ${{ github.ref_name }}
+            
+            **SHA256**: ${{ steps.sha256.outputs.hash }}
+            
+            ✅ Ready to add to Lumorix Launcher
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate Manifest
+        run: |
+          $version = "${{ github.ref_name }}".TrimStart('v')
+          $sha = Get-Content 'game.zip.sha256'
+          $size = (Get-Item 'game.zip').Length
+          
+          $manifest = @{
+              id = "com.lumorix.my-game"
+              name = "My Game"
+              version = $version
+              description = "My awesome Lumorix game"
+              developer = "Your Name"
+              releaseDate = Get-Date -Format "yyyy-MM-dd"
+              tags = @("Action", "Arcade")
+              coverImage = "/assets/games/my-game-cover.svg"
+              bannerImage = "/assets/games/my-game-banner.svg"
+              iconImage = "/assets/games/my-game-icon.svg"
+              executable = "index.html"
+              installSizeBytes = $size
+              defaultInstallFolder = "My Game"
+              supportedActions = @("install", "launch", "uninstall", "openFolder")
+              installStrategy = @{
+                  kind = "zipArchive"
+                  rootFolder = "."
+              }
+              download = @{
+                  kind = "httpArchive"
+                  url = "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/game.zip"
+                  sha256 = $sha
+                  sizeBytes = $size
+              }
+              changelog = @(@{
+                  version = $version
+                  date = Get-Date -Format "yyyy-MM-dd"
+                  items = @("Release $version")
+              })
+          } | ConvertTo-Json -Depth 10
+          
+          $manifest | Out-File 'manifest.json'
+          Write-Host "✓ Generated manifest.json"
+
+      - name: Upload Manifest to Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: manifest.json
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

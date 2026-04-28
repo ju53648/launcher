@@ -10,6 +10,7 @@ use crate::{
 
 const EMBEDDED_MANIFESTS: &[&str] = &[
     include_str!("../manifests/lumorix-dropdash.json"),
+    include_str!("../manifests/echo-protocol.json"),
 ];
 
 #[derive(Debug, Clone)]
@@ -106,7 +107,8 @@ pub fn find_manifest(runtime: &LauncherRuntime, item_id: &str) -> Result<Content
 }
 
 fn parse_manifest(raw: &str) -> Result<ContentManifest> {
-    serde_json::from_str(raw)
+    let normalized = raw.trim_start_matches('\u{feff}');
+    serde_json::from_str(normalized)
         .map_err(|err| CommandError::Manifest(format!("Manifest JSON is invalid: {err}")))
 }
 
@@ -170,6 +172,21 @@ pub fn validate_manifest(manifest: &ContentManifest) -> Result<()> {
 
             for file in content_files {
                 safe_join(install_root, &file.path)?;
+            }
+        }
+        InstallStrategy::DirectFolder { source_path } => {
+            let source = std::path::Path::new(source_path);
+            if source_path.trim().is_empty() {
+                return Err(CommandError::Manifest(format!(
+                    "Direct folder install strategy for {} requires a sourcePath",
+                    manifest.id
+                )));
+            }
+            if !source.is_absolute() {
+                return Err(CommandError::Manifest(format!(
+                    "Direct folder sourcePath for {} must be an absolute path",
+                    manifest.id
+                )));
             }
         }
         InstallStrategy::ZipArchive { .. } => {}

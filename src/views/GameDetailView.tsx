@@ -1,4 +1,4 @@
-import { ArrowLeft, Download, FolderOpen, Play, Plus, RefreshCw, Trash2, Wrench } from "lucide-react";
+import { ArrowLeft, Download, FolderOpen, Play, Plus, RefreshCw, Trash2, Wrench, X } from "lucide-react";
 import { useState } from "react";
 
 import { ConfirmDialog } from "../components/ConfirmDialog";
@@ -27,6 +27,7 @@ export function GameDetailView({
     addItemToLibrary,
     installItem,
     launchItem,
+    closeItem,
     updateItem,
     repairItem,
     uninstallItem,
@@ -112,12 +113,18 @@ export function GameDetailView({
             {t("common.actions.install")}
           </button>
         )}
-        {primaryAction === "launch" && (
-          <button className="button button--primary" onClick={() => launchItem(item.catalog.id)} type="button">
-            <Play size={16} />
-            {t("common.actions.launch")}
-          </button>
-        )}
+        {primaryAction === "launch" &&
+          (item.isRunning ? (
+            <button className="button button--danger" onClick={() => closeItem(item.catalog.id)} type="button">
+              <X size={16} />
+              {t("common.actions.closeGame")}
+            </button>
+          ) : (
+            <button className="button button--primary" onClick={() => launchItem(item.catalog.id)} type="button">
+              <Play size={16} />
+              {t("common.actions.launch")}
+            </button>
+          ))}
         {primaryAction === "update" && (
           <button className="button button--primary" onClick={() => updateItem(item.catalog.id)} type="button">
             <RefreshCw size={16} />
@@ -142,7 +149,7 @@ export function GameDetailView({
             </button>
             <button
               className="button button--danger"
-              disabled={hasActiveJob}
+              disabled={hasActiveJob || item.isRunning}
               onClick={() => setUninstallOpen(true)}
               type="button"
             >
@@ -154,7 +161,7 @@ export function GameDetailView({
         {item.collectionStatus !== "notAdded" && (
           <button
             className="button button--ghost"
-            disabled={isInstalled || hasActiveJob}
+            disabled={isInstalled || hasActiveJob || item.isRunning}
             onClick={() => setRemoveOpen(true)}
             type="button"
           >

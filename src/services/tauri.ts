@@ -83,6 +83,7 @@ export const tauriApi = {
   uninstallItem: (itemId: string) =>
     callCommand<LauncherSnapshot>("uninstall_item", { itemId }),
   launchItem: (itemId: string) => callCommand<CommandOk>("launch_item", { itemId }),
+  closeItem: (itemId: string) => callCommand<CommandOk>("close_item", { itemId }),
   openInstallFolder: (itemId: string) =>
     callCommand<CommandOk>("open_install_folder", { itemId }),
   checkLauncherUpdates: () => callCommand<LauncherSnapshot>("check_launcher_updates"),

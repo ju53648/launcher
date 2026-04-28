@@ -12,6 +12,117 @@ const bestScoreEl = document.getElementById("bestScore");
 const shieldStatusEl = document.getElementById("shieldStatus");
 const finalScoreEl = document.getElementById("finalScore");
 
+const translations = {
+  en: {
+    scoreLabel: "Score",
+    bestLabel: "Best",
+    shieldLabel: "Shield",
+    ready: "Ready",
+    titleEyebrow: "Lumorix Test Title",
+    titleIntro: "Slip between falling shards, grab bright cores, and keep the dash lane alive.",
+    controlLeft: "A / Left",
+    controlRight: "D / Right",
+    controlPulse: "Space to pulse",
+    startButton: "Start Run",
+    gameOverEyebrow: "Run Complete",
+    gameOverTitle: "Crash Detected",
+    restartButton: "Restart",
+    footerAvoid: "Dodge red shards.",
+    footerCollect: "Collect cyan cores.",
+    footerPause: "Press P to pause.",
+    finalScore: "Score",
+    paused: "Paused"
+  },
+  de: {
+    scoreLabel: "Punktzahl",
+    bestLabel: "Bestwert",
+    shieldLabel: "Schild",
+    ready: "Bereit",
+    titleEyebrow: "Lumorix Testtitel",
+    titleIntro: "Weiche fallenden Splittern aus, sammle leuchtende Kerne und halte die Dash-Spur am Leben.",
+    controlLeft: "A / Links",
+    controlRight: "D / Rechts",
+    controlPulse: "Leertaste fuer Impuls",
+    startButton: "Run starten",
+    gameOverEyebrow: "Durchlauf beendet",
+    gameOverTitle: "Crash erkannt",
+    restartButton: "Neustart",
+    footerAvoid: "Weiche roten Splittern aus.",
+    footerCollect: "Sammle cyanfarbene Kerne.",
+    footerPause: "Druecke P zum Pausieren.",
+    finalScore: "Punktzahl",
+    paused: "Pausiert"
+  },
+  pl: {
+    scoreLabel: "Wynik",
+    bestLabel: "Rekord",
+    shieldLabel: "Tarcza",
+    ready: "Gotowe",
+    titleEyebrow: "Lumorix Tytul Testowy",
+    titleIntro: "Unikaj spadajacych odlamkow, zbieraj jasne rdzenie i utrzymaj pas dash przy zyciu.",
+    controlLeft: "A / Lewo",
+    controlRight: "D / Prawo",
+    controlPulse: "Spacja aby pulsowac",
+    startButton: "Start",
+    gameOverEyebrow: "Koniec biegu",
+    gameOverTitle: "Wykryto crash",
+    restartButton: "Restart",
+    footerAvoid: "Unikaj czerwonych odlamkow.",
+    footerCollect: "Zbieraj cyjanowe rdzenie.",
+    footerPause: "Nacisnij P, aby pauzowac.",
+    finalScore: "Wynik",
+    paused: "Pauza"
+  }
+};
+
+function resolveLanguage(rawValue) {
+  const normalized = String(rawValue || "").trim().toLowerCase();
+  if (normalized.startsWith("de")) return "de";
+  if (normalized.startsWith("pl")) return "pl";
+  return "en";
+}
+
+let currentLanguage = resolveLanguage(window.__LUMORIX_LANGUAGE || navigator.language || "en");
+
+function t(key) {
+  return translations[currentLanguage]?.[key] ?? translations.en[key] ?? key;
+}
+
+function applyStaticTranslations() {
+  document.documentElement.lang = currentLanguage;
+
+  const textTargets = {
+    scoreLabel: "scoreLabel",
+    bestLabel: "bestLabel",
+    shieldLabel: "shieldLabel",
+    titleEyebrow: "titleEyebrow",
+    titleIntro: "titleIntro",
+    controlLeft: "controlLeft",
+    controlRight: "controlRight",
+    controlPulse: "controlPulse",
+    gameOverEyebrow: "gameOverEyebrow",
+    gameOverTitle: "gameOverTitle",
+    footerAvoid: "footerAvoid",
+    footerCollect: "footerCollect",
+    footerPause: "footerPause"
+  };
+
+  Object.entries(textTargets).forEach(([id, key]) => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.textContent = t(key);
+    }
+  });
+
+  startButton.textContent = t("startButton");
+  restartButton.textContent = t("restartButton");
+}
+
+function renderStatusText() {
+  finalScoreEl.textContent = `${t("finalScore")} ${Math.floor(state.score)}`;
+  shieldStatusEl.textContent = state.pulseCooldown <= 0 ? t("ready") : `${state.pulseCooldown.toFixed(1)}s`;
+}
+
 const WIDTH = canvas.width;
 const HEIGHT = canvas.height;
 const STORAGE_KEY = "lumorix-dropdash-best";
@@ -82,7 +193,7 @@ function gameOver() {
   state.best = Math.max(state.best, Math.floor(state.score));
   saveBestScore(state.best);
   bestScoreEl.textContent = state.best;
-  finalScoreEl.textContent = `Score ${Math.floor(state.score)}`;
+  renderStatusText();
   gameOverScreen.classList.remove("hidden");
 }
 
@@ -329,14 +440,14 @@ function draw() {
     ctx.fillStyle = "#ffffff";
     ctx.font = "800 48px system-ui";
     ctx.textAlign = "center";
-    ctx.fillText("Paused", WIDTH / 2, HEIGHT / 2);
+    ctx.fillText(t("paused"), WIDTH / 2, HEIGHT / 2);
   }
 
   ctx.restore();
 
   scoreEl.textContent = Math.floor(state.score);
   bestScoreEl.textContent = state.best;
-  shieldStatusEl.textContent = state.pulseCooldown <= 0 ? "Ready" : `${state.pulseCooldown.toFixed(1)}s`;
+  renderStatusText();
 }
 
 let last = performance.now();
@@ -370,5 +481,14 @@ window.addEventListener("keydown", (event) => {
 window.addEventListener("keyup", (event) => {
   keys.delete(event.key.toLowerCase());
 });
+
+window.addEventListener("lumorix-language", (event) => {
+  currentLanguage = resolveLanguage(event.detail);
+  applyStaticTranslations();
+  renderStatusText();
+});
+
+applyStaticTranslations();
+renderStatusText();
 
 requestAnimationFrame(loop);

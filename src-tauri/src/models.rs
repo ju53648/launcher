@@ -170,6 +170,8 @@ pub struct CollectionEntry {
     pub discoverable: bool,
     pub added_at: DateTime<Utc>,
     pub last_used_at: Option<DateTime<Utc>>,
+    #[serde(default)]
+    pub total_playtime_minutes: u64,
     pub last_error: Option<String>,
     pub last_error_at: Option<DateTime<Utc>>,
     pub catalog: CatalogItemRecord,
@@ -258,6 +260,10 @@ pub enum InstallStrategy {
         #[serde(rename = "contentFiles", alias = "content_files")]
         content_files: Vec<SyntheticFile>,
     },
+    DirectFolder {
+        #[serde(rename = "sourcePath", alias = "source_path")]
+        source_path: String,
+    },
     ZipArchive {
         #[serde(rename = "rootFolder", alias = "root_folder")]
         root_folder: Option<String>,
@@ -319,6 +325,7 @@ pub struct ContentView {
     pub installed: Option<InstalledItem>,
     pub collection_entry: Option<CollectionEntry>,
     pub active_job: Option<InstallJob>,
+    pub is_running: bool,
     pub available_update: Option<ContentUpdateInfo>,
     pub last_error: Option<String>,
 }

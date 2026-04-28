@@ -1,0 +1,17 @@
+{
+  "name": "@lumorix/game-template",
+  "version": "1.0.0",
+  "description": "Template for creating Lumorix launcher-compatible games",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "package": "npm run build && npm run package:zip",
+    "package:zip": "powershell -Command \"& { $ErrorActionPreference = 'Stop'; $buildDir = 'dist'; if (Test-Path 'game.zip') { Remove-Item 'game.zip' }; Compress-Archive -Path $buildDir\\* -DestinationPath 'game.zip'; (Get-FileHash 'game.zip' -Algorithm SHA256).Hash.ToLower() | Out-File 'game.zip.sha256'; Write-Host \\\"✓ Packaged game.zip\\\"; Write-Host \\\"✓ SHA256: \\\" -NoNewline; Get-Content 'game.zip.sha256'; }\""
+  },
+  "devDependencies": {
+    "vite": "^5.0.0",
+    "typescript": "^5.0.0"
+  }
+}

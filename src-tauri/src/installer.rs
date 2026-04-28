@@ -159,6 +159,12 @@ pub fn verify_item(runtime: &LauncherRuntime, item_id: &str) -> Result<Installed
 }
 
 pub fn uninstall_item(runtime: &LauncherRuntime, item_id: &str) -> Result<()> {
+    if runtime.is_item_process_running(item_id)? {
+        return Err(CommandError::Install(
+            "Close the running item before uninstalling it".into(),
+        ));
+    }
+
     let jobs = runtime
         .jobs
         .lock()
@@ -341,6 +347,9 @@ async fn run_install_pipeline(
                 &manifest.version,
             )
             .await?;
+        }
+        (InstallStrategy::DirectFolder { source_path }, _) => {
+            install_direct_folder_item(&runtime, &job_id, source_path, &install_path).await?;
         }
         (InstallStrategy::ZipArchive { root_folder }, Some(archive)) => {
             extract_zip_archive(&runtime, &job_id, archive, &install_path, root_folder.as_deref())?;
@@ -1026,6 +1035,80 @@ async fn install_synthetic_item(
     fs::write(&executable, script).map_err(|err| {
         CommandError::Install(format!("Could not write {}: {err}", executable.display()))
     })?;
+
+    Ok(())
+}
+
+async fn install_direct_folder_item(
+    runtime: &LauncherRuntime,
+    job_id: &str,
+    source_path: &str,
+    install_path: &Path,
+) -> Result<()> {
+    let source = PathBuf::from(source_path);
+    if !source.exists() {
+        return Err(CommandError::Install(format!(
+            "Direct folder source does not exist: {}",
+            source.display()
+        )));
+    }
+    if !source.is_dir() {
+        return Err(CommandError::Install(format!(
+            "Direct folder source is not a directory: {}",
+            source.display()
+        )));
+    }
+
+    let source_size = directory_size(&source);
+    let temp_install = install_path
+        .parent()
+        .unwrap_or_else(|| Path::new("."))
+        .join(format!(".lumorix-stage-{}", Uuid::new_v4()));
+
+    if temp_install.exists() {
+        fs::remove_dir_all(&temp_install).map_err(|err| {
+            CommandError::Install(format!(
+                "Could not clean temp install path {}: {err}",
+                temp_install.display()
+            ))
+        })?;
+    }
+
+    let copy_result = copy_directory_with_progress(runtime, job_id, &source, &temp_install, source_size);
+    if let Err(err) = copy_result {
+        if temp_install.exists() {
+            let _ = fs::remove_dir_all(&temp_install);
+        }
+        return Err(err);
+    }
+
+    verify_copied_directory(&source, &temp_install)?;
+
+    if install_path.exists() {
+        fs::remove_dir_all(install_path).map_err(|err| {
+            CommandError::Install(format!(
+                "Could not replace existing install at {}: {err}",
+                install_path.display()
+            ))
+        })?;
+    }
+
+    fs::rename(&temp_install, install_path).map_err(|err| {
+        CommandError::Install(format!(
+            "Could not finalize direct-folder install at {}: {err}",
+            install_path.display()
+        ))
+    })?;
+
+    update_job(
+        runtime,
+        job_id,
+        InstallPhase::Finalizing,
+        88.0,
+        "Finalizing direct-folder install",
+        source_size,
+        source_size,
+    )?;
 
     Ok(())
 }
