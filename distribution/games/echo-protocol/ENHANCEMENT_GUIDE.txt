@@ -1,0 +1,443 @@
+// ========================================
+// ECHO PROTOCOL v0.7 - ENHANCED GAMEPLAY
+// ========================================
+// NEW FEATURES & IMPROVEMENTS
+// ========================================
+
+/*
+MAJOR UPGRADES:
+
+1. ⏱️ REAL-TIME SHIFT MANAGEMENT
+   - 12-minute shifts with actual time pressure
+   - Each action costs time (2-5 minutes)
+   - Clock runs out = forced ending
+   - Time bonuses for speed runs
+
+2. 🔗 CLUE COMBINATION SYSTEM
+   - Combine 2+ clues for new revelations
+   - Unlocks hidden scenes and paths
+   - Bonus Insight + Score for discoveries
+   - Example: "Photo #12" + "Faserprofil" = "Hafen-Verbindung"
+
+3. 🎯 CONSEQUENCE PREVIEW ON HOVER
+   - Hover over choice = see Shift/Stress/Trust changes
+   - See time cost before committing
+   - See if choice locks you out of other paths
+   - Visual warning system (red=risky, green=safe)
+
+4. 📱 INCOMING MESSAGE SYSTEM
+   - Text messages from Jonas/Dispatch
+   - Radio intercepts with secrets
+   - System alerts for discoveries
+   - Mira's cryptic signals as you progress
+   - Messages appear as notifications mid-game
+
+5. 🏆 ENHANCED RANK & ACHIEVEMENT SYSTEM
+   - Ranks: Cadet → Officer → Detective → Senior → Expert → Master → Architect
+   - 40+ achievements with rewards
+   - Unlock special endings based on rank
+   - Score multiplier based on difficulty choices
+
+6. 🎮 FAST NAVIGATION SYSTEM
+   - Quick-jump buttons for recently visited scenes
+   - Breadcrumb trail of exploration
+   - Faster case file jumps
+   - Keyboard shortcuts (F1-F8 for quick scenes)
+
+7. 🔥 HARD MODE & SPEEDRUN
+   - Hard Mode: -50% time, +stress on wrong choices, locked saves
+   - Speedrun Mode: 6-minute shifts, instant endings
+   - Challenges unlock special endings
+   - Leaderboard for fastest clears
+
+8. 🌟 NEW STORY ELEMENTS
+   - 15+ new scenes branching from clue combos
+   - Mira now has active dialogue trees
+   - Jonas has 5 secret ending routes
+   - Archive contains hidden meta-narrative
+
+9. 🎨 ENHANCED UI/UX
+   - Smooth transitions between scenes
+   - Choice highlighting system
+   - Better meter animations
+   - Dark mode cinematic layout
+   - Accessibility improvements
+
+10. 🎵 AUDIO HOOKS PREPARED
+    - Message notification sounds
+    - Clock tick feedback
+    - Choice consequence sounds
+    - Ending music triggers
+    - Note: Audio implementation ready for future patch
+
+========================================
+GAMEPLAY IMPROVEMENTS:
+========================================
+
+A. DECISION CONSEQUENCES:
+   - Every choice now shows exact deltas
+   - Locked paths become visible
+   - Optional paths highlighted
+   - Risk/Reward clearly displayed
+
+B. TIME MANAGEMENT:
+   - Status bar shows time remaining
+   - Color changes as time runs out (green→yellow→red)
+   - Each choice shows time cost
+   - Final 3 minutes: urgent mode
+
+C. CLUE DISCOVERY:
+   - New "Combine Clues" button appears when 2+ are selected
+   - Instant resolution with lore reveal
+   - Bonus score: 25pts + Insight+2
+   - Can trigger new scenes directly
+
+D. BETTER SAVE SYSTEM:
+   - Auto-saves at scene transitions
+   - Quick-save (Ctrl+S)
+   - Quick-load (Ctrl+L)
+   - Slot descriptions show last choice & time
+   - Can load without overwriting
+
+E. CASE FILE ORGANIZATION:
+   - Search & filter clues by type
+   - Linked clues highlighted
+   - Timeline view of discoveries
+   - Suspect connection map
+
+F. ACHIEVEMENT TRACKING:
+   - Progress bars for each achievement
+   - Notifications when completed
+   - Bonus score multipliers
+   - Special badges in save file
+
+========================================
+NEW SCENE BRANCHES (Examples):
+========================================
+
+If you combine "Photo #12" + "Faserprofil":
+→ Opens HAFEN-VERBINDUNG scene
+  "The scarf in the photo matches the fiber sample from the harbor."
+  +Insight 2, +Score 25
+  → New choice: "Follow the harbor thread" leads to faster warehouse path
+
+If you combine "Band 08" + "Spiegeltext":
+→ Opens MIRROR-REVELATION scene
+  "The tape is a record of what the mirror saw."
+  +Shift 1, +Score 30
+  → Unlocks "Blindkammer" early access (normally late-game)
+
+If you combine "Jonas' Badge" + "Badge Abweichung":
+→ Opens JONAS-DOUBT scene
+  "Your hand on the badge. Jonas' signature on the log."
+  +Trust -2, +Score 20
+  → Affects Jonas interview outcomes
+
+========================================
+INCOMING MESSAGES SYSTEM:
+========================================
+
+DISPATCH (Radio Channel 4):
+[02:28] "Unit Voss, Harbor patrol reports activity at Warehouse 17."
+[03:15] "Silent alarm triggered at Harbor. Need confirmation."
+[04:02] "Voss, where's your status? Signal weak."
+
+JONAS (Text):
+[02:45] "Found something in the archive. Sector 3. Don't go alone."
+[03:30] "Elias... call me."
+[04:15] "I know what you're looking for. Stop here."
+
+SYSTEM ALERTS:
+[03:00] "CLUE COMBO DISCOVERED: 'Photo Evidence' linked to 'Fiber Analysis'"
+[03:45] "NEW SCENE UNLOCKED: Harbor Connection"
+[04:30] "SHIFT INSTABILITY: Reality Shift +1"
+
+MIRA'S SIGNAL (Late Game - Cryptic):
+[05:00] "I was waiting. You're late again."
+[06:15] "The tower is listening. Don't trust the intercom."
+[07:30] "If you reach the basement, let me go."
+
+========================================
+RANK PROGRESSION:
+========================================
+
+CADET (0 pts)
+→ Starts here
+→ Limited case access
+→ Can't read advanced archives
+
+OFFICER (500 pts)
+→ Full case access
+→ Unlock easy endings
+→ Basic achievements available
+
+DETECTIVE (1,200 pts)
+→ Can combine clues
+→ Unlock detective-only scenes
+→ Can attempt Hard Mode
+
+SENIOR INVESTIGATOR (2,100 pts)
+→ +20% score multiplier
+→ New dialogue options
+→ Unlock true endings
+
+EXPERT (3,300 pts)
+→ +30% score multiplier
+→ Can read encrypted archives
+→ Meta-narrative access
+
+MASTER (4,800 pts)
+→ +50% score multiplier
+→ Speed-run mode
+→ Secret endings unlocked
+
+ARCHITECT (6,500 pts)
+→ Become part of the story
+→ New final ending available
+→ Control the echo loop
+
+========================================
+ACHIEVEMENT EXAMPLES (40 total):
+========================================
+
+• First Step (10pts) - Make your first choice
+• Time Keeper (50pts) - Finish in under 300 minutes
+• Pattern Seeker (75pts) - Find 3 clue combos
+• Speed Runner (100pts) - Finish in under 150 minutes
+• Case Solver (150pts) - Unlock all scenes in a district
+• Mira Believer (50pts) - Believe Mira's account
+• Jonas Truther (50pts) - Uncover Jonas' secret
+• Deep Diver (200pts) - Complete Deep Archive fully
+• Truth Seeker (100pts) - Choose "Offenlegung" ending
+• Containment Expert (100pts) - Choose "Containment" ending
+• Loop Master (150pts) - Choose "Echo-Schleife" ending
+• Architect's Legacy (300pts) - Reach Architect rank
+• Perfect Run (250pts) - 100% accuracy/no wrong choices
+• Hard Mode Survivor (200pts) - Beat game on Hard
+• Speedrunner (300pts) - Beat game in speedrun mode
+• Mira's Friend (75pts) - Unlock "Mira Leaves" ending
+• Echo Chamber (100pts) - Find all meta-narrative pieces
+• Signal Interceptor (50pts) - Collect all hidden messages
+• Contradiction Solver (60pts) - Resolve 5 contradictions
+• Time Bonus (40pts) - Finish with 100+ minutes remaining
+
+========================================
+HARD MODE SPECIFICS:
+========================================
+
+Enabled after completing game once.
+
+Changes:
+- Only 360 minutes (6 hours) instead of 720
+- Stress increases +50% on wrong choices
+- Trust penalties doubled
+- Can't save/load during playthrough
+- One save slot per Hard Mode run
+- Wrong decisions have immediate consequences
+- Some choices permanently locked out
+- Archives require 2+ Insight to access
+- Endings much harder to achieve
+
+Rewards:
+- +100% score multiplier
+- Special "Hardened" badge on file
+- Unlock "Architect's Regret" secret ending
+- Bonus achievements
+
+========================================
+SPEEDRUN MODE:
+========================================
+
+Ultra-hardcore challenge.
+
+Rules:
+- 360 minutes total
+- No message distractions
+- No pause menu (except saves)
+- All mistakes instant consequences
+- Direct path to ending only
+- No clue combo bonuses
+- Stock phrase everything
+
+Times to beat:
+- Bronze: < 200 min
+- Silver: < 120 min
+- Gold: < 75 min
+- Platinum: < 45 min
+
+Gold+ unlocks "Echo Protocol: Mastered" ending
+where you become the next Architect.
+
+========================================
+MIRA'S NEW DIALOGUE TREE:
+========================================
+
+In the red room (endingLoop path):
+
+CHOICE 1: "Mira, was ist wirklich passiert?"
+  → Mira explains the loop from her perspective
+  → +Insight 3, Shift +1
+  → Opens new scenes about her role
+
+CHOICE 2: "Kannst du mir vergeben?"
+  → Emotional confrontation
+  → Trust/Integrity dependent
+  → Different outcomes based on stats
+  → Can lead to "Good Ending"
+
+CHOICE 3: "Ich werde dich hier rausholen."
+  → Commitment to escape together
+  → Requires high Integrity (8+)
+  → Unlocks "True Escape" ending
+  → New post-game content
+
+CHOICE 4: "Das war alles nicht echt."
+  → Denial path
+  → Stress damage
+  → Leads to "Erase" ending variant
+  → Shows consequences of avoidance
+
+========================================
+UI ENHANCEMENTS:
+========================================
+
+Choice Buttons Now Show:
+- Choice text (as before)
+- Time cost: "⏱️ -3 min"
+- Consequence preview: "⬆️Stress +1 ❤️-1"
+- Lock indicator: "🔒 Requires Access 3"
+- Combo hint: "💡 Pairs with 'Photo #12'"
+
+Choice Highlighting:
+- Optimal choice: Green glow
+- Risky choice: Orange glow
+- Locked choice: Red glow (disabled)
+- Bonus combo: Blue glow
+
+Meters Now:
+- Animate smoothly on change
+- Show delta (+1, -2, etc)
+- Color code (red=danger, green=safe, yellow=caution)
+- Percentage indicators
+
+Messages Panel:
+- Grouped by sender
+- Search functionality
+- Mark as read/unread
+- Replay old messages
+- Archive for later
+
+========================================
+KEYBOARD SHORTCUTS:
+========================================
+
+Ctrl+S = Quick Save
+Ctrl+L = Quick Load
+Ctrl+P = Case Palette (clues overview)
+Ctrl+M = Messages Center
+Ctrl+R = Restart Scene
+Ctrl+A = Achievements
+Ctrl+T = Toggle Time Pressure Display
+F1-F8 = Quick jump to last visited scenes
+ESC = Open menu
+
+========================================
+VISUAL POLISH:
+========================================
+
+Choice Transitions:
+- Fade out scene
+- Slide in new scene from bottom
+- Pulse effect on new choices
+- Smooth meter animations
+
+Time Warning:
+- Green bar (0-300 min)
+- Yellow bar (300-60 min)
+- Red bar with pulse (60-0 min)
+- Flashing when < 10 min
+
+Message Notifications:
+- Slide in from top-right
+- Auto-fade after 5 seconds
+- Priority color coding
+- Expandable for full text
+
+Clue Discovery:
+- Zoom effect on new clue
+- Gold sparkle animation
+- Achievement unlock sound (ready)
+- Combo notification
+
+========================================
+CODE INTEGRATION NOTES:
+========================================
+
+To integrate these features:
+
+1. Add new properties to EchoForm:
+   private ShiftClock _clock;
+   private RankProgress _rank;
+   private List<Achievement> _achievements;
+   private MessageCenter _messages;
+
+2. Update choice buttons:
+   - Add hover event for consequence preview
+   - Add time cost display
+   - Add lock state checking
+   - Add combo hint system
+
+3. Modify Render():
+   - Check time before every action
+   - Show time cost warnings
+   - Update rank display
+   - Process message queue
+
+4. Add new scene check:
+   - On clue discovery, check combos
+   - Notify player of new paths
+   - Unlock hidden scenes
+   - Award bonus points
+
+5. Save system:
+   - Include clock state
+   - Include rank progress
+   - Include achievements earned
+   - Include message history
+
+6. Hard Mode:
+   - Set initial time to 360
+   - Double stress penalties
+   - Lock save/load
+   - Modify choice locking
+
+========================================
+POST-LAUNCH ROADMAP:
+========================================
+
+Patch 0.7.1:
+- Audio system implementation
+- 10+ new clue combos
+- Additional achievements
+- Bug fixes
+
+Patch 0.7.2:
+- True Mira questline (10+ scenes)
+- Jonas secret endings
+- Expanded Deep Archive
+- Leaderboard system
+
+Patch 0.8:
+- Mod support
+- Player-created challenges
+- Community ending voting
+- Graphical overhaul
+
+Version 1.0:
+- Full voice acting
+- Orchestral soundtrack
+- Steam integration
+- Trading card system
+
+========================================
+*/

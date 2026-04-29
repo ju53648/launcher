@@ -743,6 +743,20 @@ namespace EchoProtocol
 
     public class EchoForm : Form
     {
+        private class IncomingMessage
+        {
+            public string Sender;
+            public string Content;
+            public bool IsRead;
+        }
+
+        private enum GameMode
+        {
+            Normal,
+            Hard,
+            Speedrun
+        }
+
         private const int SlotCount = 8;
         private const int ArchiveDistrictCount = 16;
         private const int ArchiveCaseCount = 24;
@@ -773,6 +787,10 @@ namespace EchoProtocol
         private int _score = 0;
         private int _activeSlot = 1;
         private bool _updatingSlots = false;
+        private GameMode _gameMode = GameMode.Normal;
+        private int _shiftTotalMinutes = 720;
+        private int _shiftElapsedMinutes = 0;
+        private int _comboCount = 0;
 
         private Label _stage = new Label();
         private Label _location = new Label();
@@ -786,6 +804,9 @@ namespace EchoProtocol
         private Label _threadSummary = new Label();
         private Label _slotInfo = new Label();
         private Label _buildMark = new Label();
+        private Label _modeDisplay = new Label();
+        private Label _timeDisplay = new Label();
+        private Label _messageDisplay = new Label();
 
         private FlowLayoutPanel _choices = new FlowLayoutPanel();
         private FlowLayoutPanel _caseTabs = new FlowLayoutPanel();
@@ -794,9 +815,13 @@ namespace EchoProtocol
         private NarrativePanel _narrative = new NarrativePanel();
         private RichTextBox _caseView = new RichTextBox();
         private Timer _motionTimer = new Timer();
+        private Timer _clockTimer = new Timer();
+        private readonly ToolTip _choicePreview = new ToolTip();
         private string _activeCaseTab = "clue";
         private readonly string _language = ResolveLauncherLanguage();
         private int _motionTick = 0;
+        private readonly List<IncomingMessage> _messages = new List<IncomingMessage>();
+        private readonly Dictionary<string, bool> _triggeredCombos = new Dictionary<string, bool>();
         private static readonly string[,] ContentReplacements = new string[,]
         {
             { "Akt ", "Act " },
@@ -899,6 +924,8 @@ namespace EchoProtocol
             ForeColor = Color.FromArgb(238, 243, 255);
             KeyPreview = true;
 
+            SelectGameMode();
+
             BuildScenes();
             BuildUi();
             ResetState();
@@ -918,6 +945,17 @@ namespace EchoProtocol
                 }
             };
             _motionTimer.Start();
+
+            _clockTimer.Interval = 5000;
+            _clockTimer.Tick += delegate { AdvanceClock(1); };
+            _clockTimer.Start();
+
+            _choicePreview.InitialDelay = 120;
+            _choicePreview.ReshowDelay = 120;
+            _choicePreview.AutoPopDelay = 9000;
+            _choicePreview.ShowAlways = true;
+
+            EnsureStartupMessages();
 
             KeyDown += HandleGlobalKeys;
         }
@@ -1745,15 +1783,42 @@ namespace EchoProtocol
             header.Controls.Add(_objective);
 
             _buildMark.AutoSize = true;
-            _buildMark.Text = "ATMOSPHERE BUILD 0.6";
+            _buildMark.Text = "ATMOSPHERE BUILD 0.7";
             _buildMark.ForeColor = Color.FromArgb(245, 205, 112);
             _buildMark.Font = new Font("Consolas", 10f, FontStyle.Bold);
             _buildMark.Location = new Point(760, 22);
             _buildMark.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             header.Controls.Add(_buildMark);
+
+            _modeDisplay.AutoSize = true;
+            _modeDisplay.ForeColor = Color.FromArgb(170, 210, 255);
+            _modeDisplay.Font = new Font("Consolas", 9.2f, FontStyle.Bold);
+            _modeDisplay.Location = new Point(760, 44);
+            _modeDisplay.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            header.Controls.Add(_modeDisplay);
+
+            _timeDisplay.AutoSize = true;
+            _timeDisplay.ForeColor = Color.FromArgb(150, 200, 255);
+            _timeDisplay.Font = new Font("Consolas", 12f, FontStyle.Bold);
+            _timeDisplay.Location = new Point(760, 64);
+            _timeDisplay.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            header.Controls.Add(_timeDisplay);
+
+            _messageDisplay.AutoSize = true;
+            _messageDisplay.ForeColor = Color.FromArgb(255, 170, 190);
+            _messageDisplay.Font = new Font("Segoe UI", 9.5f, FontStyle.Bold);
+            _messageDisplay.Location = new Point(760, 88);
+            _messageDisplay.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            _messageDisplay.Cursor = Cursors.Hand;
+            _messageDisplay.Click += delegate { ShowMessagesOverlay(); };
+            header.Controls.Add(_messageDisplay);
+
             header.Resize += delegate
             {
                 _buildMark.Left = Math.Max(20, header.Width - _buildMark.Width - 28);
+                _modeDisplay.Left = Math.Max(20, header.Width - _modeDisplay.Width - 28);
+                _timeDisplay.Left = Math.Max(20, header.Width - _timeDisplay.Width - 28);
+                _messageDisplay.Left = Math.Max(20, header.Width - _messageDisplay.Width - 28);
             };
 
             CardPanel sceneCard = new CardPanel();
@@ -2134,6 +2199,7 @@ namespace EchoProtocol
             _meta.Text = LocalizeContent(L("Decisions ", "Entscheidungen ") + _decisions.Count.ToString() + " | " + L("Scene ", "Szene ") + scene.Id + " | " + L("Quick select 1-", "Direktwahl 1-") + scene.Choices.Length.ToString());
             _signal.Text = BuildSignalText(scene);
             _threadSummary.Text = BuildThreadSummary();
+            UpdateTimeDisplay();
 
             RenderChoices(scene);
             RenderCaseFile();
@@ -2161,6 +2227,7 @@ namespace EchoProtocol
                 button.Font = new Font("Segoe UI", 10f, FontStyle.Regular);
                 button.Margin = new Padding(0, 0, 0, 7);
                 button.Enabled = unlocked;
+                _choicePreview.SetToolTip(button, BuildChoicePreview(choice));
 
                 int capturedIndex = i;
                 button.Click += delegate { Choose(capturedIndex); };
@@ -2223,8 +2290,15 @@ namespace EchoProtocol
             }
 
             ApplyEffects(choice.Effects, scene.Id);
+            CheckClueCombos();
             _decisions.Add(scene.Id + ":" + choice.Id);
             _score = Math.Max(0, _score + 5);
+
+            int baseChoiceMinutes = 3;
+            if (_gameMode == GameMode.Hard) baseChoiceMinutes = 2;
+            else if (_gameMode == GameMode.Speedrun) baseChoiceMinutes = 1;
+            AdvanceClock(baseChoiceMinutes);
+
             _sceneId = choice.Next;
 
             SaveSlot(_activeSlot);
@@ -2298,10 +2372,16 @@ namespace EchoProtocol
             _integrity = 8;
             _hours = 0;
             _score = 0;
+            _comboCount = 0;
+            _shiftElapsedMinutes = 0;
             _flags.Clear();
             _notes.Clear();
             _decisions.Clear();
+            _messages.Clear();
+            _triggeredCombos.Clear();
             _notes.Add(new NoteItem { Type = "clue", SceneId = "office", Title = L("Starting point", "Ausgangslage"), Text = L("Mira Hartmann missing for 11 days.", "Mira Hartmann seit 11 Tagen vermisst.") });
+            EnsureStartupMessages();
+            UpdateTimeDisplay();
         }
 
         private void SaveCurrentSlot()
@@ -2377,10 +2457,19 @@ namespace EchoProtocol
             sb.AppendLine("integrity=" + _integrity.ToString());
             sb.AppendLine("hours=" + _hours.ToString());
             sb.AppendLine("score=" + _score.ToString());
+            sb.AppendLine("gameMode=" + _gameMode.ToString());
+            sb.AppendLine("shiftTotalMinutes=" + _shiftTotalMinutes.ToString());
+            sb.AppendLine("shiftElapsedMinutes=" + _shiftElapsedMinutes.ToString());
+            sb.AppendLine("comboCount=" + _comboCount.ToString());
 
             foreach (KeyValuePair<string, bool> pair in _flags)
             {
                 sb.AppendLine("flag=" + Encode(pair.Key) + "|" + (pair.Value ? "1" : "0"));
+            }
+
+            foreach (KeyValuePair<string, bool> pair in _triggeredCombos)
+            {
+                sb.AppendLine("combo=" + Encode(pair.Key) + "|" + (pair.Value ? "1" : "0"));
             }
 
             for (int i = 0; i < _decisions.Count; i++)
@@ -2392,6 +2481,12 @@ namespace EchoProtocol
             {
                 NoteItem item = _notes[i];
                 sb.AppendLine("note=" + Encode(item.Type) + "|" + Encode(item.SceneId) + "|" + Encode(item.Title) + "|" + Encode(item.Text));
+            }
+
+            for (int i = 0; i < _messages.Count; i++)
+            {
+                IncomingMessage msg = _messages[i];
+                sb.AppendLine("msg=" + Encode(msg.Sender) + "|" + Encode(msg.Content) + "|" + (msg.IsRead ? "1" : "0"));
             }
 
             File.WriteAllText(SlotFile(slot), sb.ToString(), Encoding.UTF8);
@@ -2425,10 +2520,38 @@ namespace EchoProtocol
                     else if (line.StartsWith("integrity=")) _integrity = ParseInt(line.Substring(10), 8);
                     else if (line.StartsWith("hours=")) _hours = ParseInt(line.Substring(6), 0);
                     else if (line.StartsWith("score=")) _score = ParseInt(line.Substring(6), 0);
+                    else if (line.StartsWith("gameMode="))
+                    {
+                        string rawMode = line.Substring(9);
+                        if (string.Equals(rawMode, "Hard", StringComparison.OrdinalIgnoreCase)) _gameMode = GameMode.Hard;
+                        else if (string.Equals(rawMode, "Speedrun", StringComparison.OrdinalIgnoreCase)) _gameMode = GameMode.Speedrun;
+                        else _gameMode = GameMode.Normal;
+                    }
+                    else if (line.StartsWith("shiftTotalMinutes=")) _shiftTotalMinutes = ParseInt(line.Substring(17), _shiftTotalMinutes);
+                    else if (line.StartsWith("shiftElapsedMinutes=")) _shiftElapsedMinutes = ParseInt(line.Substring(19), 0);
+                    else if (line.StartsWith("comboCount=")) _comboCount = ParseInt(line.Substring(11), 0);
                     else if (line.StartsWith("flag="))
                     {
                         string[] parts = line.Substring(5).Split('|');
                         if (parts.Length >= 2) _flags[Decode(parts[0])] = parts[1] == "1";
+                    }
+                    else if (line.StartsWith("combo="))
+                    {
+                        string[] parts = line.Substring(6).Split('|');
+                        if (parts.Length >= 2) _triggeredCombos[Decode(parts[0])] = parts[1] == "1";
+                    }
+                    else if (line.StartsWith("msg="))
+                    {
+                        string[] parts = line.Substring(4).Split('|');
+                        if (parts.Length >= 3)
+                        {
+                            _messages.Add(new IncomingMessage
+                            {
+                                Sender = Decode(parts[0]),
+                                Content = Decode(parts[1]),
+                                IsRead = parts[2] == "1"
+                            });
+                        }
                     }
                     else if (line.StartsWith("decision="))
                     {
@@ -2451,8 +2574,12 @@ namespace EchoProtocol
                 _access = Clamp(_access, 0, 10);
                 _integrity = Clamp(_integrity, 0, 10);
                 _score = Math.Max(0, _score);
+                _shiftTotalMinutes = Math.Max(1, _shiftTotalMinutes);
+                _shiftElapsedMinutes = Math.Max(0, _shiftElapsedMinutes);
                 if (!_scenes.ContainsKey(_sceneId)) _sceneId = "office";
                 if (_notes.Count == 0) _notes.Add(new NoteItem { Type = "clue", SceneId = "office", Title = L("Starting point", "Ausgangslage"), Text = L("Mira Hartmann missing for 11 days.", "Mira Hartmann seit 11 Tagen vermisst.") });
+                if (_messages.Count == 0) EnsureStartupMessages();
+                _comboCount = Math.Max(_comboCount, _triggeredCombos.Count);
                 _activeSlot = slot;
                 return true;
             }
@@ -2576,6 +2703,233 @@ namespace EchoProtocol
             return LocalizeContent(sb.ToString().Trim());
         }
 
+        private void SelectGameMode()
+        {
+            DialogResult result = MessageBox.Show(
+                L(
+                    "Choose difficulty:\n\nYes = Hard (360 min)\nNo = Speedrun (360 min)\nCancel = Normal (720 min)",
+                    "Schwierigkeitsgrad:\n\nJa = Hard (360 min)\nNein = Speedrun (360 min)\nAbbrechen = Normal (720 min)"
+                ),
+                L("Game mode", "Spielmodus"),
+                MessageBoxButtons.YesNoCancel,
+                MessageBoxIcon.Question
+            );
+
+            if (result == DialogResult.Yes)
+            {
+                _gameMode = GameMode.Hard;
+                _shiftTotalMinutes = 360;
+            }
+            else if (result == DialogResult.No)
+            {
+                _gameMode = GameMode.Speedrun;
+                _shiftTotalMinutes = 360;
+            }
+            else
+            {
+                _gameMode = GameMode.Normal;
+                _shiftTotalMinutes = 720;
+            }
+        }
+
+        private void AdvanceClock(int minutes)
+        {
+            _shiftElapsedMinutes = Math.Max(0, _shiftElapsedMinutes + Math.Max(0, minutes));
+            UpdateTimeDisplay();
+
+            if (_shiftElapsedMinutes >= _shiftTotalMinutes)
+            {
+                _clockTimer.Stop();
+                MessageBox.Show(
+                    L("Shift time is over. Restarting from office.", "Schichtzeit ist abgelaufen. Neustart im Buero."),
+                    L("Time up", "Zeit abgelaufen"),
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning
+                );
+                ResetState();
+                SaveSlot(_activeSlot);
+                Render();
+                _clockTimer.Start();
+            }
+        }
+
+        private void UpdateTimeDisplay()
+        {
+            if (_timeDisplay == null || _modeDisplay == null) return;
+
+            int startMinutes = (2 * 60) + 13;
+            int currentMinutes = startMinutes + _shiftElapsedMinutes;
+            int hours = (currentMinutes / 60) % 24;
+            int mins = currentMinutes % 60;
+            int remaining = Math.Max(0, _shiftTotalMinutes - _shiftElapsedMinutes);
+
+            _timeDisplay.Text = hours.ToString("D2") + ":" + mins.ToString("D2") + " / " + remaining.ToString("D3") + "MIN";
+            _modeDisplay.Text = "MODE: " + _gameMode.ToString().ToUpperInvariant();
+
+            if (remaining < 60) _timeDisplay.ForeColor = Color.FromArgb(255, 105, 105);
+            else if (remaining < 180) _timeDisplay.ForeColor = Color.FromArgb(255, 205, 120);
+            else _timeDisplay.ForeColor = Color.FromArgb(150, 200, 255);
+
+            if (_messageDisplay != null)
+            {
+                int unread = 0;
+                for (int i = 0; i < _messages.Count; i++)
+                {
+                    if (!_messages[i].IsRead) unread++;
+                }
+                _messageDisplay.Text = "MAIL: " + unread.ToString() + " NEW";
+            }
+        }
+
+        private void EnsureStartupMessages()
+        {
+            if (_messages.Count > 0) return;
+            AddMessage("Dispatch", L("Unit Voss, acknowledge.", "Einheit Voss, bitte melden."));
+            AddMessage("Jonas", L("I found a strange archive trace. Don't go alone.", "Ich habe eine seltsame Archivspur gefunden. Geh nicht allein."));
+            UpdateTimeDisplay();
+        }
+
+        private void AddMessage(string sender, string content)
+        {
+            _messages.Add(new IncomingMessage
+            {
+                Sender = sender,
+                Content = content,
+                IsRead = false
+            });
+        }
+
+        private void ShowMessagesOverlay()
+        {
+            if (_messages.Count == 0)
+            {
+                MessageBox.Show(L("No messages.", "Keine Nachrichten."), L("Messages", "Nachrichten"));
+                return;
+            }
+
+            StringBuilder sb = new StringBuilder();
+            for (int i = _messages.Count - 1; i >= 0; i--)
+            {
+                IncomingMessage msg = _messages[i];
+                sb.AppendLine("[" + msg.Sender + "] " + msg.Content);
+                sb.AppendLine();
+                msg.IsRead = true;
+            }
+
+            MessageBox.Show(sb.ToString().Trim(), L("Messages", "Nachrichten"), MessageBoxButtons.OK, MessageBoxIcon.Information);
+            UpdateTimeDisplay();
+        }
+
+        private void CheckClueCombos()
+        {
+            bool hasFoto12 = HasNoteTitle("photo", "Foto #12");
+            bool hasFaserprofil = HasNoteTitle("clue", "Faserprofil");
+            bool hasBand08 = HasNoteTitle("clue", "Band 08");
+            bool hasReset = HasNoteTitle("clue", "Ruecksetzlogs");
+            bool hasGegenband = HasNoteTitle("clue", "Gegenband");
+            bool hasKonsole = HasNoteTitle("clue", "Kontrollkonsole");
+
+            TryUnlockCombo("photo_fiber", hasFoto12 && hasFaserprofil,
+                L("Photo + fiber reveal a harbor convergence.", "Foto + Faserprofil ergeben eine Hafen-Konvergenz."),
+                2,
+                30,
+                1,
+                0);
+
+            TryUnlockCombo("band_reset", hasBand08 && hasReset,
+                L("Tape 08 aligns with reset logs.", "Band 08 stimmt mit den Ruecksetzlogs ueberein."),
+                2,
+                35,
+                1,
+                0);
+
+            TryUnlockCombo("counter_console", hasGegenband && hasKonsole,
+                L("Counter-tape can now alter the console outcome.", "Gegenband kann jetzt den Konsolen-Ausgang veraendern."),
+                1,
+                40,
+                0,
+                1);
+        }
+
+        private bool HasNoteTitle(string type, string title)
+        {
+            for (int i = 0; i < _notes.Count; i++)
+            {
+                NoteItem note = _notes[i];
+                if (note.Type == type && note.Title == title) return true;
+            }
+            return false;
+        }
+
+        private void TryUnlockCombo(string key, bool condition, string message, int insightGain, int scoreGain, int shiftGain, int trustGain)
+        {
+            bool done;
+            if (_triggeredCombos.TryGetValue(key, out done) && done) return;
+            if (!condition) return;
+
+            _triggeredCombos[key] = true;
+            _comboCount++;
+            _insight = Clamp(_insight + insightGain, 0, 10);
+            _shift = Clamp(_shift + shiftGain, 0, 7);
+            _trust = Clamp(_trust + trustGain, -3, 3);
+            _score = Math.Max(0, _score + scoreGain);
+
+            _notes.Add(new NoteItem
+            {
+                Type = "anomaly",
+                SceneId = _sceneId,
+                Title = L("Combo unlocked", "Kombi freigeschaltet"),
+                Text = message
+            });
+
+            AddMessage("System", L("CLUE COMBO UNLOCKED:", "HINWEIS-KOMBO FREIGESCHALTET:") + " " + message);
+            UpdateTimeDisplay();
+        }
+
+        private string BuildChoicePreview(Choice choice)
+        {
+            if (choice == null || choice.Effects == null || choice.Effects.Length == 0)
+            {
+                return L("No immediate stat changes.", "Keine direkten Statusaenderungen.");
+            }
+
+            int deltaShift = 0;
+            int deltaStress = 0;
+            int deltaTrust = 0;
+            int deltaInsight = 0;
+            int deltaAccess = 0;
+            int deltaIntegrity = 0;
+            int deltaTime = 0;
+
+            for (int i = 0; i < choice.Effects.Length; i++)
+            {
+                Effect fx = choice.Effects[i];
+                if (fx.Type == "shift") deltaShift += fx.IntValue;
+                else if (fx.Type == "stress") deltaStress += fx.IntValue;
+                else if (fx.Type == "trust") deltaTrust += fx.IntValue;
+                else if (fx.Type == "insight") deltaInsight += fx.IntValue;
+                else if (fx.Type == "access") deltaAccess += fx.IntValue;
+                else if (fx.Type == "integrity") deltaIntegrity += fx.IntValue;
+                else if (fx.Type == "time") deltaTime += fx.IntValue;
+            }
+
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine(L("Consequence preview", "Konsequenz-Vorschau"));
+            if (deltaShift != 0) sb.AppendLine("Shift " + Signed(deltaShift));
+            if (deltaStress != 0) sb.AppendLine(L("Stress ", "Belastung ") + Signed(deltaStress));
+            if (deltaTrust != 0) sb.AppendLine(L("Trust ", "Vertrauen ") + Signed(deltaTrust));
+            if (deltaInsight != 0) sb.AppendLine(L("Insight ", "Einsicht ") + Signed(deltaInsight));
+            if (deltaAccess != 0) sb.AppendLine(L("Access ", "Zugang ") + Signed(deltaAccess));
+            if (deltaIntegrity != 0) sb.AppendLine(L("Integrity ", "Integritaet ") + Signed(deltaIntegrity));
+            if (deltaTime != 0) sb.AppendLine(L("Shift-time +", "Schichtzeit +") + deltaTime.ToString() + "h");
+            return sb.ToString().TrimEnd();
+        }
+
+        private string Signed(int value)
+        {
+            return value >= 0 ? "+" + value.ToString() : value.ToString();
+        }
+
         private string BuildLeadText()
         {
             StringBuilder sb = new StringBuilder();
@@ -2591,6 +2945,7 @@ namespace EchoProtocol
             sb.AppendLine(L("Scenes in case: ", "Szenen im Fall: ") + _scenes.Count.ToString());
             sb.AppendLine(L("Decisions so far: ", "Bisherige Entscheidungen: ") + _decisions.Count.ToString());
             sb.AppendLine(L("Current slot shift time: +", "Schichtzeit im aktuellen Slot: +") + _hours.ToString() + "h");
+            sb.AppendLine(L("Clue combos unlocked: ", "Hinweis-Kombos freigeschaltet: ") + _comboCount.ToString());
             sb.AppendLine(L("Rank: ", "Rangwertung: ") + RankLabel() + " / Score " + _score.ToString());
             return LocalizeContent(sb.ToString().TrimEnd());
         }

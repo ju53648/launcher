@@ -184,16 +184,17 @@ function resolveMessage(
   params?: TranslationParams
 ): string | null {
   const value = getValue(dictionary, key);
+  const intlLocale = toCanonicalLocale(locale);
 
   if (typeof value === "string") {
-    return interpolate(locale, value, params);
+    return interpolate(intlLocale, value, params);
   }
 
   if (isPluralTranslation(value)) {
     const count = Number(params?.count ?? 0);
-    const category = new Intl.PluralRules(locale).select(count);
+    const category = new Intl.PluralRules(intlLocale).select(count);
     const template = value[category] ?? value.other;
-    return interpolate(locale, template, params);
+    return interpolate(intlLocale, template, params);
   }
 
   return null;
@@ -209,7 +210,7 @@ function getValue(dictionary: TranslationTree, key: string): TranslationLeaf | T
 }
 
 function interpolate(
-  locale: SupportedLocale,
+  locale: CanonicalLocale,
   template: string,
   params?: TranslationParams
 ): string {

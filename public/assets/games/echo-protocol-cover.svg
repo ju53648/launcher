@@ -9,7 +9,7 @@
   <rect width="960" height="540" fill="url(#bg)" />
   <circle cx="190" cy="120" r="180" fill="#7eceff" opacity="0.2" />
   <circle cx="820" cy="470" r="220" fill="#b3162d" opacity="0.22" />
-  <text x="80" y="160" fill="#90d5ff" font-size="22" font-family="Segoe UI, sans-serif" letter-spacing="3">PSYCHOLOGICAL MYSTERY</text>
-  <text x="80" y="250" fill="#f4f7ff" font-size="74" font-weight="700" font-family="Segoe UI, sans-serif">ECHO PROTOCOL</text>
-  <text x="80" y="320" fill="#d8e2f8" font-size="28" font-family="Segoe UI, sans-serif">Reality rewrites itself after every choice.</text>
+  <text x="120" y="160" fill="#90d5ff" font-size="22" font-family="Segoe UI, sans-serif" letter-spacing="3">PSYCHOLOGICAL MYSTERY</text>
+  <text x="120" y="250" fill="#f4f7ff" font-size="74" font-weight="700" font-family="Segoe UI, sans-serif">ECHO PROTOCOL</text>
+  <text x="120" y="320" fill="#d8e2f8" font-size="28" font-family="Segoe UI, sans-serif">Reality rewrites itself after every choice.</text>
 </svg>

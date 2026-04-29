@@ -1,8 +1,9 @@
 {
-  "version": "0.5.4",
-  "title": "Native Games & Library Upgrade",
-  "date": "2026-04-28",
+  "version": "0.5.5",
+  "title": "Shakespeare English Hotfix",
+  "date": "2026-04-29",
   "notes": [
+    "Shakespeare English now uses the same stable formatting and plural behavior as the other launcher languages.",
     "Library cards now show playtime and support stronger sorting and filtering.",
     "Shop and library views gained clearer discovery filters, improved ranking, and better status actions.",
     "Running games can now be closed directly from the launcher, with live state refresh every 2 seconds.",
