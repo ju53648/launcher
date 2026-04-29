@@ -1,0 +1,14 @@
+{
+  "manifestPath": "distribution/manifests/games/lumorix-dropdash.json",
+  "archivePath": "distribution/games/lumorix-dropdash/release/lumorix-dropdash-win64.zip",
+  "archiveUrl": "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/games/lumorix-dropdash/release/lumorix-dropdash-win64.zip",
+  "installSizePath": "distribution/games/lumorix-dropdash/runtime/LumorixDropDash.exe",
+  "version": "1.1.1",
+  "releaseDate": "2026-04-28",
+  "description": "A compact offline arcade release for validating Lumorix Launcher install, launch, update, and uninstall flows through a native desktop runtime.",
+  "changelogItems": [
+    "Migrated DropDash from a browser launch flow to a standalone native Tauri desktop runtime.",
+    "Kept gameplay, visuals, controls, and scoring identical to the previous release.",
+    "Prepared archive-based delivery for launcher updates and public upload."
+  ]
+}

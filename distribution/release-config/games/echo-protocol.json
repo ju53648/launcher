@@ -1,0 +1,16 @@
+{
+  "manifestPath": "distribution/manifests/games/echo-protocol.json",
+  "archivePath": "distribution/games/echo-protocol/release/echo-protocol-win64.zip",
+  "archiveUrl": "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/games/echo-protocol/release/echo-protocol-win64.zip",
+  "installSizePath": "distribution/games/echo-protocol/EchoProtocol.exe",
+  "version": "0.4.0",
+  "releaseDate": "2026-04-28",
+  "description": "You don't remember this case. But it remembers you. A native psychological mystery app with deep archive progression and large investigation content.",
+  "changelogItems": [
+    "Prepared archive-based delivery for launcher-driven game updates.",
+    "Kept native executable launch and local save behavior unchanged."
+  ],
+  "setZipInstallStrategy": true,
+  "zipRootFolder": ".",
+  "ensureUpdateAction": true
+}

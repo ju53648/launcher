@@ -1,54 +1,66 @@
-{
-  "id": "com.lumorix.dropdash",
-  "itemType": "game",
-  "name": "Lumorix DropDash",
-  "version": "1.1.1",
-  "description": "A compact offline arcade release for validating Lumorix Launcher install, launch, update, and uninstall flows through a native desktop runtime.",
-  "developer": "Lumorix",
-  "releaseDate": "2026-04-28",
-  "categories": [
-    "Arcade",
-    "Offline"
-  ],
-  "tags": [
-    { "id": "arcade", "weight": 3 },
-    { "id": "offline", "weight": 3 },
-    { "id": "native", "weight": 2 },
-    { "id": "desktop", "weight": 2 }
-  ],
-  "coverImage": "/assets/games/lumorix-dropdash-cover.svg",
-  "bannerImage": "/assets/games/lumorix-dropdash-banner.svg",
-  "iconImage": "/assets/games/lumorix-dropdash-icon.svg",
-  "executable": "LumorixDropDash.exe",
-  "installSizeBytes": 8172032,
-  "defaultInstallFolder": "Lumorix DropDash",
-  "supportedActions": [
-    "install",
-    "launch",
-    "update",
-    "repair",
-    "uninstall",
-    "openFolder"
-  ],
-  "installStrategy": {
-    "kind": "zipArchive",
-    "rootFolder": "."
-  },
-  "download": {
-    "kind": "httpArchive",
-    "url": "https://github.com/ju53648/launcher/releases/download/v0.5.1/lumorix-dropdash-win64.zip",
-    "sha256": "4887d5de3096df6abca5f56c4bfae845933cf7e9a79f9980a929bdd796244b59",
-    "sizeBytes": 2419402
-  },
-  "changelog": [
-    {
-      "version": "1.1.1",
-      "date": "2026-04-28",
-      "items": [
-        "Migrated DropDash from a browser launch flow to a standalone native Tauri desktop runtime.",
-        "Kept gameplay, visuals, controls, and scoring identical to the previous release.",
-        "Prepared archive-based delivery for launcher updates and public upload."
-      ]
-    }
-  ]
+﻿{
+    "id":  "com.lumorix.dropdash",
+    "itemType":  "game",
+    "name":  "Lumorix DropDash",
+    "version":  "1.1.1",
+    "description":  "A compact offline arcade release for validating Lumorix Launcher install, launch, update, and uninstall flows through a native desktop runtime.",
+    "developer":  "Lumorix",
+    "releaseDate":  "2026-04-28",
+    "categories":  [
+                       "Arcade",
+                       "Offline"
+                   ],
+    "tags":  [
+                 {
+                     "id":  "arcade",
+                     "weight":  3
+                 },
+                 {
+                     "id":  "offline",
+                     "weight":  3
+                 },
+                 {
+                     "id":  "native",
+                     "weight":  2
+                 },
+                 {
+                     "id":  "desktop",
+                     "weight":  2
+                 }
+             ],
+    "coverImage":  "/assets/games/lumorix-dropdash-cover.svg",
+    "bannerImage":  "/assets/games/lumorix-dropdash-banner.svg",
+    "iconImage":  "/assets/games/lumorix-dropdash-icon.svg",
+    "executable":  "LumorixDropDash.exe",
+    "installSizeBytes":  8117248,
+    "defaultInstallFolder":  "Lumorix DropDash",
+    "supportedActions":  [
+                             "install",
+                             "launch",
+                             "update",
+                             "repair",
+                             "uninstall",
+                             "openFolder"
+                         ],
+    "installStrategy":  {
+                            "kind":  "zipArchive",
+                            "rootFolder":  "."
+                        },
+    "download":  {
+                     "kind":  "httpArchive",
+                     "url":  "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/games/lumorix-dropdash/release/lumorix-dropdash-win64.zip",
+                     "sha256":  "d94f4c52ca2e47ab1c0d006128502b55d759d19d3a0a32d36a4eb51dbe1e1afa",
+                     "sizeBytes":  2408893
+                 },
+    "changelog":  [
+                      {
+                          "version":  "1.1.1",
+                          "date":  "2026-04-28",
+                          "items":  [
+                                        "Migrated DropDash from a browser launch flow to a standalone native Tauri desktop runtime.",
+                                        "Kept gameplay, visuals, controls, and scoring identical to the previous release.",
+                                        "Prepared archive-based delivery for launcher updates and public upload."
+                                    ]
+                      }
+                  ]
 }
