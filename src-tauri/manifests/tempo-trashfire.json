@@ -1,0 +1,42 @@
+{
+  "id": "com.lumorix.tempo-trashfire",
+  "itemType": "game",
+  "name": "Tempo Trashfire",
+  "version": "0.1.0",
+  "description": "A scrappy rhythm game where collapsing club hardware still expects perfect timing on four loud lanes.",
+  "developer": "Lumorix",
+  "releaseDate": "2026-04-29",
+  "categories": ["Rhythm", "Arcade", "Offline"],
+  "tags": [
+    { "id": "rhythm", "weight": 3 },
+    { "id": "music", "weight": 3 },
+    { "id": "arcade", "weight": 2 },
+    { "id": "offline", "weight": 2 }
+  ],
+  "coverImage": "/assets/games/tempo-trashfire-cover.svg",
+  "bannerImage": "/assets/games/tempo-trashfire-banner.svg",
+  "iconImage": "/assets/games/tempo-trashfire-icon.svg",
+  "executable": "Launch-TempoTrashfire.ps1",
+  "installSizeBytes": 11534336,
+  "defaultInstallFolder": "Tempo Trashfire",
+  "supportedActions": ["install", "launch", "repair", "uninstall", "openFolder"],
+  "installStrategy": {
+    "kind": "directFolder",
+    "sourcePath": "C:\\Users\\julia\\Desktop\\Lumorix Launcher\\distribution\\games\\tempo-trashfire\\runtime"
+  },
+  "download": {
+    "kind": "localSynthetic",
+    "integrity": "embedded-tempo-trashfire-0.1.0"
+  },
+  "changelog": [
+    {
+      "version": "0.1.0",
+      "date": "2026-04-29",
+      "items": [
+        "Added a four-lane timing prototype with score, streak, and accuracy pressure.",
+        "Runs as a native PowerShell Windows Forms desktop window.",
+        "Ships with a local content pack above 10 MB to satisfy the current size floor."
+      ]
+    }
+  ]
+}

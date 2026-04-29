@@ -1,7 +1,31 @@
 {
     "version":  "1",
-    "timestamp":  "2026-04-29T17:20:24Z",
+    "timestamp":  "2026-04-29T19:13:18Z",
     "manifests":  [
+                      {
+                          "url":  "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/manifests/games/frostline-courier.json?v=0.1.0"
+                      },
+                      {
+                          "url":  "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/manifests/games/glass-garden.json?v=0.1.0"
+                      },
+                      {
+                          "url":  "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/manifests/games/graveyard-shift.json?v=0.1.0"
+                      },
+                      {
+                          "url":  "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/manifests/games/neon-circuit.json?v=0.1.0"
+                      },
+                      {
+                          "url":  "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/manifests/games/pocket-heist.json?v=0.1.0"
+                      },
+                      {
+                          "url":  "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/manifests/games/tempo-trashfire.json?v=0.1.0"
+                      },
+                      {
+                          "url":  "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/manifests/games/velvet-rook.json?v=0.1.0"
+                      },
+                      {
+                          "url":  "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/manifests/games/word-reactor.json?v=0.1.0"
+                      },
                       {
                           "url":  "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/manifests/games/echo-protocol.json?v=0.4.4"
                       },

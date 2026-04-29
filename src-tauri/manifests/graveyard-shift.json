@@ -1,0 +1,42 @@
+{
+  "id": "com.lumorix.graveyard-shift",
+  "itemType": "game",
+  "name": "Graveyard Shift",
+  "version": "0.1.0",
+  "description": "A tiny horror-clicker where you keep a cemetery lantern line alive while things keep crawling back out.",
+  "developer": "Lumorix",
+  "releaseDate": "2026-04-29",
+  "categories": ["Horror", "Arcade", "Offline"],
+  "tags": [
+    { "id": "horror", "weight": 3 },
+    { "id": "arcade", "weight": 2 },
+    { "id": "survival", "weight": 2 },
+    { "id": "offline", "weight": 2 }
+  ],
+  "coverImage": "/assets/games/graveyard-shift-cover.svg",
+  "bannerImage": "/assets/games/graveyard-shift-banner.svg",
+  "iconImage": "/assets/games/graveyard-shift-icon.svg",
+  "executable": "Launch-GraveyardShift.ps1",
+  "installSizeBytes": 11534336,
+  "defaultInstallFolder": "Graveyard Shift",
+  "supportedActions": ["install", "launch", "repair", "uninstall", "openFolder"],
+  "installStrategy": {
+    "kind": "directFolder",
+    "sourcePath": "C:\\Users\\julia\\Desktop\\Lumorix Launcher\\distribution\\games\\graveyard-shift\\runtime"
+  },
+  "download": {
+    "kind": "localSynthetic",
+    "integrity": "embedded-graveyard-shift-0.1.0"
+  },
+  "changelog": [
+    {
+      "version": "0.1.0",
+      "date": "2026-04-29",
+      "items": [
+        "Added a compact reactive cemetery defense game with click-based survival loops.",
+        "Runs as a native PowerShell Windows Forms desktop window.",
+        "Ships with a local content pack above 10 MB to satisfy the current size floor."
+      ]
+    }
+  ]
+}

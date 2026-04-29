@@ -54,10 +54,21 @@ fn launcher_language_code(runtime: &LauncherRuntime) -> &'static str {
     }
 }
 
+fn launcher_language_and_locale(runtime: &LauncherRuntime) -> (&'static str, &'static str) {
+    match launcher_language_code(runtime) {
+        "de" => ("de", "de-DE"),
+        "pl" => ("pl", "pl-PL"),
+        _ => ("en", "en-US"),
+    }
+}
+
 fn apply_launcher_language(command: &mut Command, runtime: &LauncherRuntime) {
-    let language = launcher_language_code(runtime);
+    let (language, locale) = launcher_language_and_locale(runtime);
     command.env("LUMORIX_LANGUAGE", language);
     command.env("LUMORIX_LOCALE", language);
+    command.env("LANGUAGE", language);
+    command.env("LANG", locale);
+    command.env("LC_ALL", locale);
 }
 
 pub fn launch_item(runtime: &LauncherRuntime, item_id: &str) -> Result<()> {

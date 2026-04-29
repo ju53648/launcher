@@ -1,0 +1,18 @@
+{
+    "manifestPath":  "distribution/manifests/games/tempo-trashfire.json",
+    "catalogManifestUrl":  "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/manifests/games/tempo-trashfire.json",
+    "archivePath":  "distribution/games/tempo-trashfire/release/tempo-trashfire-win64.zip",
+    "archiveUrl":  "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/games/tempo-trashfire/release/tempo-trashfire-win64.zip",
+    "installSizePath":  "distribution/games/tempo-trashfire/runtime/content.pack",
+    "version":  "0.1.0",
+    "releaseDate":  "2026-04-29",
+    "description":  "A scrappy rhythm game where collapsing club hardware still expects perfect timing on four loud lanes.",
+    "changelogItems":  [
+                           "Added a four-lane timing prototype with score, streak, and accuracy pressure.",
+                           "Runs as a native PowerShell Windows Forms desktop window.",
+                           "Ships with a local content pack above 10 MB while distributing as a compact ZIP archive."
+                       ],
+    "setZipInstallStrategy":  true,
+    "zipRootFolder":  ".",
+    "ensureUpdateAction":  true
+}

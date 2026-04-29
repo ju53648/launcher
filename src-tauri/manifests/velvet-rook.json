@@ -1,0 +1,42 @@
+{
+  "id": "com.lumorix.velvet-rook",
+  "itemType": "game",
+  "name": "Velvet Rook",
+  "version": "0.1.0",
+  "description": "A tiny tactical puzzle where one dangerous rook must clear a board without walking into velvet traps.",
+  "developer": "Lumorix",
+  "releaseDate": "2026-04-29",
+  "categories": ["Tactics", "Puzzle", "Offline"],
+  "tags": [
+    { "id": "strategy", "weight": 3 },
+    { "id": "puzzle", "weight": 3 },
+    { "id": "board-game", "weight": 2 },
+    { "id": "offline", "weight": 2 }
+  ],
+  "coverImage": "/assets/games/velvet-rook-cover.svg",
+  "bannerImage": "/assets/games/velvet-rook-banner.svg",
+  "iconImage": "/assets/games/velvet-rook-icon.svg",
+  "executable": "Launch-VelvetRook.ps1",
+  "installSizeBytes": 11534336,
+  "defaultInstallFolder": "Velvet Rook",
+  "supportedActions": ["install", "launch", "repair", "uninstall", "openFolder"],
+  "installStrategy": {
+    "kind": "directFolder",
+    "sourcePath": "C:\\Users\\julia\\Desktop\\Lumorix Launcher\\distribution\\games\\velvet-rook\\runtime"
+  },
+  "download": {
+    "kind": "localSynthetic",
+    "integrity": "embedded-velvet-rook-0.1.0"
+  },
+  "changelog": [
+    {
+      "version": "0.1.0",
+      "date": "2026-04-29",
+      "items": [
+        "Added a micro tactics board game focused on line movement and trap reading.",
+        "Runs as a native PowerShell Windows Forms desktop window.",
+        "Ships with a local content pack above 10 MB to satisfy the current size floor."
+      ]
+    }
+  ]
+}

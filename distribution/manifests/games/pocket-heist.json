@@ -1,0 +1,67 @@
+{
+    "id":  "com.lumorix.pocket-heist",
+    "itemType":  "game",
+    "name":  "Pocket Heist",
+    "version":  "0.1.0",
+    "description":  "A stealthy micro-heist game about grabbing loot on a tight grid before the guard pattern closes in.",
+    "developer":  "Lumorix",
+    "releaseDate":  "2026-04-29",
+    "categories":  [
+                       "Stealth",
+                       "Strategy",
+                       "Offline"
+                   ],
+    "tags":  [
+                 {
+                     "id":  "stealth",
+                     "weight":  3
+                 },
+                 {
+                     "id":  "strategy",
+                     "weight":  3
+                 },
+                 {
+                     "id":  "tactics",
+                     "weight":  2
+                 },
+                 {
+                     "id":  "offline",
+                     "weight":  2
+                 }
+             ],
+    "coverImage":  "/assets/games/pocket-heist-cover.svg",
+    "bannerImage":  "/assets/games/pocket-heist-banner.svg",
+    "iconImage":  "/assets/games/pocket-heist-icon.svg",
+    "executable":  "Launch-PocketHeist.ps1",
+    "installSizeBytes":  11534336,
+    "defaultInstallFolder":  "Pocket Heist",
+    "supportedActions":  [
+                             "install",
+                             "launch",
+                             "repair",
+                             "uninstall",
+                             "openFolder",
+                             "update"
+                         ],
+    "installStrategy":  {
+                            "kind":  "zipArchive",
+                            "rootFolder":  "."
+                        },
+    "download":  {
+                     "kind":  "httpArchive",
+                     "url":  "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/games/pocket-heist/release/pocket-heist-win64.zip",
+                     "sha256":  "fa01d5660141da336271ba4c9438197db1a5f71210cd18313ef69933efdf18eb",
+                     "sizeBytes":  13091
+                 },
+    "changelog":  [
+                      {
+                          "version":  "0.1.0",
+                          "date":  "2026-04-29",
+                          "items":  [
+                                        "Added a grid-based stealth prototype focused on route reading and escape timing.",
+                                        "Runs as a native PowerShell Windows Forms desktop window.",
+                                        "Ships with a local content pack above 10 MB while distributing as a compact ZIP archive."
+                                    ]
+                      }
+                  ]
+}

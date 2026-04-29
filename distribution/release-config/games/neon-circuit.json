@@ -1,0 +1,18 @@
+{
+    "manifestPath":  "distribution/manifests/games/neon-circuit.json",
+    "catalogManifestUrl":  "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/manifests/games/neon-circuit.json",
+    "archivePath":  "distribution/games/neon-circuit/release/neon-circuit-win64.zip",
+    "archiveUrl":  "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/games/neon-circuit/release/neon-circuit-win64.zip",
+    "installSizePath":  "distribution/games/neon-circuit/runtime/content.pack",
+    "version":  "0.1.0",
+    "releaseDate":  "2026-04-29",
+    "description":  "A compact reflex arcade game about routing a glowing signal through unstable neon lanes before the board overloads.",
+    "changelogItems":  [
+                           "Introduced a new fast arcade prototype built for archive-based public launcher installs.",
+                           "Uses a PowerShell Windows Forms runtime so it launches as a native desktop window.",
+                           "Ships with a local content pack above 10 MB while distributing as a compact ZIP archive."
+                       ],
+    "setZipInstallStrategy":  true,
+    "zipRootFolder":  ".",
+    "ensureUpdateAction":  true
+}

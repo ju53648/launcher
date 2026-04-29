@@ -1,5 +1,5 @@
 {
-  "version": "0.5.5",
+  "version": "0.5.6",
   "title": "Shakespeare English Hotfix",
   "notes": "Shakespeare English Hotfix\n\n- Shakespeare English now uses the same stable formatting and plural behavior as the other launcher languages.\n- Library cards now show playtime and support stronger sorting and filtering.\n- Shop and library views gained clearer discovery filters, improved ranking, and better status actions.\n- Running games can now be closed directly from the launcher, with live state refresh every 2 seconds.\n- Echo Protocol startup stability was fixed for the native desktop build.\n- Lumorix DropDash was migrated from a browser launch flow to a standalone native Tauri desktop runtime.\n- Release metadata, updater payload metadata, and package versions were synchronized for shipping.",
   "notesList": [

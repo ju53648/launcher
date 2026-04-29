@@ -1,0 +1,67 @@
+{
+    "id":  "com.lumorix.glass-garden",
+    "itemType":  "game",
+    "name":  "Glass Garden",
+    "version":  "0.1.0",
+    "description":  "A soft memory puzzle about restoring a tiny greenhouse by matching fractured glass-bloom tiles.",
+    "developer":  "Lumorix",
+    "releaseDate":  "2026-04-29",
+    "categories":  [
+                       "Puzzle",
+                       "Cozy",
+                       "Offline"
+                   ],
+    "tags":  [
+                 {
+                     "id":  "puzzle",
+                     "weight":  3
+                 },
+                 {
+                     "id":  "cozy",
+                     "weight":  3
+                 },
+                 {
+                     "id":  "memory",
+                     "weight":  2
+                 },
+                 {
+                     "id":  "offline",
+                     "weight":  2
+                 }
+             ],
+    "coverImage":  "/assets/games/glass-garden-cover.svg",
+    "bannerImage":  "/assets/games/glass-garden-banner.svg",
+    "iconImage":  "/assets/games/glass-garden-icon.svg",
+    "executable":  "Launch-GlassGarden.ps1",
+    "installSizeBytes":  11534336,
+    "defaultInstallFolder":  "Glass Garden",
+    "supportedActions":  [
+                             "install",
+                             "launch",
+                             "repair",
+                             "uninstall",
+                             "openFolder",
+                             "update"
+                         ],
+    "installStrategy":  {
+                            "kind":  "zipArchive",
+                            "rootFolder":  "."
+                        },
+    "download":  {
+                     "kind":  "httpArchive",
+                     "url":  "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/games/glass-garden/release/glass-garden-win64.zip",
+                     "sha256":  "294692599599de92112a016a6ec20687e0aef3f5bcb1c1a5db76ee45e6b9dc7d",
+                     "sizeBytes":  12746
+                 },
+    "changelog":  [
+                      {
+                          "version":  "0.1.0",
+                          "date":  "2026-04-29",
+                          "items":  [
+                                        "Added a compact cozy memory game with board reset and move tracking.",
+                                        "Runs as a native PowerShell Windows Forms desktop window.",
+                                        "Ships with a local content pack above 10 MB while distributing as a compact ZIP archive."
+                                    ]
+                      }
+                  ]
+}

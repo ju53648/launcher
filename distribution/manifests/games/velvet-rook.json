@@ -1,0 +1,67 @@
+{
+    "id":  "com.lumorix.velvet-rook",
+    "itemType":  "game",
+    "name":  "Velvet Rook",
+    "version":  "0.1.0",
+    "description":  "A tiny tactical puzzle where one dangerous rook must clear a board without walking into velvet traps.",
+    "developer":  "Lumorix",
+    "releaseDate":  "2026-04-29",
+    "categories":  [
+                       "Tactics",
+                       "Puzzle",
+                       "Offline"
+                   ],
+    "tags":  [
+                 {
+                     "id":  "strategy",
+                     "weight":  3
+                 },
+                 {
+                     "id":  "puzzle",
+                     "weight":  3
+                 },
+                 {
+                     "id":  "board-game",
+                     "weight":  2
+                 },
+                 {
+                     "id":  "offline",
+                     "weight":  2
+                 }
+             ],
+    "coverImage":  "/assets/games/velvet-rook-cover.svg",
+    "bannerImage":  "/assets/games/velvet-rook-banner.svg",
+    "iconImage":  "/assets/games/velvet-rook-icon.svg",
+    "executable":  "Launch-VelvetRook.ps1",
+    "installSizeBytes":  11534336,
+    "defaultInstallFolder":  "Velvet Rook",
+    "supportedActions":  [
+                             "install",
+                             "launch",
+                             "repair",
+                             "uninstall",
+                             "openFolder",
+                             "update"
+                         ],
+    "installStrategy":  {
+                            "kind":  "zipArchive",
+                            "rootFolder":  "."
+                        },
+    "download":  {
+                     "kind":  "httpArchive",
+                     "url":  "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/games/velvet-rook/release/velvet-rook-win64.zip",
+                     "sha256":  "5078c1fb7852d08bd4074399bfdfa7c04274f3f5306eaf4ad99f6df475194ec6",
+                     "sizeBytes":  12988
+                 },
+    "changelog":  [
+                      {
+                          "version":  "0.1.0",
+                          "date":  "2026-04-29",
+                          "items":  [
+                                        "Added a micro tactics board game focused on line movement and trap reading.",
+                                        "Runs as a native PowerShell Windows Forms desktop window.",
+                                        "Ships with a local content pack above 10 MB while distributing as a compact ZIP archive."
+                                    ]
+                      }
+                  ]
+}

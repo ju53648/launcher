@@ -1,0 +1,18 @@
+{
+    "manifestPath":  "distribution/manifests/games/graveyard-shift.json",
+    "catalogManifestUrl":  "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/manifests/games/graveyard-shift.json",
+    "archivePath":  "distribution/games/graveyard-shift/release/graveyard-shift-win64.zip",
+    "archiveUrl":  "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/games/graveyard-shift/release/graveyard-shift-win64.zip",
+    "installSizePath":  "distribution/games/graveyard-shift/runtime/content.pack",
+    "version":  "0.1.0",
+    "releaseDate":  "2026-04-29",
+    "description":  "A tiny horror-clicker where you keep a cemetery lantern line alive while things keep crawling back out.",
+    "changelogItems":  [
+                           "Added a compact reactive cemetery defense game with click-based survival loops.",
+                           "Runs as a native PowerShell Windows Forms desktop window.",
+                           "Ships with a local content pack above 10 MB while distributing as a compact ZIP archive."
+                       ],
+    "setZipInstallStrategy":  true,
+    "zipRootFolder":  ".",
+    "ensureUpdateAction":  true
+}

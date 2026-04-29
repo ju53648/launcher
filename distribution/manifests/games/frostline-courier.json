@@ -1,0 +1,67 @@
+{
+    "id":  "com.lumorix.frostline-courier",
+    "itemType":  "game",
+    "name":  "Frostline Courier",
+    "version":  "0.1.0",
+    "description":  "A compact route-planning game about moving scarce cargo across frozen stations before the weather eats your margin.",
+    "developer":  "Lumorix",
+    "releaseDate":  "2026-04-29",
+    "categories":  [
+                       "Strategy",
+                       "Logistics",
+                       "Offline"
+                   ],
+    "tags":  [
+                 {
+                     "id":  "strategy",
+                     "weight":  3
+                 },
+                 {
+                     "id":  "management",
+                     "weight":  2
+                 },
+                 {
+                     "id":  "tactics",
+                     "weight":  2
+                 },
+                 {
+                     "id":  "offline",
+                     "weight":  2
+                 }
+             ],
+    "coverImage":  "/assets/games/frostline-courier-cover.svg",
+    "bannerImage":  "/assets/games/frostline-courier-banner.svg",
+    "iconImage":  "/assets/games/frostline-courier-icon.svg",
+    "executable":  "Launch-FrostlineCourier.ps1",
+    "installSizeBytes":  11534336,
+    "defaultInstallFolder":  "Frostline Courier",
+    "supportedActions":  [
+                             "install",
+                             "launch",
+                             "repair",
+                             "uninstall",
+                             "openFolder",
+                             "update"
+                         ],
+    "installStrategy":  {
+                            "kind":  "zipArchive",
+                            "rootFolder":  "."
+                        },
+    "download":  {
+                     "kind":  "httpArchive",
+                     "url":  "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/games/frostline-courier/release/frostline-courier-win64.zip",
+                     "sha256":  "976cdb4874b81f4613ce1b4412486c91e07c7bbd30c6b3e32d58543c36ed6b4e",
+                     "sizeBytes":  12971
+                 },
+    "changelog":  [
+                      {
+                          "version":  "0.1.0",
+                          "date":  "2026-04-29",
+                          "items":  [
+                                        "Added a compact route-planning strategy prototype with fuel pressure and contract selection.",
+                                        "Runs as a native PowerShell Windows Forms desktop window.",
+                                        "Ships with a local content pack above 10 MB while distributing as a compact ZIP archive."
+                                    ]
+                      }
+                  ]
+}

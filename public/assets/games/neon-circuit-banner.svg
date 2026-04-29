@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 480" role="img" aria-label="Neon Circuit banner art">
+  <defs>
+    <linearGradient id="banner" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#08101f" />
+      <stop offset="100%" stop-color="#1b2f6e" />
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="480" fill="url(#banner)" />
+  <g stroke="#39ffc0" stroke-width="5" fill="none" opacity="0.4">
+    <path d="M0 86h300l100 100h360l130-130h390" />
+    <path d="M0 208h260l80 80h420l140-140h380" />
+    <path d="M0 328h320l70-70h360l120 120h410" />
+  </g>
+  <text x="84" y="206" fill="#39ffc0" font-size="92" font-family="Segoe UI, Arial" font-weight="700">NEON CIRCUIT</text>
+  <text x="88" y="270" fill="#f3f6ff" font-size="30" font-family="Segoe UI, Arial">Fast signal-routing arcade runs in a native desktop window.</text>
+  <circle cx="1050" cy="236" r="104" fill="#39ffc0" opacity="0.18" />
+  <rect x="1010" y="196" width="80" height="80" fill="#39ffc0" stroke="#ffffff" stroke-width="4" />
+  <circle cx="1126" cy="144" r="26" fill="#ff605b" />
+</svg>
