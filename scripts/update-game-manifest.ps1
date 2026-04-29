@@ -116,7 +116,8 @@ if ($config.ensureUpdateAction -eq $true) {
     $manifest.supportedActions = $actions
 }
 
-$manifest | ConvertTo-Json -Depth 30 | Set-Content -LiteralPath $manifestPath -Encoding utf8
+$manifestJson = $manifest | ConvertTo-Json -Depth 30
+[System.IO.File]::WriteAllText($manifestPath, $manifestJson, [System.Text.UTF8Encoding]::new($false))
 
 Write-Host "Updated manifest: $manifestPath"
 Write-Host "Version: $($manifest.version)"
