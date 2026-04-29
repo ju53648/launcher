@@ -119,6 +119,56 @@ if ($config.ensureUpdateAction -eq $true) {
 $manifestJson = $manifest | ConvertTo-Json -Depth 30
 [System.IO.File]::WriteAllText($manifestPath, $manifestJson, [System.Text.UTF8Encoding]::new($false))
 
+$catalogRelativePath = "distribution/manifests/catalog.json"
+if (-not [string]::IsNullOrWhiteSpace($config.catalogPath)) {
+    $catalogRelativePath = [string]$config.catalogPath
+}
+
+$catalogPath = Join-Path $repoRoot $catalogRelativePath
+if ((Test-Path -LiteralPath $catalogPath -PathType Leaf) -and -not [string]::IsNullOrWhiteSpace($config.catalogManifestUrl)) {
+    $catalog = Get-Content -LiteralPath $catalogPath -Raw | ConvertFrom-Json
+    $targetBaseUrl = [string]$config.catalogManifestUrl
+    $manifestFileName = [System.IO.Path]::GetFileName([string]$config.manifestPath)
+    $versionedUrl = "${targetBaseUrl}?v=$($config.version)"
+    $catalogChanged = $false
+    $matchedEntry = $false
+
+    if ($catalog.manifests) {
+        foreach ($entry in $catalog.manifests) {
+            if (-not $entry.url) {
+                continue
+            }
+
+            $entryUrl = [string]$entry.url
+            $entryBaseUrl = $entryUrl.Split("?")[0]
+            if ($entryBaseUrl -eq $targetBaseUrl -or ($entryBaseUrl.EndsWith("/$manifestFileName"))) {
+                $matchedEntry = $true
+                if ($entryUrl -ne $versionedUrl) {
+                    $entry.url = $versionedUrl
+                    $catalogChanged = $true
+                }
+            }
+        }
+    }
+
+    if (-not $matchedEntry) {
+        throw "Catalog entry for '$targetBaseUrl' was not found in $catalogPath"
+    }
+
+    $nextTimestamp = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
+    if ([string]$catalog.timestamp -ne $nextTimestamp) {
+        $catalog.timestamp = $nextTimestamp
+        $catalogChanged = $true
+    }
+
+    if ($catalogChanged) {
+        $catalogJson = $catalog | ConvertTo-Json -Depth 30
+        [System.IO.File]::WriteAllText($catalogPath, $catalogJson, [System.Text.UTF8Encoding]::new($false))
+        Write-Host "Updated catalog: $catalogPath"
+        Write-Host "Catalog manifest URL: $versionedUrl"
+    }
+}
+
 Write-Host "Updated manifest: $manifestPath"
 Write-Host "Version: $($manifest.version)"
 Write-Host "Archive bytes: $archiveSize"

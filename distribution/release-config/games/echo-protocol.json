@@ -1,5 +1,6 @@
 {
   "manifestPath": "distribution/manifests/games/echo-protocol.json",
+  "catalogManifestUrl": "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/manifests/games/echo-protocol.json",
   "archivePath": "distribution/games/echo-protocol/release/echo-protocol-win64.zip",
   "archiveUrl": "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/games/echo-protocol/release/echo-protocol-win64.zip",
   "installSizePath": "distribution/games/echo-protocol/EchoProtocol.exe",

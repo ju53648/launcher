@@ -1,5 +1,6 @@
 {
   "manifestPath": "distribution/manifests/games/lumorix-dropdash.json",
+  "catalogManifestUrl": "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/manifests/games/lumorix-dropdash.json",
   "archivePath": "distribution/games/lumorix-dropdash/release/lumorix-dropdash-win64.zip",
   "archiveUrl": "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/games/lumorix-dropdash/release/lumorix-dropdash-win64.zip",
   "installSizePath": "distribution/games/lumorix-dropdash/runtime/LumorixDropDash.exe",

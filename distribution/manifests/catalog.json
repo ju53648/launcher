@@ -1,12 +1,12 @@
 {
-  "version": "1",
-  "timestamp": "2026-04-29T12:00:00Z",
-  "manifests": [
-    {
-      "url": "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/manifests/games/echo-protocol.json"
-    },
-    {
-      "url": "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/manifests/games/lumorix-dropdash.json"
-    }
-  ]
+    "version":  "1",
+    "timestamp":  "2026-04-29T15:05:19Z",
+    "manifests":  [
+                      {
+                          "url":  "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/manifests/games/echo-protocol.json?v=0.4.0"
+                      },
+                      {
+                          "url":  "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/manifests/games/lumorix-dropdash.json?v=1.1.3"
+                      }
+                  ]
 }
