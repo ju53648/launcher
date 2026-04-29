@@ -2,20 +2,20 @@ $ErrorActionPreference = "Stop"
 
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $tauriAppDir = Join-Path $scriptDir "tauri-app"
-$webDistDir = Join-Path $scriptDir "web-dist"
 $runtimeDir = Join-Path $scriptDir "runtime"
 $releaseDir = Join-Path $scriptDir "release"
 $releaseExe = Join-Path $tauriAppDir "target\release\lumorix-dropdash-app.exe"
 $outExeRoot = Join-Path $scriptDir "LumorixDropDash.exe"
 $outExeRuntime = Join-Path $runtimeDir "LumorixDropDash.exe"
 $tauriConfigPath = Join-Path $tauriAppDir "tauri.conf.json"
+$tauriUiDir = Join-Path $tauriAppDir "ui"
 
 if (-not (Test-Path -LiteralPath $tauriAppDir -PathType Container)) {
   throw "Tauri app directory not found: $tauriAppDir"
 }
 
-if (-not (Test-Path -LiteralPath $webDistDir -PathType Container)) {
-  New-Item -ItemType Directory -Path $webDistDir | Out-Null
+if (-not (Test-Path -LiteralPath $tauriUiDir -PathType Container)) {
+  throw "Tauri UI directory not found: $tauriUiDir"
 }
 
 if (-not (Test-Path -LiteralPath $runtimeDir -PathType Container)) {
@@ -39,15 +39,6 @@ if ([string]::IsNullOrWhiteSpace($packageVersion)) {
 $archiveBaseName = "lumorix-dropdash-win64"
 $archivePath = Join-Path $releaseDir ("$archiveBaseName.zip")
 $archiveHashPath = "$archivePath.sha256"
-
-foreach ($asset in @("index.html", "styles.css", "script.js")) {
-  $source = Join-Path $scriptDir $asset
-  $destination = Join-Path $webDistDir $asset
-  if (-not (Test-Path -LiteralPath $source -PathType Leaf)) {
-    throw "Missing frontend asset: $source"
-  }
-  Copy-Item -LiteralPath $source -Destination $destination -Force
-}
 
 Push-Location $tauriAppDir
 try {

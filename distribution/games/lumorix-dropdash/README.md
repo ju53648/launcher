@@ -1,7 +1,8 @@
 # Lumorix DropDash
 
-Lumorix DropDash is a standalone desktop game package for Lumorix Launcher.
-The gameplay, visuals, controls, and scoring logic are unchanged.
+Lumorix DropDash is an official arcade game. Navigate through falling obstacles, collect power cores, and achieve the highest score. A fast-paced challenge for quick reflexes and strategy.
+
+The game is packaged as a self-contained native Tauri desktop app. There is no separate browser launcher or external web distribution step.
 
 ## Package Contents
 
@@ -9,12 +10,12 @@ The gameplay, visuals, controls, and scoring logic are unchanged.
 lumorix-dropdash/
   runtime/
     LumorixDropDash.exe
-  index.html
-  styles.css
-  script.js
   build-tauri.ps1
-  web-dist/
   tauri-app/
+    ui/
+      index.html
+      styles.css
+      script.js
   README.md
 ```
 
@@ -41,7 +42,7 @@ Controls:
 
 ## Rebuild Desktop Binary
 
-If you change `index.html`, `styles.css`, or `script.js`, rebuild the desktop binary:
+If you change the UI files in `tauri-app\ui\`, rebuild the desktop binary:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\build-tauri.ps1
