@@ -114,23 +114,39 @@ pub fn verify_installed_game_health(runtime: &LauncherRuntime) -> Result<usize> 
 }
 
 async fn fetch_source_manifests(url: &str) -> Result<Vec<ContentManifest>> {
-    let response = reqwest::get(url)
+    let body = fetch_text_uncached(url, "game catalog source").await?;
+    parse_catalog_payload(&body).await
+}
+
+async fn fetch_text_uncached(url: &str, label: &str) -> Result<String> {
+    let request_url = with_cache_buster(url);
+    let client = reqwest::Client::new();
+    let response = client
+        .get(&request_url)
+        .header(reqwest::header::CACHE_CONTROL, "no-cache, no-store, max-age=0")
+        .header(reqwest::header::PRAGMA, "no-cache")
+        .send()
         .await
-        .map_err(|err| CommandError::Network(format!("Could not fetch game catalog source: {err}")))?;
+        .map_err(|err| CommandError::Network(format!("Could not fetch {label}: {err}")))?;
+
     let status = response.status();
     if !status.is_success() {
         return Err(CommandError::Network(format!(
-            "Game catalog source returned HTTP status {}",
+            "{} returned HTTP status {}",
+            label,
             status.as_u16()
         )));
     }
 
-    let body = response
+    response
         .text()
         .await
-        .map_err(|err| CommandError::Network(format!("Could not read game catalog payload: {err}")))?;
+        .map_err(|err| CommandError::Network(format!("Could not read {label} payload: {err}")))
+}
 
-    parse_catalog_payload(&body).await
+fn with_cache_buster(url: &str) -> String {
+    let separator = if url.contains('?') { "&" } else { "?" };
+    format!("{url}{separator}_lumorix_ts={}", Utc::now().timestamp_millis())
 }
 
 async fn parse_catalog_payload(raw: &str) -> Result<Vec<ContentManifest>> {
@@ -155,25 +171,7 @@ async fn parse_catalog_payload(raw: &str) -> Result<Vec<ContentManifest>> {
                     manifests.push(manifest);
                 }
                 RemoteCatalogEntry::Reference { url } => {
-                    let referenced = reqwest::get(&url).await.map_err(|err| {
-                        CommandError::Network(format!(
-                            "Could not fetch referenced manifest '{}': {err}",
-                            url
-                        ))
-                    })?;
-                    if !referenced.status().is_success() {
-                        return Err(CommandError::Network(format!(
-                            "Referenced manifest '{}' returned HTTP status {}",
-                            url,
-                            referenced.status().as_u16()
-                        )));
-                    }
-                    let payload = referenced.text().await.map_err(|err| {
-                        CommandError::Network(format!(
-                            "Could not read referenced manifest '{}': {err}",
-                            url
-                        ))
-                    })?;
+                    let payload = fetch_text_uncached(&url, "referenced manifest").await?;
                     let manifest = serde_json::from_str::<ContentManifest>(&payload).map_err(|err| {
                         CommandError::Manifest(format!(
                             "Referenced manifest '{}' is invalid JSON: {err}",
