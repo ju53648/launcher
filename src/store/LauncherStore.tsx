@@ -86,6 +86,7 @@ const LauncherContext = createContext<LauncherContextValue | undefined>(undefine
 export function LauncherProvider({ children }: { children: ReactNode }) {
   const { locale, setLocale } = useI18n();
   const initialLocale = useRef(locale);
+  const autoGameRefreshTriggered = useRef(false);
   const [snapshot, setSnapshot] = useState<LauncherSnapshot | null>(null);
   const [loading, setLoading] = useState(true);
   const [busyAction, setBusyAction] = useState<string | null>(null);
@@ -196,6 +197,49 @@ export function LauncherProvider({ children }: { children: ReactNode }) {
 
     return () => window.clearInterval(timer);
   }, [refresh, snapshot?.items]);
+
+  useEffect(() => {
+    if (loading || !snapshot || autoGameRefreshTriggered.current) {
+      return;
+    }
+
+    autoGameRefreshTriggered.current = true;
+    if (!snapshot.config.checkGameUpdatesOnStart) {
+      return;
+    }
+
+    void (async () => {
+      const previousSnapshot = snapshot;
+      setGameRefreshFeedback({
+        phase: "checking",
+        checkedAt: null,
+        summary: null,
+        errorMessage: null
+      });
+
+      try {
+        const next = await launcherApi.checkItemUpdates();
+        const normalizedNext = normalizeLauncherSnapshot(next);
+        publishSnapshot(next);
+
+        setGameRefreshFeedback({
+          phase: "completed",
+          checkedAt: new Date().toISOString(),
+          summary: summarizeGameRefresh(previousSnapshot, normalizedNext),
+          errorMessage: null
+        });
+      } catch (caught) {
+        const normalized = normalizeError(caught);
+        console.warn("[launcher] automatic game update check failed", normalized.message);
+        setGameRefreshFeedback({
+          phase: "error",
+          checkedAt: new Date().toISOString(),
+          summary: null,
+          errorMessage: normalized.message
+        });
+      }
+    })();
+  }, [loading, publishSnapshot, snapshot]);
 
   const publishUpdateProgress = useCallback((progress: LauncherUpdateProgress) => {
     console.info("[updater]", progress.status, progress.version ?? progress.errorMessage ?? "");
