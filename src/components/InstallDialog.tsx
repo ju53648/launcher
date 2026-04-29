@@ -2,6 +2,7 @@ import { Download, FolderOpen, X } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { formatBytes } from "../domain/format";
+import { resolveCatalogImageSrc } from "../domain/media";
 import type { ContentView, LibraryFolder } from "../domain/types";
 import { useI18n } from "../i18n";
 import { StatusBadge } from "./StatusBadge";
@@ -28,6 +29,10 @@ export function InstallDialog({
 
   const selected = availableLibraries.find((library) => library.id === libraryId);
   const manifest = item.manifest;
+  const bannerImageSrc = resolveCatalogImageSrc(
+    item.catalog.bannerImage,
+    manifest?.version ?? item.catalog.releaseDate
+  );
 
   if (!manifest) return null;
 
@@ -43,8 +48,8 @@ export function InstallDialog({
           <X size={18} />
         </button>
         <div className="modal__hero">
-          {item.catalog.bannerImage ? (
-            <img src={item.catalog.bannerImage} alt="" />
+          {bannerImageSrc ? (
+            <img src={bannerImageSrc} alt="" />
           ) : (
             <div className="media-placeholder media-placeholder--hero" />
           )}

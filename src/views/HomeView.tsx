@@ -8,6 +8,7 @@ import {
   formatDate,
   jobProgressLabel
 } from "../domain/format";
+import { resolveCatalogImageSrc } from "../domain/media";
 import {
   buildRecentActivity,
   getActiveJobs,
@@ -338,11 +339,16 @@ export function HomeView({ setRoute }: { setRoute: (route: AppRoute) => void }) 
 }
 
 function ItemThumb({ item, compact = false }: { item: ContentView; compact?: boolean }) {
-  if (item.catalog.iconImage) {
+  const iconImageSrc = resolveCatalogImageSrc(
+    item.catalog.iconImage,
+    item.manifest?.version ?? item.catalog.releaseDate
+  );
+
+  if (iconImageSrc) {
     return (
       <img
         className={compact ? "item-thumb item-thumb--compact" : "item-thumb"}
-        src={item.catalog.iconImage}
+        src={iconImageSrc}
         alt=""
       />
     );

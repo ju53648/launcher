@@ -1,6 +1,7 @@
 import { Download, Play, Trash2, Wrench } from "lucide-react";
 
 import { formatBytes, formatDate, formatPlaytime, itemTypeLabel, jobProgressLabel } from "../domain/format";
+import { resolveCatalogImageSrc } from "../domain/media";
 import { getGameStatus, getPrimaryGameAction } from "../domain/selectors";
 import { getTagLabel, sortTagsByWeight } from "../domain/tags";
 import type { ContentView } from "../domain/types";
@@ -40,13 +41,17 @@ export function GameCard({
   const lastPlayedAt = item.collectionEntry?.lastUsedAt ?? item.installed?.lastLaunchedAt ?? null;
   const addedAt = item.collectionEntry?.addedAt ?? null;
   const totalPlaytimeMinutes = item.collectionEntry?.totalPlaytimeMinutes ?? 0;
+  const coverImageSrc = resolveCatalogImageSrc(
+    item.catalog.coverImage,
+    manifest?.version ?? item.catalog.releaseDate
+  );
 
   return (
     <article className="game-card">
       <button className="game-card__media" onClick={onOpen} type="button">
-        {item.catalog.coverImage ? (
+        {coverImageSrc ? (
           <img
-            src={item.catalog.coverImage}
+            src={coverImageSrc}
             alt={t("accessibility.coverImage", { name: item.catalog.name })}
           />
         ) : (

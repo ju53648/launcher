@@ -6,6 +6,7 @@ import { EmptyState } from "../components/EmptyState";
 import { RecommendationSection } from "../components/RecommendationSection";
 import { StatusBadge } from "../components/StatusBadge";
 import { formatBytes, itemTypeLabel, resolveIntlLocale } from "../domain/format";
+import { resolveCatalogImageSrc } from "../domain/media";
 import {
   getBecauseYouPlayedRecommendations,
   getDiscoverableItems,
@@ -420,14 +421,22 @@ function relevanceScore(item: ContentView, search: string, t: ReturnType<typeof 
     const gameStatus = getGameStatus(item);
     const isInstalled = gameStatus === "installed" || gameStatus === "updateAvailable";
     const actionBusy = busy;
+    const bannerImageSrc = resolveCatalogImageSrc(
+      item.catalog.bannerImage,
+      item.manifest?.version ?? item.catalog.releaseDate
+    );
+    const coverImageSrc = resolveCatalogImageSrc(
+      item.catalog.coverImage,
+      item.manifest?.version ?? item.catalog.releaseDate
+    );
 
     return (
       <section className="shop-featured">
         <div className="shop-featured__media" aria-hidden>
-          {item.catalog.bannerImage ? (
-            <img src={item.catalog.bannerImage} alt="" />
-          ) : item.catalog.coverImage ? (
-            <img src={item.catalog.coverImage} alt="" />
+          {bannerImageSrc ? (
+            <img src={bannerImageSrc} alt="" />
+          ) : coverImageSrc ? (
+            <img src={coverImageSrc} alt="" />
           ) : (
             <div className="media-placeholder media-placeholder--hero" />
           )}
@@ -493,13 +502,17 @@ function ShopCard({
   const { t } = useI18n();
   const manifest = item.manifest;
   const gameStatus = getGameStatus(item);
+  const coverImageSrc = resolveCatalogImageSrc(
+    item.catalog.coverImage,
+    manifest?.version ?? item.catalog.releaseDate
+  );
 
   return (
     <article className="shop-card">
       <button className="shop-card__media" onClick={onOpen} type="button">
-        {item.catalog.coverImage ? (
+        {coverImageSrc ? (
           <img
-            src={item.catalog.coverImage}
+            src={coverImageSrc}
             alt={t("accessibility.coverImage", { name: item.catalog.name })}
           />
         ) : (

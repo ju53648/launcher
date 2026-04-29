@@ -7,6 +7,7 @@ import { ProgressBar } from "../components/ProgressBar";
 import { RecommendationSection } from "../components/RecommendationSection";
 import { StatusBadge } from "../components/StatusBadge";
 import { formatBytes, formatDate, itemTypeLabel, jobProgressLabel } from "../domain/format";
+import { resolveCatalogImageSrc } from "../domain/media";
 import { getGameStatus, getPrimaryGameAction, getSimilarItems } from "../domain/selectors";
 import { getTagLabel, sortTagsByWeight } from "../domain/tags";
 import type { ContentView } from "../domain/types";
@@ -46,21 +47,29 @@ export function GameDetailView({
   const gameStatus = getGameStatus(item);
   const primaryAction = getPrimaryGameAction(item);
   const isInstalled = gameStatus !== "notInstalled";
+  const bannerImageSrc = resolveCatalogImageSrc(
+    item.catalog.bannerImage,
+    manifest?.version ?? item.catalog.releaseDate
+  );
+  const iconImageSrc = resolveCatalogImageSrc(
+    item.catalog.iconImage,
+    manifest?.version ?? item.catalog.releaseDate
+  );
   const preferredReturnRoute: AppRoute =
     item.collectionStatus === "notAdded" ? "shop" : "library";
 
   return (
     <div className="view-stack">
       <section className="detail-hero">
-        {item.catalog.bannerImage ? (
-          <img src={item.catalog.bannerImage} alt="" />
+        {bannerImageSrc ? (
+          <img src={bannerImageSrc} alt="" />
         ) : (
           <div className="media-placeholder media-placeholder--hero" />
         )}
         <div className="detail-hero__content">
           <div className="detail-hero__title">
-            {item.catalog.iconImage ? (
-              <img src={item.catalog.iconImage} alt="" />
+            {iconImageSrc ? (
+              <img src={iconImageSrc} alt="" />
             ) : (
               <div className="item-thumb item-thumb--hero item-thumb--fallback">
                 <span>{item.catalog.name.slice(0, 2).toUpperCase()}</span>

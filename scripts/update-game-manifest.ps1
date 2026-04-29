@@ -119,6 +119,15 @@ if ($config.ensureUpdateAction -eq $true) {
 $manifestJson = $manifest | ConvertTo-Json -Depth 30
 [System.IO.File]::WriteAllText($manifestPath, $manifestJson, [System.Text.UTF8Encoding]::new($false))
 
+$assetValidatorScript = Join-Path $repoRoot "scripts/validate-game-assets.mjs"
+if (Test-Path -LiteralPath $assetValidatorScript -PathType Leaf) {
+    $manifestPathRelative = [string]$config.manifestPath
+    node $assetValidatorScript --manifest $manifestPathRelative
+    if ($LASTEXITCODE -ne 0) {
+        throw "Game image validation failed for manifest: $manifestPathRelative"
+    }
+}
+
 $catalogRelativePath = "distribution/manifests/catalog.json"
 if (-not [string]::IsNullOrWhiteSpace($config.catalogPath)) {
     $catalogRelativePath = [string]$config.catalogPath

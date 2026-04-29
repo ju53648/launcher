@@ -15,6 +15,7 @@
     "clean:local-state": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/clean-local-state.ps1",
     "audit:local": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/audit-local-lumorix.ps1",
     "validate:locales": "node scripts/validate-locales.mjs",
+    "validate:games": "node scripts/validate-game-assets.mjs",
     "preview": "vite preview --host 127.0.0.1 --port 4173",
     "typecheck": "tsc --noEmit"
   },
