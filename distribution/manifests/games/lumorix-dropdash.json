@@ -2,7 +2,7 @@
     "id":  "com.lumorix.dropdash",
     "itemType":  "game",
     "name":  "Lumorix DropDash",
-    "version":  "1.1.1",
+    "version":  "1.1.2",
     "description":  "A compact offline arcade release for validating Lumorix Launcher install, launch, update, and uninstall flows through a native desktop runtime.",
     "developer":  "Lumorix",
     "releaseDate":  "2026-04-28",
@@ -53,6 +53,15 @@
                      "sizeBytes":  2408893
                  },
     "changelog":  [
+                      {
+                          "version":  "1.1.2",
+                          "date":  "2026-04-28",
+                          "items":  [
+                                        "Migrated DropDash from a browser launch flow to a standalone native Tauri desktop runtime.",
+                                        "Kept gameplay, visuals, controls, and scoring identical to the previous release.",
+                                        "Prepared archive-based delivery for launcher updates and public upload."
+                                    ]
+                      },
                       {
                           "version":  "1.1.1",
                           "date":  "2026-04-28",

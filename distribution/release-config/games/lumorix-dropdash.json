@@ -3,7 +3,7 @@
   "archivePath": "distribution/games/lumorix-dropdash/release/lumorix-dropdash-win64.zip",
   "archiveUrl": "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/games/lumorix-dropdash/release/lumorix-dropdash-win64.zip",
   "installSizePath": "distribution/games/lumorix-dropdash/runtime/LumorixDropDash.exe",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "releaseDate": "2026-04-28",
   "description": "A compact offline arcade release for validating Lumorix Launcher install, launch, update, and uninstall flows through a native desktop runtime.",
   "changelogItems": [
