@@ -31,6 +31,10 @@ const RETIRED_ITEM_ID_B: &[u8] = &[
     99, 111, 109, 46, 108, 117, 109, 111, 114, 105, 120, 46, 112, 114, 111, 106, 101, 99, 116,
     45, 97, 116, 108, 97, 115,
 ];
+const PUBLIC_CATALOG_SOURCE_ID: &str = "lumorix-public-catalog";
+const PUBLIC_CATALOG_SOURCE_NAME: &str = "Lumorix Public Catalog";
+const PUBLIC_CATALOG_URL: &str =
+    "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/manifests/catalog.json";
 
 pub type Result<T> = std::result::Result<T, CommandError>;
 
@@ -143,7 +147,16 @@ impl LauncherRuntime {
         }
 
         match read_json(&self.config_path) {
-            Ok(config) => Ok(config),
+            Ok(mut config) => {
+                if ensure_default_manifest_sources(&mut config) {
+                    self.save_config(&config)?;
+                    self.append_log(
+                        "INFO",
+                        "Updated launcher config with default manifest sources",
+                    );
+                }
+                Ok(config)
+            }
             Err(err) => {
                 self.append_log(
                     "WARN",
@@ -879,13 +892,16 @@ fn default_config() -> LauncherConfig {
             create_desktop_shortcuts: false,
             keep_download_cache: true,
         },
-        manifest_sources: vec![ManifestSourceConfig {
-            id: "lumorix-embedded".into(),
-            name: "Lumorix Embedded Catalog".into(),
-            url: None,
-            enabled: true,
-            source_type: ManifestSourceType::Embedded,
-        }],
+        manifest_sources: vec![
+            ManifestSourceConfig {
+                id: "lumorix-embedded".into(),
+                name: "Lumorix Embedded Catalog".into(),
+                url: None,
+                enabled: true,
+                source_type: ManifestSourceType::Embedded,
+            },
+            default_remote_manifest_source(),
+        ],
         privacy: PrivacyConfig {
             telemetry_enabled: false,
             crash_upload_enabled: false,
@@ -894,6 +910,62 @@ fn default_config() -> LauncherConfig {
                     .into(),
         },
     }
+}
+
+fn default_remote_manifest_source() -> ManifestSourceConfig {
+    ManifestSourceConfig {
+        id: PUBLIC_CATALOG_SOURCE_ID.into(),
+        name: PUBLIC_CATALOG_SOURCE_NAME.into(),
+        url: Some(PUBLIC_CATALOG_URL.into()),
+        enabled: true,
+        source_type: ManifestSourceType::CustomHttp,
+    }
+}
+
+fn ensure_default_manifest_sources(config: &mut LauncherConfig) -> bool {
+    let mut changed = false;
+
+    let has_embedded = config
+        .manifest_sources
+        .iter()
+        .any(|source| matches!(source.source_type, ManifestSourceType::Embedded));
+    if !has_embedded {
+        config.manifest_sources.insert(
+            0,
+            ManifestSourceConfig {
+                id: "lumorix-embedded".into(),
+                name: "Lumorix Embedded Catalog".into(),
+                url: None,
+                enabled: true,
+                source_type: ManifestSourceType::Embedded,
+            },
+        );
+        changed = true;
+    }
+
+    if let Some(remote_source) = config
+        .manifest_sources
+        .iter_mut()
+        .find(|source| source.id == PUBLIC_CATALOG_SOURCE_ID)
+    {
+        if !matches!(remote_source.source_type, ManifestSourceType::CustomHttp)
+            || remote_source.url.as_deref() != Some(PUBLIC_CATALOG_URL)
+            || !remote_source.enabled
+        {
+            remote_source.name = PUBLIC_CATALOG_SOURCE_NAME.into();
+            remote_source.source_type = ManifestSourceType::CustomHttp;
+            remote_source.url = Some(PUBLIC_CATALOG_URL.into());
+            remote_source.enabled = true;
+            changed = true;
+        }
+    } else {
+        config
+            .manifest_sources
+            .push(default_remote_manifest_source());
+        changed = true;
+    }
+
+    changed
 }
 
 pub fn read_json<T: DeserializeOwned>(path: &Path) -> Result<T> {
