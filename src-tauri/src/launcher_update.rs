@@ -1,25 +1,14 @@
 use chrono::Utc;
 
 use crate::{
-    models::{LauncherReleaseManifest, LauncherUpdateState, ManifestSourceType},
+    models::{LauncherReleaseManifest, LauncherUpdateState},
     storage::{CommandError, LauncherRuntime, Result},
 };
 
-pub async fn check_launcher_updates(runtime: &LauncherRuntime) -> Result<LauncherUpdateState> {
-    let config = runtime.load_config()?;
-    let source = config
-        .manifest_sources
-        .iter()
-        .find(|source| {
-            source.enabled
-                && source.url.is_some()
-                && matches!(
-                    source.source_type,
-                    ManifestSourceType::GitHubReleases | ManifestSourceType::CustomHttp
-                )
-        })
-        .cloned();
+const LAUNCHER_UPDATE_MANIFEST_URL: &str =
+    "https://github.com/ju53648/launcher/releases/latest/download/latest.json";
 
+pub async fn check_launcher_updates(runtime: &LauncherRuntime) -> Result<LauncherUpdateState> {
     let current_version = env!("CARGO_PKG_VERSION").to_string();
     let mut update_state = LauncherUpdateState {
         current_version: current_version.clone(),
@@ -31,17 +20,7 @@ pub async fn check_launcher_updates(runtime: &LauncherRuntime) -> Result<Launche
         error: None,
     };
 
-    let Some(source) = source else {
-        update_state.notes.push(
-            "No remote update source is enabled. Configure a GitHub Releases manifest when ready."
-                .into(),
-        );
-        store_state(runtime, &update_state)?;
-        return Ok(update_state);
-    };
-
-    let url = source.url.expect("checked above");
-    let release_manifest = fetch_release_manifest(&url).await?;
+    let release_manifest = fetch_release_manifest(LAUNCHER_UPDATE_MANIFEST_URL).await?;
     update_state.latest_version = Some(release_manifest.version.clone());
     update_state.update_available =
         is_version_newer(&release_manifest.version, &current_version).unwrap_or(false);
