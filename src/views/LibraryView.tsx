@@ -41,6 +41,7 @@ const DEFAULT_PREFERENCES: LibraryPreferences = {
 
 export function LibraryView({ setRoute }: { setRoute: (route: AppRoute) => void }) {
   const { locale, t } = useI18n();
+  const intlLocale = resolveIntlLocale(locale);
   const {
     snapshot,
     installItem,
@@ -61,8 +62,8 @@ export function LibraryView({ setRoute }: { setRoute: (route: AppRoute) => void 
   }, [preferences]);
 
   const collator = useMemo(
-    () => new Intl.Collator(resolveIntlLocale(locale), { sensitivity: "base" }),
-    [locale]
+    () => new Intl.Collator(intlLocale, { sensitivity: "base" }),
+    [intlLocale]
   );
 
   const libraryItems = useMemo(() => (snapshot ? getLibraryItems(snapshot) : []), [snapshot]);
@@ -85,7 +86,7 @@ export function LibraryView({ setRoute }: { setRoute: (route: AppRoute) => void 
 
   const items = useMemo(() => {
     if (!snapshot) return [];
-    const normalizedSearch = preferences.search.trim().toLocaleLowerCase(locale);
+    const normalizedSearch = preferences.search.trim().toLocaleLowerCase(intlLocale);
 
     return [...libraryItems]
       .filter((item) => {
@@ -115,12 +116,12 @@ export function LibraryView({ setRoute }: { setRoute: (route: AppRoute) => void 
           ...item.catalog.tags.map((tag) => getTagLabel(tag.id, t))
         ]
           .join(" ")
-          .toLocaleLowerCase(locale);
+          .toLocaleLowerCase(intlLocale);
 
         return haystack.includes(normalizedSearch);
       })
       .sort((left, right) => compareLibraryItems(left, right, preferences.sortBy, collator));
-  }, [collator, libraryItems, locale, preferences, snapshot, t]);
+  }, [collator, intlLocale, libraryItems, preferences, snapshot, t]);
 
   const installedCount = libraryItems.filter((item) => getGameStatus(item) !== "notInstalled").length;
   const updatesCount = libraryItems.filter((item) => getGameStatus(item) === "updateAvailable").length;

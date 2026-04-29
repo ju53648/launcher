@@ -5,7 +5,7 @@ import type { AppRoute } from "../components/AppShell";
 import { EmptyState } from "../components/EmptyState";
 import { RecommendationSection } from "../components/RecommendationSection";
 import { StatusBadge } from "../components/StatusBadge";
-import { formatBytes, itemTypeLabel } from "../domain/format";
+import { formatBytes, itemTypeLabel, resolveIntlLocale } from "../domain/format";
 import {
   getBecauseYouPlayedRecommendations,
   getDiscoverableItems,
@@ -25,6 +25,7 @@ type ShopSortKey = "relevance" | "name" | "releaseDate" | "installSize" | "statu
 
 export function ShopView({ setRoute }: { setRoute: (route: AppRoute) => void }) {
   const { locale, t } = useI18n();
+  const intlLocale = resolveIntlLocale(locale);
   const { snapshot, addItemToLibrary, busyAction, installItem, launchItem, closeItem } = useLauncher();
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
@@ -59,7 +60,7 @@ export function ShopView({ setRoute }: { setRoute: (route: AppRoute) => void }) 
   const becausePlayed = getBecauseYouPlayedRecommendations(snapshot, 3);
 
   const filteredItems = useMemo(() => {
-    const collator = new Intl.Collator(locale, { sensitivity: "base" });
+    const collator = new Intl.Collator(intlLocale, { sensitivity: "base" });
     return discoverableItems
       .filter((item) => {
         if (typeFilter !== "all" && item.catalog.itemType !== typeFilter) return false;
@@ -86,7 +87,7 @@ export function ShopView({ setRoute }: { setRoute: (route: AppRoute) => void }) 
         return haystack.includes(deferredSearch);
       })
       .sort((left, right) => compareShopItems(left, right, sortBy, deferredSearch, collator, t));
-  }, [categoryFilter, deferredSearch, discoverableItems, locale, sortBy, statusFilter, t, tagFilter, typeFilter]);
+  }, [categoryFilter, deferredSearch, discoverableItems, intlLocale, sortBy, statusFilter, t, tagFilter, typeFilter]);
 
   const hasSparseCatalog = discoverableItems.length <= 2;
 
