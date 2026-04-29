@@ -112,7 +112,6 @@ pub fn launch_item(runtime: &LauncherRuntime, item_id: &str) -> Result<()> {
         let mut command = Command::new("powershell");
         command
             .arg("-NoProfile")
-            .arg("-NonInteractive")
             .arg("-ExecutionPolicy")
             .arg("Bypass")
             .arg("-File")

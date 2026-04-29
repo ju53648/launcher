@@ -1,21 +1,17 @@
-import { ArrowRight, Check, Download, Filter, Play, Plus, Search, Sparkles } from "lucide-react";
+import { ArrowRight, Check, Download, Play, Plus, Search, Sparkles } from "lucide-react";
 import { useDeferredValue, useMemo, useState } from "react";
 
 import type { AppRoute } from "../components/AppShell";
 import { EmptyState } from "../components/EmptyState";
-import { RecommendationSection } from "../components/RecommendationSection";
 import { StatusBadge } from "../components/StatusBadge";
 import { formatBytes, itemTypeLabel, resolveIntlLocale } from "../domain/format";
 import { resolveCatalogImageSrc } from "../domain/media";
 import {
-  getBecauseYouPlayedRecommendations,
   getDiscoverableItems,
-  getForYouRecommendations,
   getGameStatus,
-  getShopCategories,
-  getShopTagGroups
+  getShopCategories
 } from "../domain/selectors";
-import { getTagCategoryLabel, getTagLabel, sortTagsByWeight } from "../domain/tags";
+import { getTagLabel, sortTagsByWeight } from "../domain/tags";
 import type { CatalogItemType, ContentView } from "../domain/types";
 import { useI18n } from "../i18n";
 import { useLauncher } from "../store/LauncherStore";
@@ -38,27 +34,18 @@ export function ShopView({ setRoute }: { setRoute: (route: AppRoute) => void }) 
 
   if (!snapshot) return null;
 
-  const typeFilters: Array<{ value: TypeFilter; label: string }> = [
-    { value: "all", label: t("shop.filters.allTypes") },
-    { value: "game", label: t("status.itemType.game") },
-    { value: "tool", label: t("status.itemType.tool") },
-    { value: "project", label: t("status.itemType.project") }
-  ];
-
-  const statusFilters: Array<{ value: ShopStatusFilter; label: string }> = [
-    { value: "all", label: t("shop.filters.statusAll") },
-    { value: "notAdded", label: t("shop.filters.statusNotAdded") },
-    { value: "inLibrary", label: t("shop.filters.statusInLibrary") },
-    { value: "installed", label: t("shop.filters.statusInstalled") },
-    { value: "updates", label: t("shop.filters.statusUpdates") }
-  ];
-
   const discoverableItems = getDiscoverableItems(snapshot);
   const featuredItem = selectFeaturedItem(discoverableItems);
   const categories = getShopCategories(snapshot);
-  const tagGroups = getShopTagGroups(snapshot);
-  const forYouRecommendations = getForYouRecommendations(snapshot, 3);
-  const becausePlayed = getBecauseYouPlayedRecommendations(snapshot, 3);
+  const tags = useMemo(
+    () =>
+      Array.from(
+        new Set(discoverableItems.flatMap((item) => sortTagsByWeight(item.catalog.tags).map((tag) => tag.id)))
+      )
+        .map((tagId) => ({ id: tagId, label: getTagLabel(tagId, t) }))
+        .sort((left, right) => left.label.localeCompare(right.label, intlLocale)),
+    [discoverableItems, intlLocale, t]
+  );
 
   const filteredItems = useMemo(() => {
     const collator = new Intl.Collator(intlLocale, { sensitivity: "base" });
@@ -91,6 +78,12 @@ export function ShopView({ setRoute }: { setRoute: (route: AppRoute) => void }) 
   }, [categoryFilter, deferredSearch, discoverableItems, intlLocale, sortBy, statusFilter, t, tagFilter, typeFilter]);
 
   const hasSparseCatalog = discoverableItems.length <= 2;
+  const hasActiveFilters =
+    deferredSearch.length > 0 ||
+    typeFilter !== "all" ||
+    statusFilter !== "all" ||
+    categoryFilter !== "all" ||
+    tagFilter !== "all";
 
   return (
     <div className="view-stack">
@@ -107,7 +100,7 @@ export function ShopView({ setRoute }: { setRoute: (route: AppRoute) => void }) 
         </div>
       </section>
 
-      {featuredItem && (
+      {!hasActiveFilters && featuredItem && (
         <FeaturedShopCard
           item={featuredItem}
           busy={Boolean(busyAction)}
@@ -135,28 +128,6 @@ export function ShopView({ setRoute }: { setRoute: (route: AppRoute) => void }) 
         />
       )}
 
-      <RecommendationSection
-        eyebrow={t("shop.recommendations.forYouEyebrow")}
-        title={t("shop.recommendations.forYouTitle")}
-        description={t("shop.recommendations.forYouBody")}
-        entries={forYouRecommendations}
-        onOpen={(itemId) => setRoute(`item:${itemId}`)}
-      />
-
-      <RecommendationSection
-        eyebrow={t("shop.recommendations.becausePlayedEyebrow")}
-        title={
-          becausePlayed.sourceItem
-            ? t("shop.recommendations.becausePlayedTitle", {
-                name: becausePlayed.sourceItem.catalog.name
-              })
-            : ""
-        }
-        description={t("shop.recommendations.becausePlayedBody")}
-        entries={becausePlayed.recommendations}
-        onOpen={(itemId) => setRoute(`item:${itemId}`)}
-      />
-
       <section className="shop-filters">
         <label className="shop-search">
           <Search size={16} />
@@ -167,102 +138,7 @@ export function ShopView({ setRoute }: { setRoute: (route: AppRoute) => void }) 
           />
         </label>
 
-        <div className="filter-row">
-          {typeFilters.map((filter) => (
-            <button
-              key={filter.value}
-              className={`filter-pill ${typeFilter === filter.value ? "is-active" : ""}`}
-              onClick={() => setTypeFilter(filter.value)}
-              type="button"
-            >
-              {filter.label}
-            </button>
-          ))}
-        </div>
-
-        <div className="shop-filter-groups">
-          <div className="shop-filter-group">
-            <span>
-              <Filter size={14} />
-              {t("shop.filters.status")}
-            </span>
-            <div className="filter-row">
-              {statusFilters.map((filter) => (
-                <button
-                  key={filter.value}
-                  className={`filter-pill ${statusFilter === filter.value ? "is-active" : ""}`}
-                  onClick={() => setStatusFilter(filter.value)}
-                  type="button"
-                >
-                  {filter.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="shop-filter-group">
-            <span>
-              <Filter size={14} />
-              {t("shop.filters.categories")}
-            </span>
-            <div className="filter-row">
-              <button
-                className={`filter-pill ${categoryFilter === "all" ? "is-active" : ""}`}
-                onClick={() => setCategoryFilter("all")}
-                type="button"
-              >
-                {t("shop.filters.all")}
-              </button>
-              {categories.map((category) => (
-                <button
-                  key={category}
-                  className={`filter-pill ${categoryFilter === category ? "is-active" : ""}`}
-                  onClick={() => setCategoryFilter(category)}
-                  type="button"
-                >
-                  {category}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="shop-filter-group">
-            <span>
-              <Filter size={14} />
-              {t("shop.filters.tags")}
-            </span>
-            <div className="filter-row">
-              <button
-                className={`filter-pill ${tagFilter === "all" ? "is-active" : ""}`}
-                onClick={() => setTagFilter("all")}
-                type="button"
-              >
-                {t("shop.filters.all")}
-              </button>
-            </div>
-            <div className="shop-tag-groups">
-              {tagGroups.map((group) => (
-                <div key={group.category} className="shop-tag-group">
-                  <small>{getTagCategoryLabel(group.category, t)}</small>
-                  <div className="filter-row">
-                    {group.tags.map((tagId) => (
-                      <button
-                        key={tagId}
-                        className={`filter-pill ${tagFilter === tagId ? "is-active" : ""}`}
-                        onClick={() => setTagFilter(tagId)}
-                        type="button"
-                      >
-                        {getTagLabel(tagId, t)}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <div className="library-toolbar__grid">
+        <div className="shop-controls-grid">
           <label>
             <span>{t("shop.sort.label")}</span>
             <select value={sortBy} onChange={(event) => setSortBy(event.target.value as ShopSortKey)}>
@@ -273,6 +149,70 @@ export function ShopView({ setRoute }: { setRoute: (route: AppRoute) => void }) 
               <option value="status">{t("shop.sort.status")}</option>
             </select>
           </label>
+
+          <label>
+            <span>{t("shop.filters.allTypes")}</span>
+            <select value={typeFilter} onChange={(event) => setTypeFilter(event.target.value as TypeFilter)}>
+              <option value="all">{t("shop.filters.allTypes")}</option>
+              <option value="game">{t("status.itemType.game")}</option>
+              <option value="tool">{t("status.itemType.tool")}</option>
+              <option value="project">{t("status.itemType.project")}</option>
+            </select>
+          </label>
+
+          <label>
+            <span>{t("shop.filters.status")}</span>
+            <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value as ShopStatusFilter)}>
+              <option value="all">{t("shop.filters.statusAll")}</option>
+              <option value="notAdded">{t("shop.filters.statusNotAdded")}</option>
+              <option value="inLibrary">{t("shop.filters.statusInLibrary")}</option>
+              <option value="installed">{t("shop.filters.statusInstalled")}</option>
+              <option value="updates">{t("shop.filters.statusUpdates")}</option>
+            </select>
+          </label>
+
+          <label>
+            <span>{t("shop.filters.categories")}</span>
+            <select value={categoryFilter} onChange={(event) => setCategoryFilter(event.target.value)}>
+              <option value="all">{t("shop.filters.all")}</option>
+              {categories.map((category) => (
+                <option key={category} value={category}>
+                  {category}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label>
+            <span>{t("shop.filters.tags")}</span>
+            <select value={tagFilter} onChange={(event) => setTagFilter(event.target.value)}>
+              <option value="all">{t("shop.filters.all")}</option>
+              {tags.map((tag) => (
+                <option key={tag.id} value={tag.id}>
+                  {tag.label}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+
+        <div className="library-toolbar__active-filters">
+          <span>{t("shop.results.shown", { count: filteredItems.length })}</span>
+          {hasActiveFilters ? (
+            <button
+              className="text-button"
+              onClick={() => {
+                setSearch("");
+                setTypeFilter("all");
+                setStatusFilter("all");
+                setCategoryFilter("all");
+                setTagFilter("all");
+              }}
+              type="button"
+            >
+              {t("common.actions.clearFilters")}
+            </button>
+          ) : null}
         </div>
       </section>
 

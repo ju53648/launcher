@@ -53,6 +53,7 @@ export function LibraryView({ setRoute }: { setRoute: (route: AppRoute) => void 
     removeItemFromLibrary
   } = useLauncher();
   const [preferences, setPreferences] = useState<LibraryPreferences>(() => loadLibraryPreferences());
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [installTarget, setInstallTarget] = useState<ContentView | null>(null);
   const [removeTarget, setRemoveTarget] = useState<ContentView | null>(null);
   const [uninstallTarget, setUninstallTarget] = useState<ContentView | null>(null);
@@ -248,56 +249,69 @@ export function LibraryView({ setRoute }: { setRoute: (route: AppRoute) => void 
                 <option value="updates">{t("library.filters.updatesOnly")}</option>
               </select>
             </label>
-
-            <label>
-              <span>{t("library.filters.category")}</span>
-              <select
-                value={preferences.category}
-                onChange={(event) =>
-                  setPreferences((current) => ({ ...current, category: event.target.value }))
-                }
-              >
-                <option value="all">{t("library.filters.allCategories")}</option>
-                {categories.map((category) => (
-                  <option key={category} value={category}>
-                    {category}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label>
-              <span>{t("library.filters.tag")}</span>
-              <select
-                value={preferences.tag}
-                onChange={(event) =>
-                  setPreferences((current) => ({ ...current, tag: event.target.value }))
-                }
-              >
-                <option value="all">{t("library.filters.allTags")}</option>
-                {tags.map((tag) => (
-                  <option key={tag.id} value={tag.id}>
-                    {tag.label}
-                  </option>
-                ))}
-              </select>
-            </label>
           </div>
+
+          {showAdvancedFilters ? (
+            <div className="library-toolbar__grid library-toolbar__grid--advanced">
+              <label>
+                <span>{t("library.filters.category")}</span>
+                <select
+                  value={preferences.category}
+                  onChange={(event) =>
+                    setPreferences((current) => ({ ...current, category: event.target.value }))
+                  }
+                >
+                  <option value="all">{t("library.filters.allCategories")}</option>
+                  {categories.map((category) => (
+                    <option key={category} value={category}>
+                      {category}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label>
+                <span>{t("library.filters.tag")}</span>
+                <select
+                  value={preferences.tag}
+                  onChange={(event) =>
+                    setPreferences((current) => ({ ...current, tag: event.target.value }))
+                  }
+                >
+                  <option value="all">{t("library.filters.allTags")}</option>
+                  {tags.map((tag) => (
+                    <option key={tag.id} value={tag.id}>
+                      {tag.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+          ) : null}
 
           <div className="library-toolbar__active-filters">
             <span>
               <SlidersHorizontal size={14} />
               {t("library.toolbar.results", { count: items.length })}
             </span>
-            {hasActiveFilters ? (
+            <div className="library-toolbar__actions">
               <button
                 className="text-button"
-                onClick={() => setPreferences((current) => ({ ...DEFAULT_PREFERENCES, sortBy: current.sortBy }))}
+                onClick={() => setShowAdvancedFilters((current) => !current)}
                 type="button"
               >
-                {t("common.actions.clearFilters")}
+                {showAdvancedFilters ? "Weniger Filter" : "Mehr Filter"}
               </button>
-            ) : null}
+              {hasActiveFilters ? (
+                <button
+                  className="text-button"
+                  onClick={() => setPreferences((current) => ({ ...DEFAULT_PREFERENCES, sortBy: current.sortBy }))}
+                  type="button"
+                >
+                  {t("common.actions.clearFilters")}
+                </button>
+              ) : null}
+            </div>
           </div>
         </div>
       </section>

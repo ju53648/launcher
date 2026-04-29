@@ -845,7 +845,9 @@
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: var(--space-3);
-  min-width: min(480px, 100%);
+  min-width: 0;
+  max-width: 560px;
+  width: 100%;
 }
 
 .library-toolbar__stats div {
@@ -918,6 +920,16 @@
   gap: var(--space-2);
 }
 
+.library-toolbar__actions {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.library-toolbar__grid--advanced {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .shop-filters,
 .recommendations-panel,
 .downloads-section {
@@ -930,6 +942,20 @@
 .shop-filters {
   display: grid;
   gap: var(--space-4);
+  background:
+    linear-gradient(135deg, rgba(0, 223, 160, 0.05), transparent 40%),
+    rgba(17, 20, 22, 0.92);
+}
+
+.shop-controls-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.shop-controls-grid label {
+  display: grid;
+  gap: var(--space-2);
 }
 
 .shop-search {
@@ -1082,13 +1108,13 @@
 .shop-featured {
   position: relative;
   overflow: hidden;
-  border: 1px solid rgba(245, 213, 96, 0.28);
+  border: 1px solid rgba(245, 213, 96, 0.24);
   border-radius: var(--radius-lg);
-  min-height: 320px;
+  min-height: 260px;
   background: #0f1215;
-  box-shadow: 0 0 0 1px rgba(245, 213, 96, 0.08), 0 20px 58px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 0 1px rgba(245, 213, 96, 0.06), 0 14px 34px rgba(0, 0, 0, 0.46);
   display: grid;
-  grid-template-columns: minmax(320px, 1.1fr) minmax(340px, 1fr);
+  grid-template-columns: minmax(300px, 1fr) minmax(300px, 1fr);
 }
 
 .shop-featured::after {
@@ -1121,14 +1147,14 @@
 .shop-featured__content {
   position: relative;
   z-index: 1;
-  padding: var(--space-7);
+  padding: var(--space-6);
   display: grid;
   align-content: center;
-  gap: var(--space-4);
+  gap: var(--space-3);
 }
 
 .shop-featured__content h2 {
-  font-size: clamp(30px, 4vw, 42px);
+  font-size: clamp(28px, 3.3vw, 36px);
   line-height: 1.08;
 }
 
@@ -1157,8 +1183,8 @@
 
 .shop-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
-  gap: var(--space-6);
+  grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+  gap: var(--space-5);
 }
 
 .shop-card {
@@ -1169,7 +1195,7 @@
     linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 46%),
     #101316;
   display: grid;
-  grid-template-rows: 250px minmax(320px, 1fr);
+  grid-template-rows: 210px minmax(300px, 1fr);
   box-shadow: var(--shadow-card);
   transition: border-color var(--transition-smooth), box-shadow var(--transition-smooth), transform var(--transition-smooth);
 }
@@ -2208,6 +2234,7 @@
   .language-selector,
   .library-toolbar__grid,
   .library-toolbar__stats,
+  .shop-controls-grid,
   .game-refresh-summary {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -2254,6 +2281,7 @@
   .language-selector,
   .library-toolbar__grid,
   .library-toolbar__stats,
+  .shop-controls-grid,
   .add-library,
   .queue-strip,
   .download-row,
