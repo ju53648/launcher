@@ -2,7 +2,7 @@
     "id":  "com.lumorix.echo-protocol",
     "itemType":  "game",
     "name":  "Echo Protocol",
-    "version":  "0.4.2",
+    "version":  "0.4.4",
     "description":  "You don\u0027t remember this case. But it remembers you. A native psychological mystery app with deep archive progression and large investigation content.",
     "developer":  "Lumorix",
     "releaseDate":  "2026-04-28",
@@ -46,7 +46,7 @@
     "bannerImage":  "/assets/games/echo-protocol-banner.svg",
     "iconImage":  "/assets/games/echo-protocol-icon.svg",
     "executable":  "EchoProtocol.exe",
-    "installSizeBytes":  170496,
+    "installSizeBytes":  179200,
     "defaultInstallFolder":  "Echo Protocol",
     "supportedActions":  [
                              "install",
@@ -67,6 +67,14 @@
                      "sizeBytes":  54848
                  },
     "changelog":  [
+                      {
+                          "version":  "0.4.4",
+                          "date":  "2026-04-28",
+                          "items":  [
+                                        "Prepared archive-based delivery for launcher-driven game updates.",
+                                        "Kept native executable launch and local save behavior unchanged."
+                                    ]
+                      },
                       {
                           "version":  "0.4.2",
                           "date":  "2026-04-28",

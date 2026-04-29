@@ -4,7 +4,7 @@
     "archivePath":  "distribution/games/echo-protocol/release/echo-protocol-win64.zip",
     "archiveUrl":  "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/games/echo-protocol/release/echo-protocol-win64.zip",
     "installSizePath":  "distribution/games/echo-protocol/EchoProtocol.exe",
-    "version":  "0.4.2",
+    "version":  "0.4.4",
     "releaseDate":  "2026-04-28",
     "description":  "You don\u0027t remember this case. But it remembers you. A native psychological mystery app with deep archive progression and large investigation content.",
     "changelogItems":  [
