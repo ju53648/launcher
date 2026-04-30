@@ -1,1 +1,22 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 900"><rect width="640" height="900" fill="#1c0f20"/><rect x="84" y="126" width="472" height="648" rx="28" fill="#35193a" stroke="#ee99d1" stroke-width="6"/><text x="320" y="294" text-anchor="middle" fill="#ee99d1" font-size="72" font-family="Segoe UI, Arial" font-weight="700">VELVET</text><text x="320" y="374" text-anchor="middle" fill="#ffe080" font-size="72" font-family="Segoe UI, Arial" font-weight="700">ROOK</text><text x="320" y="522" text-anchor="middle" fill="#ffffff" font-size="28" font-family="Segoe UI, Arial">Clear the board before the trap lines close.</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 900" role="img" aria-label="Velvet Rook cover art">
+  <defs>
+    <linearGradient id="vr-cover-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1c0c1e"/>
+      <stop offset="50%" stop-color="#321236"/>
+      <stop offset="100%" stop-color="#120814"/>
+    </linearGradient>
+  </defs>
+  <rect width="640" height="900" fill="url(#vr-cover-bg)"/>
+  <path d="M112 148h416v432H112z" fill="#2a1130" stroke="#ee99d1" stroke-opacity="0.5" stroke-width="4"/>
+  <path d="M112 148h104v432H112zM320 148h112v432H320z" fill="#3a1640" opacity="0.56"/>
+  <g opacity="0.16" stroke="#ffe080" stroke-width="3">
+    <path d="M112 202h416M112 256h416M112 310h416M112 364h416M112 418h416M112 472h416"/>
+  </g>
+  <path d="M320 232c24 0 42 18 42 42v34h34c20 0 36 16 36 36 0 14-8 26-20 32l-18 10 26 124H220l26-124-18-10c-12-6-20-18-20-32 0-20 16-36 36-36h34v-34c0-24 18-42 42-42z" fill="#ffe080"/>
+  <path d="M248 540h144l-24 82h-96z" fill="#ee99d1"/>
+  <circle cx="320" cy="182" r="46" fill="#ffffff" opacity="0.08"/>
+  <text x="74" y="122" fill="#f2a8d7" font-size="26" font-family="Segoe UI, Arial, sans-serif" font-weight="800" letter-spacing="4">LUXURY TACTICS</text>
+  <text x="74" y="748" fill="#ee99d1" font-size="84" font-family="Segoe UI, Arial, sans-serif" font-weight="900">VELVET</text>
+  <text x="74" y="824" fill="#ffe080" font-size="84" font-family="Segoe UI, Arial, sans-serif" font-weight="900">ROOK</text>
+  <text x="74" y="866" fill="#f3e6ef" font-size="28" font-family="Segoe UI, Arial, sans-serif" font-weight="600">Outplay elegant traps before the board folds into a velvet snare.</text>
+</svg>

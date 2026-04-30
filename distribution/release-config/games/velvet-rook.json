@@ -3,7 +3,7 @@
     "catalogManifestUrl":  "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/manifests/games/velvet-rook.json",
     "archivePath":  "distribution/games/velvet-rook/release/velvet-rook-win64.zip",
     "archiveUrl":  "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/games/velvet-rook/release/velvet-rook-win64.zip",
-    "installSizePath":  "distribution/games/velvet-rook/runtime/content.pack",
+    "installSizePath":  "distribution/games/velvet-rook/runtime",
     "version":  "0.1.0",
     "releaseDate":  "2026-04-29",
     "description":  "A tiny tactical puzzle where one dangerous rook must clear a board without walking into velvet traps.",

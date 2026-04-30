@@ -33,7 +33,7 @@
     "bannerImage":  "/assets/games/velvet-rook-banner.svg",
     "iconImage":  "/assets/games/velvet-rook-icon.svg",
     "executable":  "Launch-VelvetRook.ps1",
-    "installSizeBytes":  11534336,
+    "installSizeBytes":  11803245,
     "defaultInstallFolder":  "Velvet Rook",
     "supportedActions":  [
                              "install",
@@ -50,8 +50,8 @@
     "download":  {
                      "kind":  "httpArchive",
                      "url":  "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/games/velvet-rook/release/velvet-rook-win64.zip",
-                     "sha256":  "5078c1fb7852d08bd4074399bfdfa7c04274f3f5306eaf4ad99f6df475194ec6",
-                     "sizeBytes":  12988
+                     "sha256":  "1c9ecee1646ad06619aa8cfd611d9bad8ea95e9cc24e97dfd074fac7170b9886",
+                     "sizeBytes":  11802942
                  },
     "changelog":  [
                       {

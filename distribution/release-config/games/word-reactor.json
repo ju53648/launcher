@@ -3,7 +3,7 @@
     "catalogManifestUrl":  "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/manifests/games/word-reactor.json",
     "archivePath":  "distribution/games/word-reactor/release/word-reactor-win64.zip",
     "archiveUrl":  "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/games/word-reactor/release/word-reactor-win64.zip",
-    "installSizePath":  "distribution/games/word-reactor/runtime/content.pack",
+    "installSizePath":  "distribution/games/word-reactor/runtime",
     "version":  "0.1.0",
     "releaseDate":  "2026-04-29",
     "description":  "A typing sprint where you stabilize a failing reactor by entering volatile command words under pressure.",

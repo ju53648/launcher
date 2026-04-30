@@ -3,7 +3,7 @@
     "catalogManifestUrl":  "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/manifests/games/pocket-heist.json",
     "archivePath":  "distribution/games/pocket-heist/release/pocket-heist-win64.zip",
     "archiveUrl":  "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/games/pocket-heist/release/pocket-heist-win64.zip",
-    "installSizePath":  "distribution/games/pocket-heist/runtime/content.pack",
+    "installSizePath":  "distribution/games/pocket-heist/runtime",
     "version":  "0.1.0",
     "releaseDate":  "2026-04-29",
     "description":  "A stealthy micro-heist game about grabbing loot on a tight grid before the guard pattern closes in.",

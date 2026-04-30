@@ -33,7 +33,7 @@
     "bannerImage":  "/assets/games/tempo-trashfire-banner.svg",
     "iconImage":  "/assets/games/tempo-trashfire-icon.svg",
     "executable":  "Launch-TempoTrashfire.ps1",
-    "installSizeBytes":  11534336,
+    "installSizeBytes":  11802965,
     "defaultInstallFolder":  "Tempo Trashfire",
     "supportedActions":  [
                              "install",
@@ -50,8 +50,8 @@
     "download":  {
                      "kind":  "httpArchive",
                      "url":  "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/games/tempo-trashfire/release/tempo-trashfire-win64.zip",
-                     "sha256":  "fc5093dd66a0a0be95c1e455e96ae288d2fa2577da0bab0a7dff1871580055c6",
-                     "sizeBytes":  13080
+                     "sha256":  "1052dc16808f70b75f1b8be5446e3ef98b7383e7ab49e1714dc61f51dca6dfd1",
+                     "sizeBytes":  11802883
                  },
     "changelog":  [
                       {

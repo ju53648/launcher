@@ -17,7 +17,7 @@
   "bannerImage": "/assets/games/tempo-trashfire-banner.svg",
   "iconImage": "/assets/games/tempo-trashfire-icon.svg",
   "executable": "Launch-TempoTrashfire.ps1",
-  "installSizeBytes": 11534336,
+  "installSizeBytes": 11802965,
   "defaultInstallFolder": "Tempo Trashfire",
   "supportedActions": ["install", "launch", "repair", "uninstall", "openFolder"],
   "installStrategy": {

@@ -1,1 +1,26 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 900"><rect width="640" height="900" fill="#16181f"/><rect x="82" y="128" width="476" height="644" rx="32" fill="#252935" stroke="#ffd64a" stroke-width="6"/><text x="320" y="292" text-anchor="middle" fill="#ffd64a" font-size="72" font-family="Segoe UI, Arial" font-weight="700">POCKET</text><text x="320" y="372" text-anchor="middle" fill="#74d778" font-size="72" font-family="Segoe UI, Arial" font-weight="700">HEIST</text><text x="320" y="520" text-anchor="middle" fill="#ffffff" font-size="28" font-family="Segoe UI, Arial">Micro stealth. Three steals. One clean exit.</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 900" role="img" aria-label="Pocket Heist cover art">
+  <defs>
+    <linearGradient id="ph-cover-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b1017"/>
+      <stop offset="55%" stop-color="#1a2028"/>
+      <stop offset="100%" stop-color="#0f1115"/>
+    </linearGradient>
+  </defs>
+  <rect width="640" height="900" fill="url(#ph-cover-bg)"/>
+  <g opacity="0.12" stroke="#89f7b4" stroke-width="3">
+    <path d="M82 182h482M82 274h482M82 366h482M82 458h482"/>
+    <path d="M164 120v384M278 120v384M392 120v384M506 120v384"/>
+  </g>
+  <rect x="90" y="110" width="460" height="392" rx="32" fill="#15232d" stroke="#74d778" stroke-width="5"/>
+  <rect x="160" y="182" width="320" height="214" rx="28" fill="#243746" stroke="#ffd64a" stroke-width="8"/>
+  <circle cx="320" cy="288" r="58" fill="#ffd64a"/>
+  <circle cx="320" cy="288" r="20" fill="#243746"/>
+  <path d="M158 154 510 434" stroke="#ff6f61" stroke-width="8" stroke-linecap="round" opacity="0.75"/>
+  <path d="M510 156 162 432" stroke="#7ce9ff" stroke-width="8" stroke-linecap="round" opacity="0.75"/>
+  <path d="M130 520h380l28 40H102z" fill="#0f161a" opacity="0.55"/>
+  <rect x="104" y="582" width="432" height="176" rx="24" fill="#10171d" fill-opacity="0.74" stroke="#ffd64a" stroke-opacity="0.3"/>
+  <text x="112" y="126" fill="#8df3b7" font-size="26" font-family="Segoe UI, Arial, sans-serif" font-weight="800" letter-spacing="4">TACTICAL BREAK-IN</text>
+  <text x="112" y="684" fill="#ffd64a" font-size="84" font-family="Segoe UI, Arial, sans-serif" font-weight="900">POCKET</text>
+  <text x="112" y="762" fill="#74d778" font-size="84" font-family="Segoe UI, Arial, sans-serif" font-weight="900">HEIST</text>
+  <text x="112" y="814" fill="#dce4e9" font-size="24" font-family="Segoe UI, Arial, sans-serif" font-weight="600">Steal the route, dodge lasers and crack the vault before dawn.</text>
+</svg>

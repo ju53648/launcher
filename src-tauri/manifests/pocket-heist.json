@@ -17,7 +17,7 @@
   "bannerImage": "/assets/games/pocket-heist-banner.svg",
   "iconImage": "/assets/games/pocket-heist-icon.svg",
   "executable": "Launch-PocketHeist.ps1",
-  "installSizeBytes": 11534336,
+  "installSizeBytes": 11803259,
   "defaultInstallFolder": "Pocket Heist",
   "supportedActions": ["install", "launch", "repair", "uninstall", "openFolder"],
   "installStrategy": {

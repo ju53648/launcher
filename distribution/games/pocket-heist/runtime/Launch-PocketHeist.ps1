@@ -6,7 +6,7 @@ Add-Type -AssemblyName System.Drawing
 $form = New-Object System.Windows.Forms.Form
 $form.Text = 'Pocket Heist'
 $form.StartPosition = 'CenterScreen'
-$form.ClientSize = New-Object System.Drawing.Size(820, 620)
+$form.ClientSize = New-Object System.Drawing.Size(980, 680)
 $form.BackColor = [System.Drawing.Color]::FromArgb(16, 18, 24)
 $form.FormBorderStyle = 'FixedSingle'
 $form.MaximizeBox = $false
@@ -14,42 +14,90 @@ $form.KeyPreview = $true
 
 $gridPanel = New-Object System.Windows.Forms.Panel
 $gridPanel.Location = New-Object System.Drawing.Point(26, 26)
-$gridPanel.Size = New-Object System.Drawing.Size(462, 462)
+$gridPanel.Size = New-Object System.Drawing.Size(546, 546)
 $form.Controls.Add($gridPanel)
 
 $hud = New-Object System.Windows.Forms.Label
-$hud.Text = 'Loot: 0 / 3    Alarm: 0    Floor: 1'
+$hud.Text = 'Loot: 0 / 3    Alarm: 0    Floor: 1    Smoke: 2'
 $hud.ForeColor = [System.Drawing.Color]::White
 $hud.Font = New-Object System.Drawing.Font('Segoe UI', 12, [System.Drawing.FontStyle]::Bold)
 $hud.AutoSize = $true
-$hud.Location = New-Object System.Drawing.Point(524, 48)
+$hud.Location = New-Object System.Drawing.Point(612, 48)
 $form.Controls.Add($hud)
 
 $status = New-Object System.Windows.Forms.Label
-$status.Text = 'Use arrow keys. Take all loot, then reach EXIT.'
+$status.Text = 'Use arrow keys. Space drops smoke. Clear the floor, then reach EXIT.'
 $status.ForeColor = [System.Drawing.Color]::FromArgb(130, 236, 255)
-$status.MaximumSize = New-Object System.Drawing.Size(230, 0)
+$status.MaximumSize = New-Object System.Drawing.Size(300, 0)
 $status.AutoSize = $true
-$status.Location = New-Object System.Drawing.Point(524, 92)
+$status.Location = New-Object System.Drawing.Point(612, 92)
 $form.Controls.Add($status)
+
+$alarmLabel = New-Object System.Windows.Forms.Label
+$alarmLabel.Text = 'Alarm Heat: 0%'
+$alarmLabel.ForeColor = [System.Drawing.Color]::FromArgb(255, 130, 130)
+$alarmLabel.Font = New-Object System.Drawing.Font('Segoe UI', 11, [System.Drawing.FontStyle]::Bold)
+$alarmLabel.AutoSize = $true
+$alarmLabel.Location = New-Object System.Drawing.Point(612, 170)
+$form.Controls.Add($alarmLabel)
+
+$alarmBar = New-Object System.Windows.Forms.ProgressBar
+$alarmBar.Location = New-Object System.Drawing.Point(612, 198)
+$alarmBar.Size = New-Object System.Drawing.Size(240, 20)
+$alarmBar.Maximum = 100
+$alarmBar.Value = 0
+$form.Controls.Add($alarmBar)
+
+$floorLabel = New-Object System.Windows.Forms.Label
+$floorLabel.Text = 'Floor 1: office shell'
+$floorLabel.ForeColor = [System.Drawing.Color]::FromArgb(255, 214, 74)
+$floorLabel.Font = New-Object System.Drawing.Font('Segoe UI', 11, [System.Drawing.FontStyle]::Bold)
+$floorLabel.AutoSize = $true
+$floorLabel.Location = New-Object System.Drawing.Point(612, 248)
+$form.Controls.Add($floorLabel)
+
+$legend = New-Object System.Windows.Forms.Label
+$legend.Text = 'YOU = you  |  G = guard  |  $ = loot  |  I = intel  |  C = camera  |  # = wall  |  E = exit'
+$legend.ForeColor = [System.Drawing.Color]::FromArgb(214, 214, 214)
+$legend.MaximumSize = New-Object System.Drawing.Size(300, 0)
+$legend.AutoSize = $true
+$legend.Location = New-Object System.Drawing.Point(612, 286)
+$form.Controls.Add($legend)
+
+$bestLabel = New-Object System.Windows.Forms.Label
+$bestLabel.Text = 'Best job: 0 score / floor 1'
+$bestLabel.ForeColor = [System.Drawing.Color]::FromArgb(255, 214, 74)
+$bestLabel.Font = New-Object System.Drawing.Font('Segoe UI', 10, [System.Drawing.FontStyle]::Bold)
+$bestLabel.AutoSize = $true
+$bestLabel.Location = New-Object System.Drawing.Point(612, 332)
+$form.Controls.Add($bestLabel)
 
 $startButton = New-Object System.Windows.Forms.Button
 $startButton.Text = 'Start Job'
-$startButton.Location = New-Object System.Drawing.Point(524, 180)
+$startButton.Location = New-Object System.Drawing.Point(612, 360)
 $startButton.Size = New-Object System.Drawing.Size(180, 42)
 $startButton.FlatStyle = 'Flat'
 $startButton.BackColor = [System.Drawing.Color]::FromArgb(255, 214, 74)
 $form.Controls.Add($startButton)
 
-$size = 6
+$recapLabel = New-Object System.Windows.Forms.Label
+$recapLabel.Text = 'Last job: none yet'
+$recapLabel.ForeColor = [System.Drawing.Color]::FromArgb(214, 214, 214)
+$recapLabel.MaximumSize = New-Object System.Drawing.Size(300, 0)
+$recapLabel.AutoSize = $true
+$recapLabel.Location = New-Object System.Drawing.Point(612, 416)
+$form.Controls.Add($recapLabel)
+
+$size = 7
 $buttons = @()
 for ($row = 0; $row -lt $size; $row++) {
     $buttonRow = @()
     for ($col = 0; $col -lt $size; $col++) {
         $button = New-Object System.Windows.Forms.Button
-        $button.Size = New-Object System.Drawing.Size(72, 72)
-        $button.Location = New-Object System.Drawing.Point($col * 76, $row * 76)
+        $button.Size = New-Object System.Drawing.Size(74, 74)
+        $button.Location = New-Object System.Drawing.Point($col * 78, $row * 78)
         $button.FlatStyle = 'Flat'
+        $button.Font = New-Object System.Drawing.Font('Segoe UI', 12, [System.Drawing.FontStyle]::Bold)
         $buttonRow += $button
         $gridPanel.Controls.Add($button)
     }
@@ -57,108 +105,168 @@ for ($row = 0; $row -lt $size; $row++) {
 }
 
 $player = [pscustomobject]@{ Row = 0; Col = 0 }
-$guard = [pscustomobject]@{ Row = 5; Col = 5 }
+$guards = New-Object System.Collections.Generic.List[object]
 $loot = New-Object System.Collections.Generic.List[string]
-$exit = '5,0'
+$walls = New-Object System.Collections.Generic.HashSet[string]
+$cameras = New-Object System.Collections.Generic.HashSet[string]
+$smokeTiles = New-Object System.Collections.Generic.Dictionary[string, int]
+$exit = '6,0'
+$script:intelTile = ''
+$script:intelCollected = $false
+$script:cameraGrace = 0
+$script:floorModifier = ''
+$script:zoneRule = ''
 $script:collected = 0
 $script:alarm = 0
+$script:extractionTimer = -1
+$script:announcedExtraction = $false
 $script:floor = 1
+$script:smoke = 2
+$script:score = 0
+$script:savePath = Join-Path $PSScriptRoot 'pocket-heist-save.json'
+$script:bestScore = 0
+$script:bestFloor = 1
 $running = $false
 
-function Update-Board {
-    for ($row = 0; $row -lt $size; $row++) {
-        for ($col = 0; $col -lt $size; $col++) {
-            $button = $buttons[$row][$col]
-            $button.Text = ''
-            $button.BackColor = [System.Drawing.Color]::FromArgb(34, 37, 46)
-            $key = "$row,$col"
-            if ($loot.Contains($key)) {
-                $button.Text = 'LOOT'
-                $button.BackColor = [System.Drawing.Color]::FromArgb(110, 215, 118)
-            }
-            if ($key -eq $exit) {
-                $button.Text = 'EXIT'
-                $button.BackColor = [System.Drawing.Color]::FromArgb(84, 148, 252)
-            }
-            if ($guard.Row -eq $row -and $guard.Col -eq $col) {
-                $button.Text = 'GUARD'
-                $button.BackColor = [System.Drawing.Color]::FromArgb(255, 103, 103)
-            }
-            if ($player.Row -eq $row -and $player.Col -eq $col) {
-                $button.Text = 'YOU'
-                $button.BackColor = [System.Drawing.Color]::FromArgb(255, 214, 74)
-            }
-        }
+$moduleRoot = Join-Path $PSScriptRoot 'modules'
+. (Join-Path $moduleRoot 'config.ps1')
+. (Join-Path $moduleRoot 'helpers.ps1')
+. (Join-Path $moduleRoot 'core.ps1')
+
+$layouts = Get-PocketHeistLayouts
+
+if (Test-Path $script:savePath) {
+    try {
+        $saveData = Get-Content $script:savePath -Raw | ConvertFrom-Json
+        $script:bestScore = [int]$saveData.bestScore
+        $script:bestFloor = [int]$saveData.bestFloor
+        $bestLabel.Text = "Best job: $($script:bestScore) score / floor $($script:bestFloor)"
     }
-    $hud.Text = "Loot: $($script:collected) / 3    Alarm: $($script:alarm)    Floor: $($script:floor)"
-}
-
-function Reset-Level {
-    $player.Row = 0
-    $player.Col = 0
-    $guard.Row = 5
-    $guard.Col = 5
-    $loot.Clear()
-    $loot.Add('1,4')
-    $loot.Add('3,2')
-    $loot.Add('4,5')
-    $script:collected = 0
-    $script:alarm = 0
-    Update-Board
-}
-
-function Move-Guard {
-    if ($guard.Row -lt $player.Row) { $guard.Row += 1 }
-    elseif ($guard.Row -gt $player.Row) { $guard.Row -= 1 }
-    elseif ($guard.Col -lt $player.Col) { $guard.Col += 1 }
-    elseif ($guard.Col -gt $player.Col) { $guard.Col -= 1 }
+    catch {
+    }
 }
 
 function Handle-Move([int]$nextRow, [int]$nextCol) {
     if (-not $running) { return }
     if ($nextRow -lt 0 -or $nextRow -ge $size -or $nextCol -lt 0 -or $nextCol -ge $size) { return }
 
-    $player.Row = $nextRow
-    $player.Col = $nextCol
-    $key = "$nextRow,$nextCol"
-    if ($loot.Contains($key)) {
-        $loot.Remove($key) | Out-Null
-        $script:collected += 1
-        $status.Text = 'Clean pickup. Keep moving.'
+    $destination = "$nextRow,$nextCol"
+    if ($walls.Contains($destination)) {
+        $status.Text = 'Blocked route. Find another angle.'
+        return
     }
 
-    Move-Guard
-    if ($guard.Row -eq $player.Row -and $guard.Col -eq $player.Col) {
-        $running = $false
-        [System.Windows.Forms.MessageBox]::Show('Caught. Job failed.', 'Pocket Heist') | Out-Null
+    Step-Smoke
+    $player.Row = $nextRow
+    $player.Col = $nextCol
+
+    if ($loot.Contains($destination)) {
+        $loot.Remove($destination) | Out-Null
+        $script:collected += 1
+        $script:score += 18 + ($script:floor * 6)
+        $script:alarm = [Math]::Max(0, $script:alarm - 6)
+        $status.Text = 'Clean pickup. Stay light on your feet.'
+        if ($script:collected -ge 3 -and -not $script:announcedExtraction) {
+            $script:announcedExtraction = $true
+            $status.Text = 'Bags are full. Reach EXIT to extract before heat spikes.'
+        }
     }
-    elseif ($key -eq $exit -and $script:collected -ge 3) {
-        $script:floor += 1
-        $status.Text = 'Perfect escape. Floor rotated.'
-        Reset-Level
+
+    if (-not $script:intelCollected -and $destination -eq $script:intelTile) {
+        $script:intelCollected = $true
+        $script:score += 24 + ($script:floor * 10)
+        if ($script:floorModifier -like '*smoke refill*') {
+            $script:smoke = 3
+            $status.Text = 'Intel lifted. Executive codes gave a full smoke refill.'
+        }
+        elseif ($script:floor -ge 5) {
+            $script:alarm = [Math]::Max(0, $script:alarm - 16)
+            $script:score += 12
+            $status.Text = 'Intel pulled from the roof. Patrol window cracked open.'
+        }
+        else {
+            $script:alarm = [Math]::Max(0, $script:alarm - 10)
+            $status.Text = 'Intel secured. Patrol timing got easier to read.'
+        }
     }
-    else {
-        $script:alarm += 1
+
+    Trigger-Cameras
+    Move-Guards
+
+    foreach ($guard in $guards) {
+        if ($guard.Row -eq $player.Row -and $guard.Col -eq $player.Col) {
+            End-Run 'Caught on the floor. Job failed.'
+            Update-Board
+            return
+        }
     }
+
+    $timerJustStarted = $false
+    if ($script:extractionTimer -lt 0 -and $script:collected -ge 3 -and $script:alarm -ge 60) {
+        $script:extractionTimer = 8
+        $timerJustStarted = $true
+    }
+
+    if ($destination -eq $exit -and $script:collected -ge 3) {
+        $intelBonus = if ($script:intelCollected) { 28 + ($script:floor * 5) } else { 0 }
+        $heatBonus = if ($script:intelCollected -and $script:alarm -ge 55) { 40 + ($script:floor * 6) } else { 0 }
+        if ($script:floor -ge 3) {
+            $script:score += 80 + [Math]::Max(0, 30 - $script:alarm) + $intelBonus + $heatBonus
+            if ($script:intelCollected) {
+                if ($heatBonus -gt 0) {
+                    End-Run 'Crew paid. Hot extraction with intel pulled premium hazard pay.'
+                }
+                else {
+                    End-Run 'Crew paid. Three floors cleared and the intel package came home clean.'
+                }
+            }
+            else {
+                End-Run 'Crew paid. Three floors cleared without tripping the whole tower.'
+            }
+            Update-Board
+            return
+        }
+        $script:score += 45 + [Math]::Max(0, 20 - $script:alarm) + $intelBonus + $heatBonus
+        if ($script:intelCollected) {
+            if ($heatBonus -gt 0) {
+                $status.Text = 'Escape route hot. Intel sold for hazard premium.'
+            }
+            else {
+                $status.Text = 'Escape route clean. Intel packet sold, buying you time on the next floor.'
+            }
+        }
+        else {
+            $status.Text = 'Escape route clean. Next floor is hot.'
+        }
+        Load-Floor ($script:floor + 1)
+        return
+    }
+
+    if ($script:extractionTimer -gt 0) {
+        $script:extractionTimer -= 1
+        if ($script:extractionTimer -le 0) {
+            End-Run 'Lockdown hit. Reinforcements flooded the route before extraction.'
+            Update-Board
+            return
+        }
+        if ($timerJustStarted) {
+            $status.Text = "Bags full -- lockdown. $($script:extractionTimer) move$(if ($script:extractionTimer -ne 1) { 's' }) to EXIT."
+        } else {
+            $status.Text = "Lockdown: $($script:extractionTimer) move$(if ($script:extractionTimer -ne 1) { 's' }) left - reach EXIT."
+        }
+    }
+
+    if ($script:alarm -ge 100) {
+        End-Run 'Full alarm. The building sealed around you.'
+        Update-Board
+        return
+    }
+
+    if ($destination -eq $exit -and $script:collected -lt 3) {
+        $status.Text = "Exit sealed. You have $($script:collected) / 3 bags - collect the rest first."
+    }
+
     Update-Board
 }
 
-$form.Add_KeyDown({
-    param($sender, $eventArgs)
-    switch ($eventArgs.KeyCode) {
-        'Left'  { Handle-Move $player.Row ($player.Col - 1) }
-        'Right' { Handle-Move $player.Row ($player.Col + 1) }
-        'Up'    { Handle-Move ($player.Row - 1) $player.Col }
-        'Down'  { Handle-Move ($player.Row + 1) $player.Col }
-    }
-})
-
-$startButton.Add_Click({
-    $running = $true
-    $script:floor = 1
-    Reset-Level
-    $status.Text = 'Job live. Do not get greedy.'
-})
-
-Reset-Level
-[void]$form.ShowDialog()
+Start-PocketHeistRuntime

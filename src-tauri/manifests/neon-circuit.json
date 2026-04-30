@@ -21,7 +21,7 @@
   "bannerImage": "/assets/games/neon-circuit-banner.svg",
   "iconImage": "/assets/games/neon-circuit-icon.svg",
   "executable": "Launch-NeonCircuit.ps1",
-  "installSizeBytes": 11534336,
+  "installSizeBytes": 11809232,
   "defaultInstallFolder": "Neon Circuit",
   "supportedActions": [
     "install",

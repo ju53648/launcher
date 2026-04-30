@@ -1,0 +1,37 @@
+{
+    "game":  "glass-garden",
+    "name":  "Glass Garden",
+    "description":  "Puzzle/Sandbox - hochauflÃ¶sende Grafiken",
+    "generatedDate":  "2026-04-29 22:19:54",
+    "assetCount":  7,
+    "assets":  [
+                   {
+                       "file":  "plant-models.bin",
+                       "sizeBytes":  2097152
+                   },
+                   {
+                       "file":  "particle-data.bin",
+                       "sizeBytes":  2097152
+                   },
+                   {
+                       "file":  "environment-art.bin",
+                       "sizeBytes":  2097152
+                   },
+                   {
+                       "file":  "ambient-music.bin",
+                       "sizeBytes":  1572864
+                   },
+                   {
+                       "file":  "growth-animations.bin",
+                       "sizeBytes":  1572864
+                   },
+                   {
+                       "file":  "glass-effects.bin",
+                       "sizeBytes":  1048576
+                   },
+                   {
+                       "file":  "bloom-simulation.bin",
+                       "sizeBytes":  1310720
+                   }
+               ]
+}

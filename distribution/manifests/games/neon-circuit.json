@@ -33,7 +33,7 @@
     "bannerImage":  "/assets/games/neon-circuit-banner.svg",
     "iconImage":  "/assets/games/neon-circuit-icon.svg",
     "executable":  "Launch-NeonCircuit.ps1",
-    "installSizeBytes":  11534336,
+    "installSizeBytes":  11809232,
     "defaultInstallFolder":  "Neon Circuit",
     "supportedActions":  [
                              "install",
@@ -50,8 +50,8 @@
     "download":  {
                      "kind":  "httpArchive",
                      "url":  "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/games/neon-circuit/release/neon-circuit-win64.zip",
-                     "sha256":  "de6b029dbdefae4e5c77a870c1e09527fe1cd491d3f3e0e0a07b21e3c3f5bdf1",
-                     "sizeBytes":  14388
+                     "sha256":  "7cb59ac000897756acdde097e040489d6daa6d8b45b9b5e75af91380f9ceffcb",
+                     "sizeBytes":  11804106
                  },
     "changelog":  [
                       {

@@ -69,7 +69,7 @@ $form.Controls.Add($startButton)
 
 for ($index = 0; $index -lt $stations.Count; $index++) {
     $button = New-Object System.Windows.Forms.Button
-    $button.Text = $stations[$index].Name
+    $button.Text = if ($stations[$index].Bonus -gt 0) { "$($stations[$index].Name) +$($stations[$index].Bonus)" } else { $stations[$index].Name }
     $button.Tag = $index
     $button.Size = New-Object System.Drawing.Size(220, 62)
     $button.Location = New-Object System.Drawing.Point(40 + (($index % 2) * 260), 170 + ([Math]::Floor($index / 2) * 100))
@@ -80,77 +80,11 @@ for ($index = 0; $index -lt $stations.Count; $index++) {
     $form.Controls.Add($button)
 }
 
-function New-Contract {
-    $options = 0..($stations.Count - 1) | Where-Object { $_ -ne $script:location }
-    $script:target = Get-Random -InputObject $options
-    $status.Text = "Current contract: $($stations[$script:target].Name)"
-}
+$runtimeRoot = if ($PSScriptRoot) { $PSScriptRoot } else { Split-Path -Parent $MyInvocation.MyCommand.Path }
+$moduleRoot = Join-Path $runtimeRoot 'modules'
 
-function Update-Hud {
-    $hud.Text = "Station: $($stations[$script:location].Name)    Fuel: $($script:fuel)    Deliveries: $($script:deliveries)    Score: $($script:score)"
-    foreach ($button in $buttons) {
-        $button.BackColor = if ([int]$button.Tag -eq $script:location) {
-            [System.Drawing.Color]::FromArgb(255, 214, 100)
-        }
-        elseif ([int]$button.Tag -eq $script:target) {
-            [System.Drawing.Color]::FromArgb(105, 172, 255)
-        }
-        else {
-            [System.Drawing.Color]::FromArgb(34, 46, 66)
-        }
-    }
-}
+. (Join-Path $moduleRoot 'Frostline.Gameplay.ps1')
+. (Join-Path $moduleRoot 'Frostline.Events.ps1')
+. (Join-Path $moduleRoot 'Frostline.Entrypoint.ps1')
 
-function Travel-To([int]$destination) {
-    if ($destination -eq $script:location) { return }
-    $cost = $distances[$script:location][$destination]
-    if ($cost -gt $script:fuel) {
-        $status.Text = 'Not enough fuel. Take a shorter run.'
-        return
-    }
-
-    $script:fuel -= $cost
-    $script:location = $destination
-    $script:fuel += $stations[$destination].Bonus
-    if ($script:location -eq $script:target) {
-        $script:deliveries += 1
-        $script:score += 25 + ($script:fuel * 2)
-        $status.Text = 'Contract fulfilled. New route inbound.'
-        New-Contract
-    }
-    else {
-        $script:score = [Math]::Max(0, $script:score + 3 - $cost)
-        $status.Text = 'Cargo still onboard.'
-    }
-
-    if ($script:fuel -le 0) {
-        [System.Windows.Forms.MessageBox]::Show("Convoy stalled. Score: $($script:score)", 'Frostline Courier') | Out-Null
-        $script:location = 0
-        $script:fuel = 8
-        $script:score = 0
-        $script:deliveries = 0
-        New-Contract
-    }
-
-    Update-Hud
-}
-
-foreach ($button in $buttons) {
-    $button.Add_Click({
-        param($sender, $eventArgs)
-        Travel-To([int]$sender.Tag)
-    })
-}
-
-$startButton.Add_Click({
-    $script:location = 0
-    $script:fuel = 8
-    $script:score = 0
-    $script:deliveries = 0
-    New-Contract
-    Update-Hud
-})
-
-New-Contract
-Update-Hud
-[void]$form.ShowDialog()
+Start-FrostlineCourierRuntime

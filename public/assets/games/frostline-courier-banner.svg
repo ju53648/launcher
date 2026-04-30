@@ -1,1 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 480"><rect width="1280" height="480" fill="#0d1421"/><rect x="58" y="56" width="1164" height="368" rx="34" fill="#1c2d44" stroke="#96e5ff" stroke-width="6"/><text x="96" y="214" fill="#96e5ff" font-size="88" font-family="Segoe UI, Arial" font-weight="700">FROSTLINE COURIER</text><text x="96" y="278" fill="#ffffff" font-size="30" font-family="Segoe UI, Arial">Tiny logistics under very rude weather.</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 480" role="img" aria-label="Frostline Courier banner art">
+  <rect width="1280" height="480" fill="#0b1c2b"/>
+  <path d="M680 398 832 232l86 88 126-156 74 76 162-182v422H680z" fill="#d9f1ff" opacity="0.18"/>
+  <path d="M680 432 826 282l92 62 124-126 76 60 162-136v338H680z" fill="#dff8ff" opacity="0.34"/>
+  <path d="M812 332 928 186l74 76 118-154 60 66" fill="none" stroke="#ffffff" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="1122" cy="124" r="34" fill="#ffd98d"/>
+  <circle cx="1122" cy="124" r="14" fill="#ffffff" opacity="0.9"/>
+  <text x="76" y="146" fill="#c8eeff" font-size="26" font-family="Segoe UI, Arial, sans-serif" font-weight="800" letter-spacing="4">WINTER ROUTE DRAMA</text>
+  <text x="76" y="248" fill="#bce7ff" font-size="92" font-family="Segoe UI, Arial, sans-serif" font-weight="900">FROSTLINE COURIER</text>
+  <text x="76" y="312" fill="#e7f7ff" font-size="30" font-family="Segoe UI, Arial, sans-serif" font-weight="600">Carry the last warm signal through a whiteout that wants you gone.</text>
+</svg>

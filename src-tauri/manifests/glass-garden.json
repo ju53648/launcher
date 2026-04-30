@@ -17,7 +17,7 @@
   "bannerImage": "/assets/games/glass-garden-banner.svg",
   "iconImage": "/assets/games/glass-garden-icon.svg",
   "executable": "Launch-GlassGarden.ps1",
-  "installSizeBytes": 11534336,
+  "installSizeBytes": 11802157,
   "defaultInstallFolder": "Glass Garden",
   "supportedActions": ["install", "launch", "repair", "uninstall", "openFolder"],
   "installStrategy": {

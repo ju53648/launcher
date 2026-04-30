@@ -1,1 +1,15 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 480"><rect width="1280" height="480" fill="#16181f"/><rect x="58" y="58" width="1164" height="364" rx="34" fill="#252935" stroke="#ffd64a" stroke-width="6"/><text x="100" y="214" fill="#ffd64a" font-size="90" font-family="Segoe UI, Arial" font-weight="700">POCKET HEIST</text><text x="100" y="278" fill="#ffffff" font-size="30" font-family="Segoe UI, Arial">Grid stealth for people who like one more risky move.</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 480" role="img" aria-label="Pocket Heist banner art">
+  <rect width="1280" height="480" fill="#0f1318"/>
+  <g opacity="0.12" stroke="#89f7b4" stroke-width="3">
+    <path d="M760 84h430M760 148h430M760 212h430M760 276h430M760 340h430"/>
+    <path d="M820 84v288M916 84v288M1012 84v288M1108 84v288"/>
+  </g>
+  <rect x="826" y="110" width="300" height="218" rx="28" fill="#243746" stroke="#ffd64a" stroke-width="8"/>
+  <circle cx="976" cy="220" r="56" fill="#ffd64a"/>
+  <circle cx="976" cy="220" r="22" fill="#243746"/>
+  <path d="M814 114 1138 328" stroke="#ff6f61" stroke-width="7" stroke-linecap="round" opacity="0.8"/>
+  <path d="M1138 114 814 328" stroke="#7ce9ff" stroke-width="7" stroke-linecap="round" opacity="0.8"/>
+  <text x="76" y="146" fill="#8df3b7" font-size="26" font-family="Segoe UI, Arial, sans-serif" font-weight="800" letter-spacing="4">TACTICAL BREAK-IN</text>
+  <text x="76" y="250" fill="#ffd64a" font-size="96" font-family="Segoe UI, Arial, sans-serif" font-weight="900">POCKET HEIST</text>
+  <text x="76" y="312" fill="#dce4e9" font-size="30" font-family="Segoe UI, Arial, sans-serif" font-weight="600">Plan the route, dodge the beams and leave with the score.</text>
+</svg>

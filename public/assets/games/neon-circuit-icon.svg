@@ -1,6 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Neon Circuit icon">
-  <rect width="128" height="128" rx="28" fill="#0b1025" />
-  <path d="M28 82 50 38h20L48 90h-20Z" fill="#39ffc0" />
-  <path d="M72 38h28L78 90H50l22-52Z" fill="#ff605b" opacity="0.9" />
-  <circle cx="92" cy="34" r="10" fill="#f7f361" />
+  <rect width="128" height="128" rx="28" fill="#091122"/>
+  <path d="M10 34h108M10 64h108M10 94h108" stroke="#7ceaff" stroke-opacity="0.12" stroke-width="3"/>
+  <path d="M20 42h28l14-14h26l16 16h12" fill="none" stroke="#39ffc0" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="66" y="62" width="34" height="34" rx="6" fill="#effcff"/>
+  <rect x="77" y="73" width="12" height="12" rx="3" fill="#07111a"/>
+  <circle cx="100" cy="34" r="10" fill="#ff5c78"/>
+  <circle cx="108" cy="90" r="8" fill="#f6ff85"/>
 </svg>

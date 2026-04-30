@@ -33,7 +33,7 @@
     "bannerImage":  "/assets/games/frostline-courier-banner.svg",
     "iconImage":  "/assets/games/frostline-courier-icon.svg",
     "executable":  "Launch-FrostlineCourier.ps1",
-    "installSizeBytes":  11534336,
+    "installSizeBytes":  11803019,
     "defaultInstallFolder":  "Frostline Courier",
     "supportedActions":  [
                              "install",
@@ -50,8 +50,8 @@
     "download":  {
                      "kind":  "httpArchive",
                      "url":  "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/games/frostline-courier/release/frostline-courier-win64.zip",
-                     "sha256":  "976cdb4874b81f4613ce1b4412486c91e07c7bbd30c6b3e32d58543c36ed6b4e",
-                     "sizeBytes":  12971
+                     "sha256":  "6a78a07e67e9eca9645ab50d6b177b36789a5ed6724841db6b5b782183d3cbc5",
+                     "sizeBytes":  11802957
                  },
     "changelog":  [
                       {

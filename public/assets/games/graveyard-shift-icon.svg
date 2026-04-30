@@ -1,1 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128"><rect width="128" height="128" rx="28" fill="#11161f"/><path d="M36 104V58c0-18 56-18 56 0v46Z" fill="#ccff92"/><rect x="58" y="72" width="12" height="20" fill="#11161f"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Graveyard Shift icon">
+  <rect width="128" height="128" rx="28" fill="#12171d"/>
+  <circle cx="92" cy="34" r="22" fill="#f4d88a"/>
+  <path d="M0 100c24-10 42-10 64-6s40 4 64-6v40H0z" fill="#0b1014"/>
+  <rect x="20" y="56" width="12" height="34" rx="4" fill="#c7f08f"/>
+  <rect x="48" y="48" width="14" height="42" rx="4" fill="#c7f08f"/>
+  <rect x="80" y="54" width="12" height="36" rx="4" fill="#c7f08f"/>
+  <path d="M20 66h26M48 60h30M80 68h22" stroke="#c7f08f" stroke-width="6" stroke-linecap="round"/>
+</svg>

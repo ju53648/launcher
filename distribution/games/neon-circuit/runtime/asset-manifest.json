@@ -1,0 +1,29 @@
+{
+    "game":  "neon-circuit",
+    "name":  "Neon Circuit",
+    "description":  "Arcade reflex game - viele kleine schnelle Effekte",
+    "generatedDate":  "2026-04-29 22:19:54",
+    "assetCount":  5,
+    "assets":  [
+                   {
+                       "file":  "neon-patterns.bin",
+                       "sizeBytes":  4194304
+                   },
+                   {
+                       "file":  "arcade-sfx-pack.bin",
+                       "sizeBytes":  3145728
+                   },
+                   {
+                       "file":  "circuit-levels.bin",
+                       "sizeBytes":  2097152
+                   },
+                   {
+                       "file":  "glow-effects.bin",
+                       "sizeBytes":  1048576
+                   },
+                   {
+                       "file":  "overload-shaders.bin",
+                       "sizeBytes":  1310720
+                   }
+               ]
+}

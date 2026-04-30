@@ -1,1 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128"><rect width="128" height="128" rx="28" fill="#0d1421"/><path d="M20 80h88l-20 28H40Z" fill="#96e5ff"/><rect x="44" y="34" width="40" height="38" rx="10" fill="#ffd664"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Frostline Courier icon">
+  <rect width="128" height="128" rx="28" fill="#12293b"/>
+  <path d="M0 102 28 78l18 14 22-28 20 18 40-44v90H0z" fill="#dff8ff" opacity="0.28"/>
+  <path d="M20 92 44 60l18 18 26-36 20 22" fill="none" stroke="#ffffff" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="90" cy="34" r="12" fill="#ffd89b"/>
+  <circle cx="90" cy="34" r="5" fill="#ffffff" opacity="0.9"/>
+</svg>

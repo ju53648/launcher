@@ -1,1 +1,20 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 480"><rect width="1280" height="480" fill="#151029"/><rect x="48" y="48" width="1184" height="384" rx="36" fill="#2a214d" stroke="#ffc444" stroke-width="6"/><text x="100" y="210" fill="#ffc444" font-size="90" font-family="Segoe UI, Arial" font-weight="700">WORD REACTOR</text><text x="100" y="274" fill="#ffffff" font-size="30" font-family="Segoe UI, Arial">Typing sprint. Reactor panic. Very few excuses.</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 480" role="img" aria-label="Word Reactor banner art">
+  <defs>
+    <linearGradient id="wr-banner-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#150d28"/>
+      <stop offset="56%" stop-color="#2d1848"/>
+      <stop offset="100%" stop-color="#130a16"/>
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="480" fill="url(#wr-banner-bg)"/>
+  <g opacity="0.16" fill="#ffffff" font-size="34" font-family="Georgia, serif" font-weight="700">
+    <text x="790" y="122">Q</text><text x="876" y="158">A</text><text x="968" y="108">R</text><text x="1062" y="166">M</text><text x="1148" y="134">X</text>
+    <text x="820" y="328">T</text><text x="912" y="366">O</text><text x="1020" y="318">N</text><text x="1128" y="356">E</text>
+  </g>
+  <circle cx="1032" cy="238" r="124" fill="#ffc444" opacity="0.18"/>
+  <circle cx="1032" cy="238" r="80" fill="#58ffd6" opacity="0.24"/>
+  <circle cx="1032" cy="238" r="48" fill="#1f1233" stroke="#fff0b8" stroke-width="6"/>
+  <text x="78" y="146" fill="#ffe28b" font-size="26" font-family="Segoe UI, Arial, sans-serif" font-weight="800" letter-spacing="4">VOCABULARY CRISIS</text>
+  <text x="78" y="250" fill="#ffffff" font-size="96" font-family="Segoe UI, Arial, sans-serif" font-weight="900">WORD REACTOR</text>
+  <text x="78" y="312" fill="#dde4f7" font-size="30" font-family="Segoe UI, Arial, sans-serif" font-weight="600">Type the chain, cool the core, stop the language engine from slipping apart.</text>
+</svg>

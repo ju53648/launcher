@@ -1,0 +1,33 @@
+{
+    "game":  "pocket-heist",
+    "name":  "Pocket Heist",
+    "description":  "Strategie - viele kleine Sound-Effekte",
+    "generatedDate":  "2026-04-29 22:19:55",
+    "assetCount":  6,
+    "assets":  [
+                   {
+                       "file":  "heist-music.bin",
+                       "sizeBytes":  2097152
+                   },
+                   {
+                       "file":  "sfx-pack.bin",
+                       "sizeBytes":  3145728
+                   },
+                   {
+                       "file":  "level-blueprints.bin",
+                       "sizeBytes":  2097152
+                   },
+                   {
+                       "file":  "character-sprites.bin",
+                       "sizeBytes":  1572864
+                   },
+                   {
+                       "file":  "ui-elements.bin",
+                       "sizeBytes":  1572864
+                   },
+                   {
+                       "file":  "security-simulations.bin",
+                       "sizeBytes":  1310720
+                   }
+               ]
+}

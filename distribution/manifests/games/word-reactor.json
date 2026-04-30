@@ -33,7 +33,7 @@
     "bannerImage":  "/assets/games/word-reactor-banner.svg",
     "iconImage":  "/assets/games/word-reactor-icon.svg",
     "executable":  "Launch-WordReactor.ps1",
-    "installSizeBytes":  11534336,
+    "installSizeBytes":  11803448,
     "defaultInstallFolder":  "Word Reactor",
     "supportedActions":  [
                              "install",
@@ -50,8 +50,8 @@
     "download":  {
                      "kind":  "httpArchive",
                      "url":  "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/games/word-reactor/release/word-reactor-win64.zip",
-                     "sha256":  "4bfe133aac0974647d9e10367b0a7ef45a362055013e478fda26942a2316e095",
-                     "sizeBytes":  13099
+                     "sha256":  "203d3d1d864d55556b10fda3605735709e73ed80158b144888dc42658f51a03e",
+                     "sizeBytes":  11802907
                  },
     "changelog":  [
                       {

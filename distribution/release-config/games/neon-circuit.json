@@ -3,7 +3,7 @@
     "catalogManifestUrl":  "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/manifests/games/neon-circuit.json",
     "archivePath":  "distribution/games/neon-circuit/release/neon-circuit-win64.zip",
     "archiveUrl":  "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/games/neon-circuit/release/neon-circuit-win64.zip",
-    "installSizePath":  "distribution/games/neon-circuit/runtime/content.pack",
+    "installSizePath":  "distribution/games/neon-circuit/runtime",
     "version":  "0.1.0",
     "releaseDate":  "2026-04-29",
     "description":  "A compact reflex arcade game about routing a glowing signal through unstable neon lanes before the board overloads.",

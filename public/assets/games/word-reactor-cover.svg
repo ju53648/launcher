@@ -1,1 +1,35 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 900"><rect width="640" height="900" fill="#151029"/><rect x="72" y="120" width="496" height="660" rx="28" fill="#2a214d" stroke="#ffc444" stroke-width="6"/><text x="320" y="280" text-anchor="middle" fill="#ffc444" font-size="74" font-family="Segoe UI, Arial" font-weight="700">WORD</text><text x="320" y="360" text-anchor="middle" fill="#58ffd6" font-size="74" font-family="Segoe UI, Arial" font-weight="700">REACTOR</text><text x="320" y="500" text-anchor="middle" fill="#ffffff" font-size="28" font-family="Segoe UI, Arial">Type command words before the core slips.</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 900" role="img" aria-label="Word Reactor cover art">
+  <defs>
+    <linearGradient id="wr-cover-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#130d24"/>
+      <stop offset="55%" stop-color="#2a1443"/>
+      <stop offset="100%" stop-color="#120912"/>
+    </linearGradient>
+    <radialGradient id="wr-cover-core" cx="50%" cy="28%" r="42%">
+      <stop offset="0%" stop-color="#ffe384" stop-opacity="0.95"/>
+      <stop offset="62%" stop-color="#ffc444" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#ffc444" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="640" height="900" fill="url(#wr-cover-bg)"/>
+  <rect width="640" height="900" fill="url(#wr-cover-core)"/>
+  <g opacity="0.2" fill="#ffffff" font-size="42" font-family="Georgia, serif" font-weight="700">
+    <text x="72" y="176">A</text><text x="154" y="126">R</text><text x="454" y="164">K</text><text x="522" y="220">E</text>
+    <text x="88" y="446">P</text><text x="506" y="430">Q</text><text x="124" y="612">M</text><text x="478" y="670">X</text>
+  </g>
+  <path d="M138 238c34-48 92-78 182-90 88 14 150 42 186 82-40 24-60 68-64 134-72 36-142 38-216 2 0-70-24-114-88-128z" fill="#1b1030" fill-opacity="0.9" stroke="#ffc444" stroke-width="8"/>
+  <circle cx="320" cy="318" r="96" fill="#2c1848" stroke="#58ffd6" stroke-width="6" stroke-dasharray="12 18"/>
+  <g fill="#fff2bf" font-size="54" font-family="Segoe UI, Arial, sans-serif" font-weight="900" text-anchor="middle">
+    <text x="320" y="280">WORD</text>
+    <text x="320" y="346">CHAIN</text>
+    <text x="320" y="412">CORE</text>
+  </g>
+  <g fill="#241233" opacity="0.85">
+    <rect x="102" y="570" width="438" height="158" rx="22" stroke="#ffc444" stroke-opacity="0.45"/>
+    <rect x="102" y="736" width="438" height="86" rx="22" stroke="#58ffd6" stroke-opacity="0.28"/>
+  </g>
+  <text x="92" y="126" fill="#ffe58f" font-size="26" font-family="Segoe UI, Arial, sans-serif" font-weight="800" letter-spacing="4">VOCABULARY CRISIS</text>
+  <text x="92" y="672" fill="#ffffff" font-size="82" font-family="Segoe UI, Arial, sans-serif" font-weight="900">WORD</text>
+  <text x="92" y="752" fill="#58ffd6" font-size="82" font-family="Segoe UI, Arial, sans-serif" font-weight="900">REACTOR</text>
+  <text x="92" y="808" fill="#d7dff5" font-size="24" font-family="Segoe UI, Arial, sans-serif" font-weight="600">Build the right phrase before the language core goes unstable.</text>
+</svg>

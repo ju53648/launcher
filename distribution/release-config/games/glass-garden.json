@@ -3,7 +3,7 @@
     "catalogManifestUrl":  "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/manifests/games/glass-garden.json",
     "archivePath":  "distribution/games/glass-garden/release/glass-garden-win64.zip",
     "archiveUrl":  "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/games/glass-garden/release/glass-garden-win64.zip",
-    "installSizePath":  "distribution/games/glass-garden/runtime/content.pack",
+    "installSizePath":  "distribution/games/glass-garden/runtime",
     "version":  "0.1.0",
     "releaseDate":  "2026-04-29",
     "description":  "A soft memory puzzle about restoring a tiny greenhouse by matching fractured glass-bloom tiles.",

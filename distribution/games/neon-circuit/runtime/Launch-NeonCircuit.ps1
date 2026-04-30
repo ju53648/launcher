@@ -4,23 +4,31 @@ Add-Type -AssemblyName System.Drawing
 [System.Windows.Forms.Application]::EnableVisualStyles()
 
 $script:score = 0
-$script:timeLeft = 45
+$script:timeLeft = 60
 $script:energy = 100
+$script:combo = 0
+$script:wave = 1
+$script:pulse = 0
+$script:surgeTicks = 0
+$script:nearMissCooldown = 0
 $script:highScorePath = Join-Path $PSScriptRoot 'neon-circuit-save.json'
 
 $themeBackground = [System.Drawing.Color]::FromArgb(10, 12, 26)
 $panelBackground = [System.Drawing.Color]::FromArgb(18, 24, 52)
 $accent = [System.Drawing.Color]::FromArgb(57, 255, 192)
 $warning = [System.Drawing.Color]::FromArgb(255, 96, 91)
+$chargeColor = [System.Drawing.Color]::FromArgb(94, 146, 255)
+$resonanceColor = [System.Drawing.Color]::FromArgb(210, 114, 255)
 $text = [System.Drawing.Color]::FromArgb(236, 241, 255)
 
 $form = New-Object System.Windows.Forms.Form
 $form.Text = 'Neon Circuit'
 $form.StartPosition = 'CenterScreen'
-$form.ClientSize = New-Object System.Drawing.Size(960, 640)
+$form.ClientSize = New-Object System.Drawing.Size(980, 660)
 $form.BackColor = $themeBackground
 $form.FormBorderStyle = 'FixedSingle'
 $form.MaximizeBox = $false
+$form.KeyPreview = $true
 
 $title = New-Object System.Windows.Forms.Label
 $title.Text = 'NEON CIRCUIT'
@@ -31,7 +39,7 @@ $title.Location = New-Object System.Drawing.Point(24, 18)
 $form.Controls.Add($title)
 
 $subtitle = New-Object System.Windows.Forms.Label
-$subtitle.Text = 'Route the signal. Hit green gates. Avoid overload.'
+$subtitle.Text = 'Ride the grid, chain sync gates, bank pulse, and survive the overload waves.'
 $subtitle.ForeColor = $text
 $subtitle.Font = New-Object System.Drawing.Font('Segoe UI', 10)
 $subtitle.AutoSize = $true
@@ -39,7 +47,7 @@ $subtitle.Location = New-Object System.Drawing.Point(27, 60)
 $form.Controls.Add($subtitle)
 
 $hud = New-Object System.Windows.Forms.Panel
-$hud.Size = New-Object System.Drawing.Size(250, 558)
+$hud.Size = New-Object System.Drawing.Size(270, 576)
 $hud.Location = New-Object System.Drawing.Point(688, 52)
 $hud.BackColor = $panelBackground
 $form.Controls.Add($hud)
@@ -53,11 +61,11 @@ $scoreLabel.Location = New-Object System.Drawing.Point(20, 24)
 $hud.Controls.Add($scoreLabel)
 
 $timeLabel = New-Object System.Windows.Forms.Label
-$timeLabel.Text = 'Time: 45'
+$timeLabel.Text = 'Time: 60'
 $timeLabel.ForeColor = $text
-$timeLabel.Font = New-Object System.Drawing.Font('Segoe UI', 14, [System.Drawing.FontStyle]::Bold)
+$timeLabel.Font = New-Object System.Drawing.Font('Segoe UI', 13, [System.Drawing.FontStyle]::Bold)
 $timeLabel.AutoSize = $true
-$timeLabel.Location = New-Object System.Drawing.Point(20, 70)
+$timeLabel.Location = New-Object System.Drawing.Point(20, 68)
 $hud.Controls.Add($timeLabel)
 
 $energyLabel = New-Object System.Windows.Forms.Label
@@ -65,23 +73,80 @@ $energyLabel.Text = 'Grid Stability: 100%'
 $energyLabel.ForeColor = $text
 $energyLabel.Font = New-Object System.Drawing.Font('Segoe UI', 12, [System.Drawing.FontStyle]::Bold)
 $energyLabel.AutoSize = $true
-$energyLabel.Location = New-Object System.Drawing.Point(20, 110)
+$energyLabel.Location = New-Object System.Drawing.Point(20, 104)
 $hud.Controls.Add($energyLabel)
+
+$comboLabel = New-Object System.Windows.Forms.Label
+$comboLabel.Text = 'Combo: 0'
+$comboLabel.ForeColor = [System.Drawing.Color]::FromArgb(255, 214, 108)
+$comboLabel.Font = New-Object System.Drawing.Font('Segoe UI', 12, [System.Drawing.FontStyle]::Bold)
+$comboLabel.AutoSize = $true
+$comboLabel.Location = New-Object System.Drawing.Point(20, 140)
+$hud.Controls.Add($comboLabel)
+
+$waveLabel = New-Object System.Windows.Forms.Label
+$waveLabel.Text = 'Wave: 1'
+$waveLabel.ForeColor = $chargeColor
+$waveLabel.Font = New-Object System.Drawing.Font('Segoe UI', 12, [System.Drawing.FontStyle]::Bold)
+$waveLabel.AutoSize = $true
+$waveLabel.Location = New-Object System.Drawing.Point(20, 176)
+$hud.Controls.Add($waveLabel)
 
 $bestLabel = New-Object System.Windows.Forms.Label
 $bestLabel.Text = 'Best: 0'
 $bestLabel.ForeColor = $accent
 $bestLabel.Font = New-Object System.Drawing.Font('Segoe UI', 12, [System.Drawing.FontStyle]::Bold)
 $bestLabel.AutoSize = $true
-$bestLabel.Location = New-Object System.Drawing.Point(20, 148)
+$bestLabel.Location = New-Object System.Drawing.Point(20, 212)
 $hud.Controls.Add($bestLabel)
 
+$recapLabel = New-Object System.Windows.Forms.Label
+$recapLabel.Text = 'Last run: none yet'
+$recapLabel.ForeColor = $text
+$recapLabel.Font = New-Object System.Drawing.Font('Segoe UI', 10)
+$recapLabel.AutoSize = $true
+$recapLabel.MaximumSize = New-Object System.Drawing.Size(220, 0)
+$recapLabel.Location = New-Object System.Drawing.Point(20, 238)
+$hud.Controls.Add($recapLabel)
+
+$titleLabel = New-Object System.Windows.Forms.Label
+$titleLabel.Text = 'Circuit title: back-alley spark'
+$titleLabel.ForeColor = $accent
+$titleLabel.Font = New-Object System.Drawing.Font('Segoe UI', 10)
+$titleLabel.AutoSize = $true
+$titleLabel.MaximumSize = New-Object System.Drawing.Size(220, 0)
+$titleLabel.Location = New-Object System.Drawing.Point(20, 262)
+$hud.Controls.Add($titleLabel)
+
+$pulseLabel = New-Object System.Windows.Forms.Label
+$pulseLabel.Text = 'Pulse: 0 / 100'
+$pulseLabel.ForeColor = $chargeColor
+$pulseLabel.Font = New-Object System.Drawing.Font('Segoe UI', 11, [System.Drawing.FontStyle]::Bold)
+$pulseLabel.AutoSize = $true
+$pulseLabel.Location = New-Object System.Drawing.Point(20, 288)
+$hud.Controls.Add($pulseLabel)
+
+$pulseBar = New-Object System.Windows.Forms.ProgressBar
+$pulseBar.Location = New-Object System.Drawing.Point(20, 318)
+$pulseBar.Size = New-Object System.Drawing.Size(220, 20)
+$pulseBar.Maximum = 100
+$pulseBar.Value = 0
+$hud.Controls.Add($pulseBar)
+
+$surgeLabel = New-Object System.Windows.Forms.Label
+$surgeLabel.Text = 'Surge: stable'
+$surgeLabel.ForeColor = $accent
+$surgeLabel.Font = New-Object System.Drawing.Font('Segoe UI', 10, [System.Drawing.FontStyle]::Bold)
+$surgeLabel.AutoSize = $true
+$surgeLabel.Location = New-Object System.Drawing.Point(20, 344)
+$hud.Controls.Add($surgeLabel)
+
 $helpLabel = New-Object System.Windows.Forms.Label
-$helpLabel.Text = "Arrow keys move`r`nSpace stabilizes nearby gates`r`nGreen gates = points`r`nRed gates = heavy damage"
+$helpLabel.Text = "Arrow keys move`r`nGreen = score + combo`r`nBlue = pulse charge`r`nPurple diamond = resonance burst`r`nYellow dot = rare spark bonus`r`nRed = damage`r`nSpace detonates a pulse burst`r`nFull pulse = extra drain - fire it!"
 $helpLabel.ForeColor = $text
 $helpLabel.Font = New-Object System.Drawing.Font('Segoe UI', 10)
 $helpLabel.AutoSize = $true
-$helpLabel.Location = New-Object System.Drawing.Point(20, 198)
+$helpLabel.Location = New-Object System.Drawing.Point(20, 374)
 $hud.Controls.Add($helpLabel)
 
 $statusLabel = New-Object System.Windows.Forms.Label
@@ -89,14 +154,14 @@ $statusLabel.Text = 'Press Start to energize the board.'
 $statusLabel.ForeColor = $accent
 $statusLabel.Font = New-Object System.Drawing.Font('Segoe UI', 10, [System.Drawing.FontStyle]::Bold)
 $statusLabel.AutoSize = $true
-$statusLabel.MaximumSize = New-Object System.Drawing.Size(210, 0)
-$statusLabel.Location = New-Object System.Drawing.Point(20, 300)
+$statusLabel.MaximumSize = New-Object System.Drawing.Size(220, 0)
+$statusLabel.Location = New-Object System.Drawing.Point(20, 470)
 $hud.Controls.Add($statusLabel)
 
 $startButton = New-Object System.Windows.Forms.Button
 $startButton.Text = 'Start Run'
 $startButton.Size = New-Object System.Drawing.Size(200, 42)
-$startButton.Location = New-Object System.Drawing.Point(20, 370)
+$startButton.Location = New-Object System.Drawing.Point(20, 526)
 $startButton.BackColor = $accent
 $startButton.FlatStyle = 'Flat'
 $hud.Controls.Add($startButton)
@@ -104,14 +169,14 @@ $hud.Controls.Add($startButton)
 $resetButton = New-Object System.Windows.Forms.Button
 $resetButton.Text = 'Reset Run'
 $resetButton.Size = New-Object System.Drawing.Size(200, 42)
-$resetButton.Location = New-Object System.Drawing.Point(20, 422)
+$resetButton.Location = New-Object System.Drawing.Point(20, 576)
 $resetButton.BackColor = [System.Drawing.Color]::FromArgb(80, 94, 148)
 $resetButton.ForeColor = $text
 $resetButton.FlatStyle = 'Flat'
 $hud.Controls.Add($resetButton)
 
 $board = New-Object System.Windows.Forms.Panel
-$board.Size = New-Object System.Drawing.Size(620, 558)
+$board.Size = New-Object System.Drawing.Size(620, 576)
 $board.Location = New-Object System.Drawing.Point(24, 52)
 $board.BackColor = [System.Drawing.Color]::FromArgb(14, 18, 36)
 $form.Controls.Add($board)
@@ -119,60 +184,30 @@ $form.Controls.Add($board)
 $rng = [System.Random]::new()
 $player = New-Object psobject -Property @{ X = 280; Y = 250; Size = 24 }
 $gates = New-Object System.Collections.Generic.List[object]
-$gameActive = $false
-$bestScore = 0
+$script:gameActive = $false
+$script:bestScore = 0
+$bestTitle = 'back-alley spark'
+$script:chargeStreak = 0
+
+$modulesRoot = Join-Path $PSScriptRoot 'modules'
+. (Join-Path $modulesRoot '01-ScorePersistence.ps1')
+. (Join-Path $modulesRoot '02-GateLogic.ps1')
+. (Join-Path $modulesRoot '03-GameFlow.ps1')
 
 if (Test-Path $script:highScorePath) {
     try {
         $saveData = Get-Content $script:highScorePath -Raw | ConvertFrom-Json
         if ($null -ne $saveData.bestScore) {
-            $bestScore = [int]$saveData.bestScore
-            $bestLabel.Text = "Best: $bestScore"
+            $script:bestScore = [int]$saveData.bestScore
+            $bestLabel.Text = "Best: $script:bestScore"
+        }
+        if ($null -ne $saveData.bestTitle) {
+            $bestTitle = [string]$saveData.bestTitle
+            $titleLabel.Text = "Circuit title: $bestTitle"
         }
     }
     catch {
     }
-}
-
-function Save-BestScore {
-    if ($script:score -le $bestScore) {
-        return
-    }
-
-    $scriptJson = @{ bestScore = $script:score } | ConvertTo-Json
-    Set-Content -Path $script:highScorePath -Value $scriptJson -Encoding UTF8
-    $script:bestScore = $script:score
-    $bestLabel.Text = "Best: $($script:score)"
-}
-
-function New-Gate {
-    $size = 30 + $rng.Next(0, 26)
-    $danger = $rng.NextDouble() -lt 0.25
-    return [pscustomobject]@{
-        X = $rng.Next(28, 560)
-        Y = $rng.Next(28, 498)
-        Size = $size
-        Danger = $danger
-        Pulse = $rng.Next(0, 100)
-    }
-}
-
-function Reset-Board {
-    $gates.Clear()
-    for ($index = 0; $index -lt 11; $index++) {
-        $gates.Add((New-Gate))
-    }
-
-    $player.X = 280
-    $player.Y = 250
-    $script:score = 0
-    $script:timeLeft = 45
-    $script:energy = 100
-    $scoreLabel.Text = 'Score: 0'
-    $timeLabel.Text = 'Time: 45'
-    $energyLabel.Text = 'Grid Stability: 100%'
-    $statusLabel.Text = 'Board synced. Catch the green gates.'
-    $board.Invalidate()
 }
 
 $board.Add_Paint({
@@ -184,18 +219,51 @@ $board.Add_Paint({
 
     $gridPen = New-Object System.Drawing.Pen([System.Drawing.Color]::FromArgb(34, 49, 86), 1)
     for ($line = 0; $line -le 620; $line += 40) {
-        $graphics.DrawLine($gridPen, $line, 0, $line, 558)
+        $graphics.DrawLine($gridPen, $line, 0, $line, 576)
     }
-    for ($line = 0; $line -le 558; $line += 40) {
+    for ($line = 0; $line -le 576; $line += 40) {
         $graphics.DrawLine($gridPen, 0, $line, 620, $line)
     }
 
     foreach ($gate in $gates) {
-        $color = if ($gate.Danger) { $warning } else { $accent }
+        $color = $accent
+        if ($gate.Type -eq 'danger') {
+            $color = $warning
+        }
+        elseif ($gate.Type -eq 'charge') {
+            $color = $chargeColor
+        }
+        elseif ($gate.Type -eq 'resonance') {
+            $color = $resonanceColor
+        }
+           elseif ($gate.Type -eq 'spark') {
+               $color = [System.Drawing.Color]::FromArgb(255, 200, 70)
+           }
         $brush = New-Object System.Drawing.SolidBrush($color)
-        $graphics.FillEllipse($brush, $gate.X, $gate.Y, $gate.Size, $gate.Size)
-        $glowPen = New-Object System.Drawing.Pen([System.Drawing.Color]::FromArgb(110, $color.R, $color.G, $color.B), 4)
-        $graphics.DrawEllipse($glowPen, $gate.X - 4, $gate.Y - 4, $gate.Size + 8, $gate.Size + 8)
+        if ($gate.Type -eq 'resonance') {
+            $points = @(
+                [System.Drawing.PointF]::new($gate.X + $gate.Size/2, $gate.Y - 2)
+                [System.Drawing.PointF]::new($gate.X + $gate.Size + 2, $gate.Y + $gate.Size/2)
+                [System.Drawing.PointF]::new($gate.X + $gate.Size/2, $gate.Y + $gate.Size + 2)
+                [System.Drawing.PointF]::new($gate.X - 2, $gate.Y + $gate.Size/2)
+            )
+            $graphics.FillPolygon($brush, $points)
+            $glowPen = New-Object System.Drawing.Pen([System.Drawing.Color]::FromArgb(130, $color.R, $color.G, $color.B), 5)
+            $graphics.DrawPolygon($glowPen, $points)
+        }
+           elseif ($gate.Type -eq 'spark') {
+               $graphics.FillEllipse($brush, $gate.X, $gate.Y, $gate.Size, $gate.Size)
+               $glowPen = New-Object System.Drawing.Pen([System.Drawing.Color]::FromArgb(200, $color.R, $color.G, $color.B), 3)
+               for ($i = 0; $i -lt 3; $i++) {
+                   $rad = 4 + ($i * 3)
+                   $graphics.DrawEllipse($glowPen, $gate.X - $rad, $gate.Y - $rad, $gate.Size + 2*$rad, $gate.Size + 2*$rad)
+               }
+           }
+           else {
+            $graphics.FillEllipse($brush, $gate.X, $gate.Y, $gate.Size, $gate.Size)
+            $glowPen = New-Object System.Drawing.Pen([System.Drawing.Color]::FromArgb(110, $color.R, $color.G, $color.B), 4)
+            $graphics.DrawEllipse($glowPen, $gate.X - 4, $gate.Y - 4, $gate.Size + 8, $gate.Size + 8)
+        }
     }
 
     $playerBrush = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(255, 242, 88))
@@ -204,11 +272,10 @@ $board.Add_Paint({
     $graphics.DrawRectangle($outlinePen, $player.X, $player.Y, $player.Size, $player.Size)
 })
 
-$form.KeyPreview = $true
 $form.Add_KeyDown({
     param($sender, $eventArgs)
 
-    if (-not $gameActive) {
+    if (-not $script:gameActive) {
         return
     }
 
@@ -216,24 +283,20 @@ $form.Add_KeyDown({
         'Left'  { $player.X = [Math]::Max(0, $player.X - 18) }
         'Right' { $player.X = [Math]::Min(596, $player.X + 18) }
         'Up'    { $player.Y = [Math]::Max(0, $player.Y - 18) }
-        'Down'  { $player.Y = [Math]::Min(534, $player.Y + 18) }
+        'Down'  { $player.Y = [Math]::Min(552, $player.Y + 18) }
         'Space' {
-            foreach ($gate in $gates.ToArray()) {
-                $distanceX = [Math]::Abs(($gate.X + ($gate.Size / 2)) - ($player.X + 12))
-                $distanceY = [Math]::Abs(($gate.Y + ($gate.Size / 2)) - ($player.Y + 12))
-                if ($distanceX -lt 70 -and $distanceY -lt 70) {
-                    if ($gate.Danger) {
-                        $script:energy = [Math]::Max(0, $script:energy - 16)
-                        $statusLabel.Text = 'You stabilized a hot node, but the grid still screamed.'
+            if ($script:pulse -lt 100) {
+                $statusLabel.Text = 'Pulse not charged yet.'
+            }
+            else {
+                foreach ($gate in $gates.ToArray()) {
+                    $distanceX = [Math]::Abs(($gate.X + ($gate.Size / 2)) - ($player.X + 12))
+                    $distanceY = [Math]::Abs(($gate.Y + ($gate.Size / 2)) - ($player.Y + 12))
+                    if ($distanceX -lt 90 -and $distanceY -lt 90) {
+                        Capture-Gate $gate $true
                     }
-                    else {
-                        $script:score += 18
-                        $script:energy = [Math]::Min(100, $script:energy + 8)
-                        $statusLabel.Text = 'Clean sync. Chain more gates.'
-                    }
-                    $gates.Remove($gate)
-                    $gates.Add((New-Gate))
                 }
+                $script:pulse = 0
             }
         }
     }
@@ -244,36 +307,52 @@ $form.Add_KeyDown({
 $tickTimer = New-Object System.Windows.Forms.Timer
 $tickTimer.Interval = 100
 $tickTimer.Add_Tick({
-    if (-not $gameActive) {
+    if (-not $script:gameActive) {
         return
     }
 
-    foreach ($gate in $gates) {
-        $gate.Pulse += 1
-        if ($gate.Pulse % 8 -eq 0 -and -not $gate.Danger) {
-            $script:score += 1
-        }
-    }
-
     foreach ($gate in $gates.ToArray()) {
+        $gate.X = [Math]::Max(0, [Math]::Min(590, $gate.X + $gate.DriftX))
+        $gate.Y = [Math]::Max(0, [Math]::Min(546, $gate.Y + $gate.DriftY))
+        if ($gate.X -le 0 -or $gate.X -ge 590) {
+            $gate.DriftX *= -1
+        }
+        if ($gate.Y -le 0 -or $gate.Y -ge 546) {
+            $gate.DriftY *= -1
+        }
+
         $intersectsX = $player.X + $player.Size -gt $gate.X -and $player.X -lt ($gate.X + $gate.Size)
         $intersectsY = $player.Y + $player.Size -gt $gate.Y -and $player.Y -lt ($gate.Y + $gate.Size)
         if ($intersectsX -and $intersectsY) {
-            if ($gate.Danger) {
-                $script:energy = [Math]::Max(0, $script:energy - 20)
-                $statusLabel.Text = 'Overload spike. Back off the red nodes.'
+            Capture-Gate $gate $false
+        }
+        elseif ($gate.Type -eq 'danger' -and $script:nearMissCooldown -le 0) {
+            $distanceX = [Math]::Abs(($gate.X + ($gate.Size / 2)) - ($player.X + 12))
+            $distanceY = [Math]::Abs(($gate.Y + ($gate.Size / 2)) - ($player.Y + 12))
+            if ($distanceX -lt 44 -and $distanceY -lt 44) {
+                $script:score += 5 + $script:wave
+                $script:pulse = [Math]::Min(100, $script:pulse + 6)
+                $script:nearMissCooldown = 4
+                $statusLabel.Text = 'Near miss! High-voltage skim paid off.'
             }
-            else {
-                $script:score += 12
-                $script:energy = [Math]::Min(100, $script:energy + 4)
-                $statusLabel.Text = 'Signal captured. Keep the route alive.'
-            }
-            $gates.Remove($gate)
-            $gates.Add((New-Gate))
         }
     }
 
-    $script:energy = [Math]::Max(0, $script:energy - 1)
+    if ($script:nearMissCooldown -gt 0) {
+        $script:nearMissCooldown -= 1
+    }
+    if ($script:surgeTicks -gt 0) {
+        $script:surgeTicks -= 1
+    }
+
+    $energyDrain = 1 + [Math]::Floor([Math]::Pow($script:wave - 1, 1.2))
+    if ($script:pulse -ge 100) {
+        $energyDrain += 1
+    }
+    if ($script:surgeTicks -gt 0) {
+        $energyDrain += 3
+    }
+    $script:energy = [Math]::Max(0, $script:energy - $energyDrain)
     if ($tickTimer.Tag -isnot [int]) {
         $tickTimer.Tag = 0
     }
@@ -281,18 +360,31 @@ $tickTimer.Add_Tick({
     if ([int]$tickTimer.Tag -ge 1000) {
         $tickTimer.Tag = 0
         $script:timeLeft -= 1
+        $newWave = 1 + [int][Math]::Floor((60 - $script:timeLeft) / 15)
+        if ($newWave -gt $script:wave) {
+            $script:wave = $newWave
+            $script:score += 22 + ($script:wave * 4)
+            $script:energy = [Math]::Min(100, $script:energy + 10)
+            $script:pulse = [Math]::Min(100, $script:pulse + 18)
+            $script:surgeTicks = 45
+            $spikeMessage = "Wave $($script:wave) live: surge bonus applied (+score, +energy, +pulse)."
+            if ($script:wave -eq 3 -or $script:wave -eq 4 -or $script:wave -eq 5) {
+                $script:pulse = [Math]::Min(100, $script:pulse + 25)
+                $script:score += 50 + ($script:wave * 10)
+                $script:surgeTicks = 60
+                $spikeMessage = "WAVE $($script:wave) SPIKE: Resonance cascade! Massive pulse surge!"
+            }
+            Fill-Gates
+            $statusLabel.Text = $spikeMessage
+        }
     }
 
-    $scoreLabel.Text = "Score: $($script:score)"
-    $timeLabel.Text = "Time: $($script:timeLeft)"
-    $energyLabel.Text = "Grid Stability: $($script:energy)%"
-
-    if ($script:energy -le 0 -or $script:timeLeft -le 0) {
-        $gameActive = $false
-        $tickTimer.Stop()
-        Save-BestScore
-        $statusLabel.Text = "Run complete. Final score: $($script:score)."
-        [System.Windows.Forms.MessageBox]::Show("Signal discharged. Score: $($script:score)", 'Neon Circuit') | Out-Null
+    Update-Hud
+    if ($script:energy -le 0) {
+        End-Run 'Grid destabilized. The signal collapsed under overload.'
+    }
+    elseif ($script:timeLeft -le 0) {
+        End-Run 'Time expired. Signal discharged cleanly - the grid held.'
     }
 
     $board.Invalidate()
@@ -300,20 +392,26 @@ $tickTimer.Add_Tick({
 
 $startButton.Add_Click({
     Reset-Board
-    $gameActive = $true
+    $script:gameActive = $true
     $tickTimer.Tag = 0
     $tickTimer.Start()
     $statusLabel.Text = 'Circuit online. Move now.'
+    $recapLabel.Text = 'Last run: active circuit'
     $form.Focus()
 })
 
 $resetButton.Add_Click({
     Reset-Board
-    $gameActive = $false
+    $script:gameActive = $false
     $tickTimer.Stop()
     $statusLabel.Text = 'Run reset. Press Start when ready.'
+    $recapLabel.Text = 'Last run: manual reset'
     $form.Focus()
 })
 
-Reset-Board
-[void]$form.ShowDialog()
+function Start-NeonCircuitRuntime {
+    Reset-Board
+    [void]$form.ShowDialog()
+}
+
+Start-NeonCircuitRuntime

@@ -1,0 +1,33 @@
+{
+    "game":  "word-reactor",
+    "name":  "Word Reactor",
+    "description":  "Wort-Puzzle - groÃŸe WÃ¶rterbuch-Dateien",
+    "generatedDate":  "2026-04-29 22:19:55",
+    "assetCount":  6,
+    "assets":  [
+                   {
+                       "file":  "dictionary-en.bin",
+                       "sizeBytes":  3145728
+                   },
+                   {
+                       "file":  "dictionary-de.bin",
+                       "sizeBytes":  3145728
+                   },
+                   {
+                       "file":  "word-puzzles.bin",
+                       "sizeBytes":  2097152
+                   },
+                   {
+                       "file":  "ui-fonts.bin",
+                       "sizeBytes":  1048576
+                   },
+                   {
+                       "file":  "word-sounds.bin",
+                       "sizeBytes":  1048576
+                   },
+                   {
+                       "file":  "reactor-challenges.bin",
+                       "sizeBytes":  1310720
+                   }
+               ]
+}

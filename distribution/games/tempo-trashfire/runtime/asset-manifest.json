@@ -1,0 +1,33 @@
+{
+    "game":  "tempo-trashfire",
+    "name":  "Tempo Trashfire",
+    "description":  "Rhythmus-Spiel - extensive Musik-Daten",
+    "generatedDate":  "2026-04-29 22:19:55",
+    "assetCount":  6,
+    "assets":  [
+                   {
+                       "file":  "rhythm-tracks.bin",
+                       "sizeBytes":  4194304
+                   },
+                   {
+                       "file":  "beat-patterns.bin",
+                       "sizeBytes":  2097152
+                   },
+                   {
+                       "file":  "visual-effects.bin",
+                       "sizeBytes":  2097152
+                   },
+                   {
+                       "file":  "sound-design.bin",
+                       "sizeBytes":  1572864
+                   },
+                   {
+                       "file":  "ui-hud.bin",
+                       "sizeBytes":  1048576
+                   },
+                   {
+                       "file":  "crowd-loops.bin",
+                       "sizeBytes":  786432
+                   }
+               ]
+}

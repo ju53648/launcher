@@ -1,0 +1,37 @@
+{
+    "game":  "velvet-rook",
+    "name":  "Velvet Rook",
+    "description":  "Schach/Strategie - Bewegungs- und Position-Daten",
+    "generatedDate":  "2026-04-29 22:19:54",
+    "assetCount":  7,
+    "assets":  [
+                   {
+                       "file":  "chess-openings.bin",
+                       "sizeBytes":  2097152
+                   },
+                   {
+                       "file":  "piece-models.bin",
+                       "sizeBytes":  2097152
+                   },
+                   {
+                       "file":  "board-patterns.bin",
+                       "sizeBytes":  2097152
+                   },
+                   {
+                       "file":  "strategy-analysis.bin",
+                       "sizeBytes":  1572864
+                   },
+                   {
+                       "file":  "game-notation.bin",
+                       "sizeBytes":  1048576
+                   },
+                   {
+                       "file":  "velvet-theme.bin",
+                       "sizeBytes":  1048576
+                   },
+                   {
+                       "file":  "endgame-library.bin",
+                       "sizeBytes":  1835008
+                   }
+               ]
+}

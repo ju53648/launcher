@@ -1,1 +1,22 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 900"><rect width="640" height="900" fill="#0d1421"/><rect x="78" y="122" width="484" height="656" rx="30" fill="#1c2d44" stroke="#96e5ff" stroke-width="6"/><text x="320" y="286" text-anchor="middle" fill="#96e5ff" font-size="68" font-family="Segoe UI, Arial" font-weight="700">FROSTLINE</text><text x="320" y="366" text-anchor="middle" fill="#ffd664" font-size="68" font-family="Segoe UI, Arial" font-weight="700">COURIER</text><text x="320" y="520" text-anchor="middle" fill="#ffffff" font-size="28" font-family="Segoe UI, Arial">Plan short routes before the cold burns your fuel.</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 900" role="img" aria-label="Frostline Courier cover art">
+  <defs>
+    <linearGradient id="fc-cover-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#081524"/>
+      <stop offset="52%" stop-color="#14324a"/>
+      <stop offset="100%" stop-color="#123b58"/>
+    </linearGradient>
+  </defs>
+  <rect width="640" height="900" fill="url(#fc-cover-bg)"/>
+  <path d="M0 670 126 560l96 78 112-168 108 124 198-252v558H0z" fill="#d9f1ff" opacity="0.18"/>
+  <path d="M0 734 126 622l80 58 124-166 96 98 214-198v486H0z" fill="#dff8ff" opacity="0.32"/>
+  <path d="M126 560 246 404l82 84 132-176 60 68" fill="none" stroke="#ffffff" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="470" cy="290" r="46" fill="#ffd98d"/>
+  <circle cx="470" cy="290" r="20" fill="#ffffff" opacity="0.9"/>
+  <g fill="#e8fbff" opacity="0.8">
+    <circle cx="120" cy="218" r="4"/><circle cx="188" cy="176" r="3"/><circle cx="252" cy="240" r="4"/><circle cx="334" cy="168" r="3"/><circle cx="548" cy="152" r="4"/>
+  </g>
+  <text x="74" y="126" fill="#c5eeff" font-size="26" font-family="Segoe UI, Arial, sans-serif" font-weight="800" letter-spacing="4">WINTER ROUTE DRAMA</text>
+  <text x="74" y="744" fill="#bce7ff" font-size="82" font-family="Segoe UI, Arial, sans-serif" font-weight="900">FROSTLINE</text>
+  <text x="74" y="822" fill="#ffffff" font-size="82" font-family="Segoe UI, Arial, sans-serif" font-weight="900">COURIER</text>
+  <text x="74" y="866" fill="#e5f7ff" font-size="28" font-family="Segoe UI, Arial, sans-serif" font-weight="600">Carry heat, messages and nerve across a collapsing white horizon.</text>
+</svg>

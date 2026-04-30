@@ -1,19 +1,21 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 480" role="img" aria-label="Neon Circuit banner art">
   <defs>
-    <linearGradient id="banner" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#08101f" />
-      <stop offset="100%" stop-color="#1b2f6e" />
+    <linearGradient id="nc-banner-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#050916"/>
+      <stop offset="52%" stop-color="#0d1730"/>
+      <stop offset="100%" stop-color="#190a1c"/>
     </linearGradient>
   </defs>
-  <rect width="1280" height="480" fill="url(#banner)" />
-  <g stroke="#39ffc0" stroke-width="5" fill="none" opacity="0.4">
-    <path d="M0 86h300l100 100h360l130-130h390" />
-    <path d="M0 208h260l80 80h420l140-140h380" />
-    <path d="M0 328h320l70-70h360l120 120h410" />
-  </g>
-  <text x="84" y="206" fill="#39ffc0" font-size="92" font-family="Segoe UI, Arial" font-weight="700">NEON CIRCUIT</text>
-  <text x="88" y="270" fill="#f3f6ff" font-size="30" font-family="Segoe UI, Arial">Fast signal-routing arcade runs in a native desktop window.</text>
-  <circle cx="1050" cy="236" r="104" fill="#39ffc0" opacity="0.18" />
-  <rect x="1010" y="196" width="80" height="80" fill="#39ffc0" stroke="#ffffff" stroke-width="4" />
-  <circle cx="1126" cy="144" r="26" fill="#ff605b" />
+  <rect width="1280" height="480" fill="url(#nc-banner-bg)"/>
+  <path d="M0 96h1280M0 188h1280M0 280h1280M0 372h1280" stroke="#74f4ff" stroke-opacity="0.08" stroke-width="3"/>
+  <path d="M0 116h250l84 84h216l96-96h154l140 140h340" fill="none" stroke="#39ffc0" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M0 248h184l120-120h198l102 102h180l96-96h300" fill="none" stroke="#8ecbff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
+  <path d="M0 344h302l76-76h220l90 90h120" fill="none" stroke="#ff5c78" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" opacity="0.75"/>
+  <rect x="1020" y="166" width="116" height="116" rx="14" fill="#effcff"/>
+  <rect x="1055" y="201" width="46" height="46" rx="7" fill="#07111a"/>
+  <circle cx="1180" cy="144" r="24" fill="#ff5c78"/>
+  <circle cx="1148" cy="328" r="36" fill="#f6ff85"/>
+  <text x="78" y="146" fill="#77efff" font-size="26" font-family="Segoe UI, Arial, sans-serif" font-weight="800" letter-spacing="4">ARCADE SIGNAL RUN</text>
+  <text x="78" y="254" fill="#ffffff" font-size="96" font-family="Segoe UI, Arial, sans-serif" font-weight="900">NEON CIRCUIT</text>
+  <text x="78" y="316" fill="#d6e6f4" font-size="30" font-family="Segoe UI, Arial, sans-serif" font-weight="600">Route impossible currents before the board overloads.</text>
 </svg>

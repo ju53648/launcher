@@ -1,1 +1,26 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 900"><rect width="640" height="900" fill="#e2f4eb"/><rect x="86" y="126" width="468" height="648" rx="30" fill="#f3fbf7" stroke="#89d4b0" stroke-width="6"/><text x="320" y="296" text-anchor="middle" fill="#276c4b" font-size="72" font-family="Segoe UI, Arial" font-weight="700">GLASS</text><text x="320" y="376" text-anchor="middle" fill="#89d4b0" font-size="72" font-family="Segoe UI, Arial" font-weight="700">GARDEN</text><text x="320" y="520" text-anchor="middle" fill="#276c4b" font-size="28" font-family="Segoe UI, Arial">A soft memory puzzle inside a cracked greenhouse.</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 900" role="img" aria-label="Glass Garden cover art">
+  <defs>
+    <linearGradient id="gg-cover-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#d7f0e5"/>
+      <stop offset="55%" stop-color="#c4ead9"/>
+      <stop offset="100%" stop-color="#eff9f3"/>
+    </linearGradient>
+    <linearGradient id="gg-cover-panel" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f7fdf9" stop-opacity="0.92"/>
+      <stop offset="100%" stop-color="#def3e8" stop-opacity="0.82"/>
+    </linearGradient>
+  </defs>
+  <rect width="640" height="900" fill="url(#gg-cover-bg)"/>
+  <path d="M96 138h448l-36 516H132z" fill="url(#gg-cover-panel)" stroke="#85d0aa" stroke-width="6"/>
+  <path d="M320 138v516M96 316h448M148 232 320 138 492 232" fill="none" stroke="#85d0aa" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M176 640c20-88 72-148 156-180-20 56-12 126 12 180z" fill="#7cc8a0" opacity="0.85"/>
+  <path d="M346 664c-8-86 26-160 112-226 10 62 46 132 86 188z" fill="#4aa97d" opacity="0.78"/>
+  <path d="M128 514c96 10 170 18 224 26 70 10 126 30 170 58" fill="none" stroke="#ffffff" stroke-opacity="0.22" stroke-width="10" stroke-linecap="round"/>
+  <path d="M202 230 172 356M402 182 368 314M454 292 520 248" stroke="#ffffff" stroke-opacity="0.78" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="178" cy="704" r="18" fill="#f6fff9" opacity="0.85"/>
+  <circle cx="484" cy="198" r="28" fill="#f6fff9" opacity="0.8"/>
+  <text x="74" y="120" fill="#4ea27a" font-size="26" font-family="Segoe UI, Arial, sans-serif" font-weight="800" letter-spacing="4">LUMINOUS GREENHOUSE</text>
+  <text x="74" y="752" fill="#23694b" font-size="86" font-family="Segoe UI, Arial, sans-serif" font-weight="900">GLASS</text>
+  <text x="74" y="828" fill="#83cfaa" font-size="86" font-family="Segoe UI, Arial, sans-serif" font-weight="900">GARDEN</text>
+  <text x="74" y="870" fill="#376a53" font-size="24" font-family="Segoe UI, Arial, sans-serif" font-weight="600">A memory puzzle growing inside a fractured greenhouse shell.</text>
+</svg>

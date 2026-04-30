@@ -1,1 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128"><rect width="128" height="128" rx="28" fill="#16181f"/><rect x="24" y="28" width="80" height="72" rx="18" fill="#ffd64a"/><rect x="48" y="18" width="32" height="20" rx="10" fill="#74d778"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Pocket Heist icon">
+  <rect width="128" height="128" rx="28" fill="#161a20"/>
+  <rect x="24" y="28" width="80" height="72" rx="18" fill="#243746" stroke="#ffd64a" stroke-width="5"/>
+  <circle cx="64" cy="64" r="18" fill="#ffd64a"/>
+  <circle cx="64" cy="64" r="7" fill="#243746"/>
+  <path d="M28 32 100 96M100 32 28 96" stroke="#7ce9ff" stroke-width="4" stroke-linecap="round" opacity="0.8"/>
+  <rect x="46" y="18" width="36" height="18" rx="9" fill="#74d778"/>
+</svg>

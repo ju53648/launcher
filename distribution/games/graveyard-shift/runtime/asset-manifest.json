@@ -1,0 +1,33 @@
+{
+    "game":  "graveyard-shift",
+    "name":  "Graveyard Shift",
+    "description":  "Horror-AtmosphÃ¤re - Ambient-Sounds und Dark-Assets",
+    "generatedDate":  "2026-04-29 22:19:55",
+    "assetCount":  6,
+    "assets":  [
+                   {
+                       "file":  "ambient-soundscape.bin",
+                       "sizeBytes":  4194304
+                   },
+                   {
+                       "file":  "dark-textures.bin",
+                       "sizeBytes":  2097152
+                   },
+                   {
+                       "file":  "creature-models.bin",
+                       "sizeBytes":  2097152
+                   },
+                   {
+                       "file":  "horror-music.bin",
+                       "sizeBytes":  1572864
+                   },
+                   {
+                       "file":  "jump-scares.bin",
+                       "sizeBytes":  1048576
+                   },
+                   {
+                       "file":  "cemetery-layouts.bin",
+                       "sizeBytes":  786432
+                   }
+               ]
+}

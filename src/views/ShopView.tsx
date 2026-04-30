@@ -249,23 +249,23 @@ export function ShopView({ setRoute }: { setRoute: (route: AppRoute) => void }) 
             ))}
           </section>
 
-            {hasSparseCatalog && (
-              <section className="shop-sparse-state">
-                <p className="eyebrow">{t("shop.sparseState.eyebrow")}</p>
-                <h3>{t("shop.sparseState.title")}</h3>
-                <p>{t("shop.sparseState.body")}</p>
-                <div className="shop-sparse-state__actions">
-                  <button className="button button--secondary" onClick={() => setRoute("library")} type="button">
-                    {t("common.actions.viewLibrary")}
+          {hasSparseCatalog && (
+            <section className="shop-sparse-state">
+              <p className="eyebrow">{t("shop.sparseState.eyebrow")}</p>
+              <h3>{t("shop.sparseState.title")}</h3>
+              <p>{t("shop.sparseState.body")}</p>
+              <div className="shop-sparse-state__actions">
+                <button className="button button--secondary" onClick={() => setRoute("library")} type="button">
+                  {t("common.actions.viewLibrary")}
+                </button>
+                {featuredItem && (
+                  <button className="button button--ghost" onClick={() => setRoute(`item:${featuredItem.catalog.id}`)} type="button">
+                    {t("common.actions.details")}
                   </button>
-                  {featuredItem && (
-                    <button className="button button--ghost" onClick={() => setRoute(`item:${featuredItem.catalog.id}`)} type="button">
-                      {t("common.actions.details")}
-                    </button>
-                  )}
-                </div>
-              </section>
-            )}
+                )}
+              </div>
+            </section>
+          )}
         </>
       )}
     </div>
@@ -344,83 +344,83 @@ function relevanceScore(item: ContentView, search: string, t: ReturnType<typeof 
   return score;
 }
 
-  function FeaturedShopCard({
-    item,
-    busy,
-    onOpen,
-    onInstall,
-    onPlay
-  }: {
-    item: ContentView;
-    busy: boolean;
-    onOpen: () => void;
-    onInstall: () => Promise<void>;
-    onPlay: () => Promise<void>;
-  }) {
-    const { t } = useI18n();
-    const gameStatus = getGameStatus(item);
-    const isInstalled = gameStatus === "installed" || gameStatus === "updateAvailable";
-    const actionBusy = busy;
-    const bannerImageSrc = resolveCatalogImageSrc(
-      item.catalog.bannerImage,
-      item.manifest?.version ?? item.catalog.releaseDate
-    );
-    const coverImageSrc = resolveCatalogImageSrc(
-      item.catalog.coverImage,
-      item.manifest?.version ?? item.catalog.releaseDate
-    );
+function FeaturedShopCard({
+  item,
+  busy,
+  onOpen,
+  onInstall,
+  onPlay
+}: {
+  item: ContentView;
+  busy: boolean;
+  onOpen: () => void;
+  onInstall: () => Promise<void>;
+  onPlay: () => Promise<void>;
+}) {
+  const { t } = useI18n();
+  const gameStatus = getGameStatus(item);
+  const isInstalled = gameStatus === "installed" || gameStatus === "updateAvailable";
+  const actionBusy = busy;
+  const bannerImageSrc = resolveCatalogImageSrc(
+    item.catalog.bannerImage,
+    item.manifest?.version ?? item.catalog.releaseDate
+  );
+  const coverImageSrc = resolveCatalogImageSrc(
+    item.catalog.coverImage,
+    item.manifest?.version ?? item.catalog.releaseDate
+  );
 
-    return (
-      <section className="shop-featured">
-        <div className="shop-featured__media" aria-hidden>
-          {bannerImageSrc ? (
-            <img src={bannerImageSrc} alt="" />
-          ) : coverImageSrc ? (
-            <img src={coverImageSrc} alt="" />
-          ) : (
-            <div className="media-placeholder media-placeholder--hero" />
-          )}
+  return (
+    <section className="shop-featured">
+      <div className="shop-featured__media" aria-hidden>
+        {bannerImageSrc ? (
+          <img src={bannerImageSrc} alt="" />
+        ) : coverImageSrc ? (
+          <img src={coverImageSrc} alt="" />
+        ) : (
+          <div className="media-placeholder media-placeholder--hero" />
+        )}
+      </div>
+      <div className="shop-featured__content">
+        <p className="eyebrow">{t("shop.featured.eyebrow")}</p>
+        <h2>{item.catalog.name}</h2>
+        <p>{item.catalog.description}</p>
+        <div className="shop-featured__meta">
+          <StatusBadge status={gameStatus} type="game" />
+          <span>{item.catalog.developer}</span>
         </div>
-        <div className="shop-featured__content">
-          <p className="eyebrow">{t("shop.featured.eyebrow")}</p>
-          <h2>{item.catalog.name}</h2>
-          <p>{item.catalog.description}</p>
-          <div className="shop-featured__meta">
-            <StatusBadge status={gameStatus} type="game" />
-            <span>{item.catalog.developer}</span>
-          </div>
-          <div className="shop-featured__actions">
-            {isInstalled ? (
-              <button
-                className={`button ${item.isRunning ? "button--danger" : "button--primary"}`}
-                disabled={actionBusy}
-                onClick={() => void onPlay()}
-                type="button"
-              >
-                {item.isRunning ? (
-                  t("common.actions.closeGame")
-                ) : (
-                  <>
-                    <Play size={16} />
-                    {t("common.actions.launch")}
-                  </>
-                )}
-              </button>
-            ) : (
-              <button className="button button--primary" disabled={actionBusy} onClick={() => void onInstall()} type="button">
-                <Download size={16} />
-                {t("common.actions.install")}
-              </button>
-            )}
-            <button className="button button--ghost" onClick={onOpen} type="button">
-              {t("common.actions.details")}
-              <ArrowRight size={16} />
+        <div className="shop-featured__actions">
+          {isInstalled ? (
+            <button
+              className={`button ${item.isRunning ? "button--danger" : "button--primary"}`}
+              disabled={actionBusy}
+              onClick={() => void onPlay()}
+              type="button"
+            >
+              {item.isRunning ? (
+                t("common.actions.closeGame")
+              ) : (
+                <>
+                  <Play size={16} />
+                  {t("common.actions.launch")}
+                </>
+              )}
             </button>
-          </div>
+          ) : (
+            <button className="button button--primary" disabled={actionBusy} onClick={() => void onInstall()} type="button">
+              <Download size={16} />
+              {t("common.actions.install")}
+            </button>
+          )}
+          <button className="button button--ghost" onClick={onOpen} type="button">
+            {t("common.actions.details")}
+            <ArrowRight size={16} />
+          </button>
         </div>
-      </section>
-    );
-  }
+      </div>
+    </section>
+  );
+}
 
 function ShopCard({
   item,

@@ -3,7 +3,7 @@
     "catalogManifestUrl":  "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/manifests/games/graveyard-shift.json",
     "archivePath":  "distribution/games/graveyard-shift/release/graveyard-shift-win64.zip",
     "archiveUrl":  "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/games/graveyard-shift/release/graveyard-shift-win64.zip",
-    "installSizePath":  "distribution/games/graveyard-shift/runtime/content.pack",
+    "installSizePath":  "distribution/games/graveyard-shift/runtime",
     "version":  "0.1.0",
     "releaseDate":  "2026-04-29",
     "description":  "A tiny horror-clicker where you keep a cemetery lantern line alive while things keep crawling back out.",

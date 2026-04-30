@@ -69,6 +69,11 @@ if ($config.installSizePath) {
     $installSizePath = Join-Path $repoRoot $config.installSizePath
     if (Test-Path -LiteralPath $installSizePath -PathType Leaf) {
         $manifest.installSizeBytes = (Get-Item -LiteralPath $installSizePath).Length
+    } elseif (Test-Path -LiteralPath $installSizePath -PathType Container) {
+        $manifest.installSizeBytes = (
+            Get-ChildItem -LiteralPath $installSizePath -File -Recurse |
+            Measure-Object -Property Length -Sum
+        ).Sum
     }
 }
 

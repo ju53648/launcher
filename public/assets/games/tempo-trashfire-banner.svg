@@ -1,1 +1,14 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 480"><rect width="1280" height="480" fill="#120d1d"/><rect x="58" y="56" width="1164" height="368" rx="34" fill="#221c34" stroke="#56ffd0" stroke-width="6"/><text x="96" y="214" fill="#ff528a" font-size="88" font-family="Segoe UI, Arial" font-weight="700">TEMPO TRASHFIRE</text><text x="96" y="278" fill="#ffffff" font-size="30" font-family="Segoe UI, Arial">Four lanes. Loud mistakes. Tiny rhythm disaster.</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 480" role="img" aria-label="Tempo Trashfire banner art">
+  <rect width="1280" height="480" fill="#1d0b18"/>
+  <circle cx="998" cy="212" r="104" fill="#ffb347" opacity="0.92"/>
+  <circle cx="1126" cy="240" r="90" fill="#58d3ff" opacity="0.84"/>
+  <circle cx="1062" cy="286" r="74" fill="#ff6f9c" opacity="0.72"/>
+  <g stroke="#ffffff" stroke-opacity="0.18" stroke-width="6" fill="none">
+    <path d="M760 128c54 0 54 48 108 48s54-48 108-48 54 48 108 48 54-48 108-48"/>
+    <path d="M760 208c54 0 54 48 108 48s54-48 108-48 54 48 108 48 54-48 108-48"/>
+    <path d="M760 288c54 0 54 48 108 48s54-48 108-48 54 48 108 48 54-48 108-48"/>
+  </g>
+  <text x="76" y="146" fill="#ffd7a8" font-size="26" font-family="Segoe UI, Arial, sans-serif" font-weight="800" letter-spacing="4">RHYTHM PANIC SET</text>
+  <text x="76" y="250" fill="#ff6f9c" font-size="96" font-family="Segoe UI, Arial, sans-serif" font-weight="900">TEMPO TRASHFIRE</text>
+  <text x="76" y="312" fill="#f1dce7" font-size="30" font-family="Segoe UI, Arial, sans-serif" font-weight="600">Keep the crowd alive while the entire set list tries to implode.</text>
+</svg>

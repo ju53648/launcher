@@ -1,1 +1,35 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 900"><rect width="640" height="900" fill="#11161f"/><circle cx="510" cy="150" r="80" fill="#f8d572" opacity="0.8"/><rect x="80" y="120" width="480" height="660" rx="28" fill="#1d2633" stroke="#ccff92" stroke-width="6"/><text x="320" y="290" text-anchor="middle" fill="#ccff92" font-size="72" font-family="Segoe UI, Arial" font-weight="700">GRAVEYARD</text><text x="320" y="370" text-anchor="middle" fill="#ffffff" font-size="72" font-family="Segoe UI, Arial" font-weight="700">SHIFT</text><text x="320" y="520" text-anchor="middle" fill="#ffd7a0" font-size="28" font-family="Segoe UI, Arial">Click fast. Keep the lanterns alive.</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 900" role="img" aria-label="Graveyard Shift cover art">
+  <defs>
+    <linearGradient id="gs-cover-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0d1014"/>
+      <stop offset="60%" stop-color="#1a2027"/>
+      <stop offset="100%" stop-color="#090c11"/>
+    </linearGradient>
+    <radialGradient id="gs-cover-moon" cx="76%" cy="24%" r="28%">
+      <stop offset="0%" stop-color="#ffe49b"/>
+      <stop offset="70%" stop-color="#f6d67f" stop-opacity="0.88"/>
+      <stop offset="100%" stop-color="#f6d67f" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="640" height="900" fill="url(#gs-cover-bg)"/>
+  <rect width="640" height="900" fill="url(#gs-cover-moon)"/>
+  <circle cx="486" cy="210" r="82" fill="#f2d889" opacity="0.9"/>
+  <path d="M0 596c116-68 208-82 320-62s196 10 320-30v396H0z" fill="#11181d"/>
+  <path d="M0 676c134-50 220-58 320-44s198 6 320-18v286H0z" fill="#0b1014"/>
+  <path d="M0 560c132-70 230-86 330-70 80 12 176 14 310-18" fill="none" stroke="#202830" stroke-width="42" opacity="0.55"/>
+  <g fill="#c3f08a">
+    <rect x="112" y="570" width="18" height="126" rx="6"/>
+    <rect x="234" y="534" width="20" height="160" rx="6"/>
+    <rect x="372" y="552" width="18" height="148" rx="6"/>
+    <rect x="500" y="522" width="22" height="180" rx="6"/>
+  </g>
+  <path d="M122 602h112M238 574h136M382 598h132" stroke="#c3f08a" stroke-width="10" stroke-linecap="round" opacity="0.9"/>
+  <path d="M332 474c22-18 50-26 82-24-18 18-26 44-26 74-18-18-38-34-56-50z" fill="#dae8d2" opacity="0.35"/>
+  <g opacity="0.24" fill="#dff3c8">
+    <circle cx="132" cy="204" r="2"/><circle cx="204" cy="156" r="2"/><circle cx="286" cy="190" r="2"/><circle cx="342" cy="118" r="2"/><circle cx="564" cy="112" r="2"/>
+  </g>
+  <text x="74" y="124" fill="#d6fca2" font-size="26" font-family="Segoe UI, Arial, sans-serif" font-weight="800" letter-spacing="4">LATE SHIFT SURVIVAL</text>
+  <text x="74" y="742" fill="#d6fca2" font-size="80" font-family="Segoe UI, Arial, sans-serif" font-weight="900">GRAVEYARD</text>
+  <text x="74" y="818" fill="#ffffff" font-size="80" font-family="Segoe UI, Arial, sans-serif" font-weight="900">SHIFT</text>
+  <text x="74" y="862" fill="#d9e5d7" font-size="24" font-family="Segoe UI, Arial, sans-serif" font-weight="600">Keep the cemetery gate sealed until first light cuts through.</text>
+</svg>

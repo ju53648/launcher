@@ -17,7 +17,7 @@
   "bannerImage": "/assets/games/word-reactor-banner.svg",
   "iconImage": "/assets/games/word-reactor-icon.svg",
   "executable": "Launch-WordReactor.ps1",
-  "installSizeBytes": 11534336,
+  "installSizeBytes": 11803448,
   "defaultInstallFolder": "Word Reactor",
   "supportedActions": ["install", "launch", "repair", "uninstall", "openFolder"],
   "installStrategy": {

@@ -17,7 +17,7 @@
   "bannerImage": "/assets/games/frostline-courier-banner.svg",
   "iconImage": "/assets/games/frostline-courier-icon.svg",
   "executable": "Launch-FrostlineCourier.ps1",
-  "installSizeBytes": 11534336,
+  "installSizeBytes": 11803019,
   "defaultInstallFolder": "Frostline Courier",
   "supportedActions": ["install", "launch", "repair", "uninstall", "openFolder"],
   "installStrategy": {

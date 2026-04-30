@@ -1,1 +1,18 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 480"><rect width="1280" height="480" fill="#e2f4eb"/><rect x="58" y="56" width="1164" height="368" rx="34" fill="#f3fbf7" stroke="#89d4b0" stroke-width="6"/><text x="96" y="214" fill="#276c4b" font-size="88" font-family="Segoe UI, Arial" font-weight="700">GLASS GARDEN</text><text x="96" y="278" fill="#276c4b" font-size="30" font-family="Segoe UI, Arial">Tiny cozy memory puzzle with greenhouse vibes.</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 480" role="img" aria-label="Glass Garden banner art">
+  <defs>
+    <linearGradient id="gg-banner-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#d8efe5"/>
+      <stop offset="55%" stop-color="#c6ead9"/>
+      <stop offset="100%" stop-color="#eff9f3"/>
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="480" fill="url(#gg-banner-bg)"/>
+  <path d="M812 76h360l-28 250H840z" fill="#f7fdf9" fill-opacity="0.86" stroke="#85d0aa" stroke-width="6"/>
+  <path d="M992 76v250M812 172h360M880 124 992 76 1104 124" fill="none" stroke="#85d0aa" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M882 312c18-72 62-120 134-146-16 48-10 98 10 146z" fill="#7cc8a0" opacity="0.9"/>
+  <path d="M1028 330c-8-68 18-122 84-174 10 52 34 100 60 142z" fill="#4aa97d" opacity="0.82"/>
+  <path d="M854 134 834 246M1046 104 1016 210M1092 210 1160 170" stroke="#ffffff" stroke-opacity="0.84" stroke-width="5" stroke-linecap="round"/>
+  <text x="76" y="146" fill="#509f78" font-size="26" font-family="Segoe UI, Arial, sans-serif" font-weight="800" letter-spacing="4">LUMINOUS GREENHOUSE</text>
+  <text x="76" y="248" fill="#246a4c" font-size="96" font-family="Segoe UI, Arial, sans-serif" font-weight="900">GLASS GARDEN</text>
+  <text x="76" y="312" fill="#3a7057" font-size="30" font-family="Segoe UI, Arial, sans-serif" font-weight="600">Grow memory and light inside a cracked botanical chamber.</text>
+</svg>

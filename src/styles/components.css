@@ -245,7 +245,7 @@
 .modal__actions {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-3);
+  gap: var(--space-4);
 }
 
 .privacy-points {
@@ -281,7 +281,7 @@
 
 .sidebar__nav {
   display: grid;
-  gap: var(--space-1);
+  gap: var(--space-2);
 }
 
 .nav-item {
@@ -351,7 +351,7 @@
 .shell-main {
   min-width: 0;
   overflow: auto;
-  padding: var(--space-8);
+  padding: var(--space-6) var(--space-8);
   scrollbar-width: thin;
   scrollbar-color: var(--color-line) transparent;
 }
@@ -375,9 +375,15 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--space-5);
-  margin-bottom: var(--space-8);
-  padding-bottom: var(--space-6);
+  margin-bottom: var(--space-6);
+  padding-bottom: var(--space-4);
   border-bottom: 1px solid var(--color-line);
+}
+
+.topbar > div:first-child,
+.section-toolbar > div:first-child {
+  display: grid;
+  gap: var(--space-2);
 }
 
 .topbar__meta {
@@ -394,7 +400,7 @@
 
 .view-stack {
   display: grid;
-  gap: var(--space-6);
+  gap: var(--space-8);
   animation: fade-up 280ms ease both;
 }
 
@@ -491,7 +497,11 @@
 .dashboard-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: var(--space-4);
+  gap: var(--space-5);
+}
+
+.downloads-summary {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .metric-panel,
@@ -509,13 +519,13 @@
   border: 1px solid var(--color-line);
   border-radius: var(--radius-md);
   background: rgba(17, 20, 22, 0.90);
-  padding: var(--space-5);
+  padding: var(--space-6);
 }
 
 .home-dashboard {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(260px, 360px);
-  gap: var(--space-5);
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 380px);
+  gap: var(--space-6);
   align-items: stretch;
   background:
     linear-gradient(135deg, rgba(0, 223, 160, 0.08), transparent 46%),
@@ -532,7 +542,7 @@
 
 .home-dashboard__copy h2 {
   max-width: 14ch;
-  font-size: 38px;
+  font-size: 32px;
 }
 
 .home-dashboard__copy p,
@@ -561,7 +571,7 @@
 }
 
 .home-dashboard__update strong {
-  font-size: 24px;
+  font-size: 20px;
 }
 
 .home-dashboard__actions {
@@ -572,7 +582,7 @@
 
 .metric-panel {
   display: grid;
-  gap: var(--space-2);
+  gap: var(--space-3);
   transition: border-color var(--transition-smooth), box-shadow var(--transition-smooth);
   cursor: default;
 }
@@ -601,7 +611,7 @@
 
 .queue-strip {
   display: grid;
-  grid-template-columns: minmax(180px, 260px) 1fr;
+  grid-template-columns: minmax(180px, 300px) 1fr;
   gap: var(--space-4);
   align-items: center;
 }
@@ -642,12 +652,21 @@
 .home-columns {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-5);
+  gap: var(--space-6);
 }
 
 .activity-panel .section-toolbar {
   margin-bottom: 0;
   padding-bottom: var(--space-4);
+}
+
+.recommendations-panel {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.recommendations-panel .section-toolbar {
+  margin-bottom: 0;
 }
 
 .activity-list {
@@ -825,15 +844,20 @@
   background:
     linear-gradient(135deg, rgba(0, 223, 160, 0.08), transparent 44%),
     rgba(17, 20, 22, 0.92);
-  padding: var(--space-5);
+  padding: var(--space-6);
   display: grid;
-  gap: var(--space-5);
+  gap: var(--space-6);
 }
 
 .library-toolbar__intro {
   display: flex;
   justify-content: space-between;
   gap: var(--space-5);
+}
+
+.library-toolbar__intro > div:first-child {
+  display: grid;
+  gap: var(--space-1);
 }
 
 .library-toolbar__intro p:last-child {
@@ -856,11 +880,11 @@
   background: rgba(7, 11, 13, 0.6);
   padding: var(--space-4);
   display: grid;
-  gap: 2px;
+  gap: var(--space-1);
 }
 
 .library-toolbar__stats strong {
-  font-size: 24px;
+  font-size: 20px;
 }
 
 .library-toolbar__stats span,
@@ -898,7 +922,7 @@
 
 .library-toolbar__grid {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   gap: var(--space-3);
 }
 
@@ -941,7 +965,8 @@
 
 .shop-filters {
   display: grid;
-  gap: var(--space-4);
+  gap: var(--space-5);
+  padding: var(--space-6);
   background:
     linear-gradient(135deg, rgba(0, 223, 160, 0.05), transparent 40%),
     rgba(17, 20, 22, 0.92);
@@ -949,7 +974,7 @@
 
 .shop-controls-grid {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   gap: var(--space-3);
 }
 
@@ -1011,6 +1036,7 @@
   color: var(--color-subtle);
   font-size: 12px;
   text-transform: uppercase;
+  letter-spacing: 0.06em;
 }
 
 .recommendation-grid {
@@ -1098,7 +1124,7 @@
 }
 
 .shop-intro__stat strong {
-  font-size: 28px;
+  font-size: 22px;
 }
 
 .shop-intro__stat span {
@@ -1147,10 +1173,10 @@
 .shop-featured__content {
   position: relative;
   z-index: 1;
-  padding: var(--space-6);
+  padding: var(--space-8);
   display: grid;
   align-content: center;
-  gap: var(--space-3);
+  gap: var(--space-4);
 }
 
 .shop-featured__content h2 {
@@ -1195,7 +1221,7 @@
     linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 46%),
     #101316;
   display: grid;
-  grid-template-rows: 210px minmax(300px, 1fr);
+  grid-template-rows: 210px 1fr;
   box-shadow: var(--shadow-card);
   transition: border-color var(--transition-smooth), box-shadow var(--transition-smooth), transform var(--transition-smooth);
 }
@@ -1228,8 +1254,8 @@
 .shop-card__body {
   min-width: 0;
   display: grid;
-  gap: var(--space-4);
-  padding: var(--space-5);
+  gap: var(--space-5);
+  padding: var(--space-6);
 }
 
 .shop-card__heading {
@@ -1299,7 +1325,6 @@
 
 .section-toolbar--compact {
   margin-bottom: 0;
-  padding-bottom: var(--space-4);
 }
 
 .game-card {
@@ -1345,8 +1370,8 @@
 .game-card__body {
   min-width: 0;
   display: grid;
-  gap: var(--space-4);
-  padding: var(--space-5);
+  gap: var(--space-5);
+  padding: var(--space-6);
 }
 
 .game-card__title-row {
@@ -1371,6 +1396,10 @@
 
 .game-card__description {
   min-height: 66px;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .game-card__facts {
@@ -1379,9 +1408,11 @@
   gap: var(--space-3);
 }
 
-.game-card__tags,
-.game-card__meta,
-.game-card__actions {
+.game-card__facts > :last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+}
+
+.game-card__tags {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-3);
@@ -1402,7 +1433,7 @@
   background: rgba(255, 255, 255, 0.02);
   padding: var(--space-3);
   display: grid;
-  gap: 2px;
+  gap: var(--space-1);
 }
 
 .game-card__meta strong {
@@ -1520,16 +1551,17 @@
 }
 
 .detail-hero__content {
-  max-width: 100%;
+  max-width: none;
+  width: 100%;
   min-height: 310px;
   display: flex;
-  align-items: end;
+  align-items: flex-end;
   justify-content: space-between;
 }
 
 .detail-hero__title {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--space-4);
 }
 
@@ -1537,9 +1569,20 @@
   margin-bottom: var(--space-3);
 }
 
+.detail-hero__title > div:not(.item-thumb) {
+  display: grid;
+  gap: var(--space-2);
+  align-content: start;
+}
+
+.detail-hero__title .detail-back {
+  margin-bottom: 0;
+}
+
 .detail-hero__tagline {
   max-width: 64ch;
   color: var(--color-muted);
+  margin-bottom: var(--space-3);
 }
 
 .detail-hero__badges {
@@ -1558,8 +1601,8 @@
 
 .detail-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.5fr) minmax(300px, 0.8fr);
-  gap: var(--space-5);
+  grid-template-columns: minmax(0, 2fr) minmax(260px, 1fr);
+  gap: var(--space-6);
 }
 
 .detail-panel {
@@ -1595,11 +1638,13 @@
 .spec-list dt {
   color: var(--color-subtle);
   font-size: 12px;
+  font-weight: 600;
   text-transform: uppercase;
+  letter-spacing: 0.06em;
 }
 
 .spec-list dd {
-  margin: 3px 0 0;
+  margin: var(--space-1) 0 0;
   overflow-wrap: anywhere;
 }
 
@@ -1672,13 +1717,14 @@
   background: rgba(12, 14, 16, 0.66);
   padding: var(--space-3);
   display: grid;
-  gap: 2px;
+  gap: var(--space-1);
 }
 
 .game-refresh-summary dt {
   color: var(--color-subtle);
   font-size: 12px;
   text-transform: uppercase;
+  letter-spacing: 0.06em;
 }
 
 .game-refresh-summary dd {
@@ -1697,7 +1743,7 @@
   border-top: 1px solid var(--color-line);
   padding-top: var(--space-4);
   display: grid;
-  gap: var(--space-2);
+  gap: var(--space-3);
 }
 
 .changelog-entry span,
@@ -1711,6 +1757,15 @@
 .socials-layout {
   display: grid;
   gap: var(--space-5);
+}
+
+.settings-layout,
+.about-layout {
+  gap: var(--space-8);
+}
+
+.socials-layout {
+  gap: var(--space-6);
 }
 
 .downloads-section {
@@ -2029,7 +2084,7 @@
   position: relative;
   overflow: hidden;
   display: flex;
-  align-items: end;
+  align-items: flex-end;
   padding: var(--space-6);
 }
 

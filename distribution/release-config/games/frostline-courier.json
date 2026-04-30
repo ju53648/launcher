@@ -3,7 +3,7 @@
     "catalogManifestUrl":  "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/manifests/games/frostline-courier.json",
     "archivePath":  "distribution/games/frostline-courier/release/frostline-courier-win64.zip",
     "archiveUrl":  "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/games/frostline-courier/release/frostline-courier-win64.zip",
-    "installSizePath":  "distribution/games/frostline-courier/runtime/content.pack",
+    "installSizePath":  "distribution/games/frostline-courier/runtime",
     "version":  "0.1.0",
     "releaseDate":  "2026-04-29",
     "description":  "A compact route-planning game about moving scarce cargo across frozen stations before the weather eats your margin.",

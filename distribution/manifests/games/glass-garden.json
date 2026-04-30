@@ -33,7 +33,7 @@
     "bannerImage":  "/assets/games/glass-garden-banner.svg",
     "iconImage":  "/assets/games/glass-garden-icon.svg",
     "executable":  "Launch-GlassGarden.ps1",
-    "installSizeBytes":  11534336,
+    "installSizeBytes":  11802157,
     "defaultInstallFolder":  "Glass Garden",
     "supportedActions":  [
                              "install",
@@ -50,8 +50,8 @@
     "download":  {
                      "kind":  "httpArchive",
                      "url":  "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/games/glass-garden/release/glass-garden-win64.zip",
-                     "sha256":  "294692599599de92112a016a6ec20687e0aef3f5bcb1c1a5db76ee45e6b9dc7d",
-                     "sizeBytes":  12746
+                     "sha256":  "d8b9c9d0a0421ab6d4bd3301707ee79a11646308c6ac1b71f3d1513f0906643e",
+                     "sizeBytes":  11802717
                  },
     "changelog":  [
                       {

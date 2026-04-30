@@ -1,0 +1,37 @@
+{
+    "game":  "frostline-courier",
+    "name":  "Frostline Courier",
+    "description":  "Adventure - Winter-Umgebungen",
+    "generatedDate":  "2026-04-29 22:19:54",
+    "assetCount":  7,
+    "assets":  [
+                   {
+                       "file":  "ambient-music.bin",
+                       "sizeBytes":  2097152
+                   },
+                   {
+                       "file":  "environment-sounds.bin",
+                       "sizeBytes":  1572864
+                   },
+                   {
+                       "file":  "terrain-textures.bin",
+                       "sizeBytes":  2097152
+                   },
+                   {
+                       "file":  "journey-routes.bin",
+                       "sizeBytes":  2097152
+                   },
+                   {
+                       "file":  "character-animations.bin",
+                       "sizeBytes":  1572864
+                   },
+                   {
+                       "file":  "visual-effects.bin",
+                       "sizeBytes":  1048576
+                   },
+                   {
+                       "file":  "weather-cycles.bin",
+                       "sizeBytes":  1310720
+                   }
+               ]
+}
