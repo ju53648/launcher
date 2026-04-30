@@ -4,10 +4,10 @@ function Initialize-SaveState {
             $saveData = Get-Content $script:savePath -Raw | ConvertFrom-Json
             $script:bestScore = [int]$saveData.bestScore
             $script:bestSeason = [int]$saveData.bestSeason
-            $bestLabel.Text = "Best bloom: $($script:bestScore) score / season $($script:bestSeason)"
+            $bestLabel.Text = "Best house: $($script:bestScore) score / season $($script:bestSeason)"
         }
         catch {
-            $bestLabel.Text = 'Best bloom: save unreadable'
+            $bestLabel.Text = 'Best house: save unreadable'
         }
     }
 }
@@ -20,7 +20,7 @@ function Save-Progress {
         $script:bestSeason = $script:season
     }
 
-    $bestLabel.Text = "Best bloom: $($script:bestScore) score / season $($script:bestSeason)"
+    $bestLabel.Text = "Best house: $($script:bestScore) score / season $($script:bestSeason)"
     $payload = @{
         bestScore = $script:bestScore
         bestSeason = $script:bestSeason

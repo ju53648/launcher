@@ -8,9 +8,8 @@ use chrono::Utc;
 use serde::Deserialize;
 
 use crate::{
-    manifest::validate_manifest,
+    manifest::{missing_required_install_paths, validate_manifest},
     models::{ContentManifest, InstalledStatus, ManifestSourceType},
-    paths::safe_join,
     storage::{CommandError, LauncherRuntime, Result},
 };
 
@@ -78,18 +77,24 @@ pub fn verify_installed_game_health(runtime: &LauncherRuntime) -> Result<usize> 
         };
 
         let install_path = PathBuf::from(&installed.install_path);
-        let executable_path = safe_join(&install_path, &manifest.executable)?;
-        let executable_exists = executable_path.exists();
         let install_exists = install_path.exists();
+        let missing_paths = if install_exists {
+            missing_required_install_paths(manifest, &install_path)?
+        } else {
+            vec![manifest.executable.clone()]
+        };
 
-        let next_status = if executable_exists && install_exists {
+        let next_status = if install_exists && missing_paths.is_empty() {
             InstalledStatus::Installed
         } else {
             InstalledStatus::Broken
         };
 
         let next_error = if matches!(next_status, InstalledStatus::Broken) {
-            Some("Executable or install folder is missing".to_string())
+            Some(format!(
+                "Installed item is missing required files: {}",
+                missing_paths.join(", ")
+            ))
         } else {
             None
         };

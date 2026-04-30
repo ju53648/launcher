@@ -1,42 +1,67 @@
 {
-  "id": "com.lumorix.word-reactor",
-  "itemType": "game",
-  "name": "Word Reactor",
-  "version": "0.1.0",
-  "description": "A typing sprint where you stabilize a failing reactor by entering volatile command words under pressure.",
-  "developer": "Lumorix",
-  "releaseDate": "2026-04-29",
-  "categories": ["Typing", "Arcade", "Offline"],
-  "tags": [
-    { "id": "typing", "weight": 3 },
-    { "id": "arcade", "weight": 2 },
-    { "id": "fast-paced", "weight": 2 },
-    { "id": "offline", "weight": 2 }
-  ],
-  "coverImage": "/assets/games/word-reactor-cover.svg",
-  "bannerImage": "/assets/games/word-reactor-banner.svg",
-  "iconImage": "/assets/games/word-reactor-icon.svg",
-  "executable": "Launch-WordReactor.ps1",
-  "installSizeBytes": 11803448,
-  "defaultInstallFolder": "Word Reactor",
-  "supportedActions": ["install", "launch", "repair", "uninstall", "openFolder"],
-  "installStrategy": {
-    "kind": "directFolder",
-    "sourcePath": "C:\\Users\\julia\\Desktop\\Lumorix Launcher\\distribution\\games\\word-reactor\\runtime"
-  },
-  "download": {
-    "kind": "localSynthetic",
-    "integrity": "embedded-word-reactor-0.1.0"
-  },
-  "changelog": [
-    {
-      "version": "0.1.0",
-      "date": "2026-04-29",
-      "items": [
-        "Added a rapid-fire typing prototype with streak and pressure scoring.",
-        "Runs as a native PowerShell Windows Forms desktop window.",
-        "Ships with a local content pack above 10 MB to satisfy the current size floor."
-      ]
-    }
-  ]
+    "id":  "com.lumorix.word-reactor",
+    "itemType":  "game",
+    "name":  "Word Reactor",
+    "version":  "0.1.0",
+    "description":  "A replayable typing-arcade containment game where volatile command words keep a failing reactor just below meltdown.",
+    "developer":  "Faultline Typing Club",
+    "releaseDate":  "2026-04-29",
+    "categories":  [
+                       "Typing",
+                       "Arcade",
+                       "Offline"
+                   ],
+    "tags":  [
+                 {
+                     "id":  "typing",
+                     "weight":  3
+                 },
+                 {
+                     "id":  "arcade",
+                     "weight":  2
+                 },
+                 {
+                     "id":  "fast-paced",
+                     "weight":  2
+                 },
+                 {
+                     "id":  "offline",
+                     "weight":  2
+                 }
+             ],
+    "coverImage":  "/assets/games/word-reactor-cover.svg",
+    "bannerImage":  "/assets/games/word-reactor-banner.svg",
+    "iconImage":  "/assets/games/word-reactor-icon.svg",
+    "executable":  "WordReactor.exe",
+    "installSizeBytes":  11839848,
+    "defaultInstallFolder":  "Word Reactor",
+    "supportedActions":  [
+                             "install",
+                             "launch",
+                             "repair",
+                             "uninstall",
+                             "openFolder"
+                         ],
+    "installStrategy":  {
+                            "kind":  "directFolder",
+                            "sourcePath":  "C:\\Users\\julia\\Desktop\\Lumorix Launcher\\distribution\\games\\word-reactor\\runtime"
+                        },
+    "download":  {
+                     "kind":  "localSynthetic",
+                     "integrity":  "embedded-word-reactor-0.1.0"
+                 },
+    "changelog":  [
+                      {
+                          "version":  "0.1.0",
+                          "date":  "2026-04-29",
+                          "items":  [
+                                        "Expanded a rapid-fire typing prototype with streak and pressure scoring.",
+                                        "Now presented as a native Windows desktop executable with a branded Lumorix Arcade release shell.",
+                                        "Positioned as a replayable standalone release from its own studio identity inside the launcher catalog."
+                                    ]
+                      }
+                  ],
+    "requiredPaths":  [
+                          "modules"
+                      ]
 }

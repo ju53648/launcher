@@ -8,7 +8,7 @@ function New-GraveyardShiftUi {
     $form.MaximizeBox = $false
 
     $title = New-Object System.Windows.Forms.Label
-    $title.Text = 'GRAVEYARD SHIFT'
+    $title.Text = 'GRAVEYARD SHIFT // LANTERN WATCH'
     $title.ForeColor = [System.Drawing.Color]::FromArgb(204, 255, 146)
     $title.Font = New-Object System.Drawing.Font('Consolas', 20, [System.Drawing.FontStyle]::Bold)
     $title.AutoSize = $true
@@ -19,6 +19,7 @@ function New-GraveyardShiftUi {
     $yard.Location = New-Object System.Drawing.Point(22, 58)
     $yard.Size = New-Object System.Drawing.Size(700, 530)
     $yard.BackColor = [System.Drawing.Color]::FromArgb(24, 33, 42)
+    $yard.BorderStyle = 'FixedSingle'
     $form.Controls.Add($yard)
 
     $hud = New-Object System.Windows.Forms.Label
@@ -29,26 +30,60 @@ function New-GraveyardShiftUi {
     $hud.Location = New-Object System.Drawing.Point(748, 78)
     $form.Controls.Add($hud)
 
+    $comboLabel = New-Object System.Windows.Forms.Label
+    $comboLabel.Text = 'Combo: x1'
+    $comboLabel.ForeColor = [System.Drawing.Color]::FromArgb(156, 225, 255)
+    $comboLabel.Font = New-Object System.Drawing.Font('Segoe UI', 10, [System.Drawing.FontStyle]::Bold)
+    $comboLabel.AutoSize = $true
+    $comboLabel.Location = New-Object System.Drawing.Point(748, 110)
+    $form.Controls.Add($comboLabel)
+
+    $bestLabel = New-Object System.Windows.Forms.Label
+    $bestLabel.Text = 'Best: 0'
+    $bestLabel.ForeColor = [System.Drawing.Color]::FromArgb(204, 255, 146)
+    $bestLabel.Font = New-Object System.Drawing.Font('Segoe UI', 10, [System.Drawing.FontStyle]::Bold)
+    $bestLabel.AutoSize = $true
+    $bestLabel.Location = New-Object System.Drawing.Point(748, 136)
+    $form.Controls.Add($bestLabel)
+
     $status = New-Object System.Windows.Forms.Label
-    $status.Text = 'Keep the graves quiet.'
+    $status.Text = 'Hold the lantern corridor. Nothing leaves the ground twice.'
     $status.ForeColor = [System.Drawing.Color]::FromArgb(255, 188, 121)
     $status.MaximumSize = New-Object System.Drawing.Size(190, 0)
     $status.AutoSize = $true
-    $status.Location = New-Object System.Drawing.Point(748, 126)
+    $status.Location = New-Object System.Drawing.Point(748, 174)
     $form.Controls.Add($status)
 
     $startButton = New-Object System.Windows.Forms.Button
-    $startButton.Text = 'Light Lanterns'
-    $startButton.Location = New-Object System.Drawing.Point(748, 210)
+    $startButton.Text = 'Open Night Shift'
+    $startButton.Location = New-Object System.Drawing.Point(748, 248)
     $startButton.Size = New-Object System.Drawing.Size(180, 42)
     $startButton.FlatStyle = 'Flat'
     $startButton.BackColor = [System.Drawing.Color]::FromArgb(204, 255, 146)
     $form.Controls.Add($startButton)
 
+    $legendTitle = New-Object System.Windows.Forms.Label
+    $legendTitle.Text = 'FIELD NOTES'
+    $legendTitle.ForeColor = [System.Drawing.Color]::FromArgb(204, 255, 146)
+    $legendTitle.Font = New-Object System.Drawing.Font('Consolas', 12, [System.Drawing.FontStyle]::Bold)
+    $legendTitle.AutoSize = $true
+    $legendTitle.Location = New-Object System.Drawing.Point(748, 322)
+    $form.Controls.Add($legendTitle)
+
+    $legendBody = New-Object System.Windows.Forms.Label
+    $legendBody.Text = "SPT  quiet drift`r`nPGT  gleam surge`r`nHEX  bad marker`r`n`r`nCold blue turns amber, then red before a spirit breaks the lane.`r`nKeep a streak alive to bank score bursts and extra clock."
+    $legendBody.ForeColor = [System.Drawing.Color]::FromArgb(215, 219, 230)
+    $legendBody.MaximumSize = New-Object System.Drawing.Size(200, 0)
+    $legendBody.AutoSize = $true
+    $legendBody.Location = New-Object System.Drawing.Point(748, 352)
+    $form.Controls.Add($legendBody)
+
     return @{
         Form = $form
         Yard = $yard
         Hud = $hud
+        ComboLabel = $comboLabel
+        BestLabel = $bestLabel
         Status = $status
         StartButton = $startButton
     }

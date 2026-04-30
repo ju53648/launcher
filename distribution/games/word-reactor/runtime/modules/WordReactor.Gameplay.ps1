@@ -5,8 +5,35 @@ function End-Game([string]$reason) {
     $status.Text = $reason
     $recapLabel.Text = "Last run: score $($script:score), round $($script:round), heat $($script:heat)%, rank $(Get-ReactorTitle $script:score $script:round)"
     $startButton.Text = 'Restart Reactor'
+    Update-EntryFeedback
     $form.Refresh()
     [System.Windows.Forms.MessageBox]::Show("Final score: $($script:score)`r`nRound reached: $($script:round)", 'Word Reactor') | Out-Null
+}
+
+function New-SpecialDirective([string]$name, [int]$remaining, [int]$bonusScore, [int]$heatRelief, [int]$timeBonus, [string]$statusText) {
+    return [pscustomobject]@{
+        Name = $name
+        Remaining = $remaining
+        BonusScore = $bonusScore
+        HeatRelief = $heatRelief
+        TimeBonus = $timeBonus
+        StatusText = $statusText
+    }
+}
+
+function Start-SpecialDirective {
+    $directiveRoll = $rng.Next(0, 3)
+    if ($directiveRoll -eq 0) {
+        $script:specialEventActive = New-SpecialDirective 'Bonus Window' 2 25 0 0 'DIRECTIVE: Bonus Window armed. Next 2 clean commits gain +25 score.'
+    }
+    elseif ($directiveRoll -eq 1) {
+        $script:specialEventActive = New-SpecialDirective 'Coolant Window' 3 0 8 0 'DIRECTIVE: Coolant Window live. Next 3 clean commits shed an extra 8 heat.'
+    }
+    else {
+        $script:specialEventActive = New-SpecialDirective 'Time Bank' 2 0 0 2 'DIRECTIVE: Time Bank primed. Next 2 clean commits refund 2 seconds.'
+    }
+
+    $status.Text = $script:specialEventActive.StatusText
 }
 
 function Advance-Round {
@@ -31,6 +58,7 @@ function Start-Run {
     $script:roundGoal = 6
     $script:ventCooldown = 0
     $script:specialEventActive = $null
+    $script:challengeCounter = 0
     $script:queue.Clear()
     Fill-Queue
     Refresh-QueueDisplay
@@ -116,6 +144,7 @@ function Submit-Word {
         $script:correctThisRound += 1
         $baseScore = ($targetWord.Length * 6) + ($script:streak * 3) + ($script:round * 4)
         $comboBonus = 0
+        $bonusMessages = New-Object System.Collections.Generic.List[string]
         if ($script:round -ge 4 -and $script:streak % 5 -eq 0) {
             $comboBonus = [Math]::Floor($baseScore * 0.88)
             $status.Text = "COMBO SURGE: Milestone $($script:streak)! Score boost +88%."
@@ -124,12 +153,49 @@ function Submit-Word {
             $status.Text = 'Clean commit. Reactor pressure dropped.'
         }
         $script:score += $baseScore + $comboBonus
-        $script:heat = [Math]::Max(0, $script:heat - (10 + [Math]::Min(8, $script:streak)))
+        $baseHeatDrop = 10 + [Math]::Min(8, $script:streak)
+        $script:heat = [Math]::Max(0, $script:heat - $baseHeatDrop)
+
+        if ($targetWord.Length -ge 9 -or $targetWord.Contains(' ')) {
+            $script:timeLeft += 1
+            $bonusMessages.Add('+1s tempo refund')
+        }
+
+        if ($script:heat -ge 75) {
+            $clutchCooling = 4 + [Math]::Min(4, [Math]::Floor($targetWord.Length / 2))
+            $script:heat = [Math]::Max(0, $script:heat - $clutchCooling)
+            $bonusMessages.Add("-$($clutchCooling)% clutch cooling")
+        }
+
+        if ($null -ne $script:specialEventActive) {
+            if ($script:specialEventActive.BonusScore -gt 0) {
+                $script:score += $script:specialEventActive.BonusScore
+                $bonusMessages.Add("+$($script:specialEventActive.BonusScore) directive score")
+            }
+            if ($script:specialEventActive.HeatRelief -gt 0) {
+                $script:heat = [Math]::Max(0, $script:heat - $script:specialEventActive.HeatRelief)
+                $bonusMessages.Add("-$($script:specialEventActive.HeatRelief)% directive cooling")
+            }
+            if ($script:specialEventActive.TimeBonus -gt 0) {
+                $script:timeLeft += $script:specialEventActive.TimeBonus
+                $bonusMessages.Add("+$($script:specialEventActive.TimeBonus)s directive refund")
+            }
+
+            $directiveName = $script:specialEventActive.Name
+            $script:specialEventActive.Remaining -= 1
+            if ($script:specialEventActive.Remaining -le 0) {
+                $script:specialEventActive = $null
+                $bonusMessages.Add("$directiveName complete")
+            }
+        }
+
         $script:challengeCounter += 1
-        if ($script:round -ge 3 -and $script:challengeCounter -ge 3) {
-            $eventPool = @('BONUS CHALLENGE: +25 pts per next 2 correct', 'POWER SURGE: Heat -8% for 4 correct', 'DEEP FREEZE: All words +1 length')
-            $script:specialEventActive = $eventPool[$rng.Next(0, $eventPool.Count)]
-            $status.Text = $script:specialEventActive
+        if ($bonusMessages.Count -gt 0) {
+            $status.Text = "$($status.Text)  " + ($bonusMessages -join '  |  ')
+        }
+
+        if ($script:round -ge 3 -and $script:challengeCounter -ge 3 -and $null -eq $script:specialEventActive) {
+            Start-SpecialDirective
             $script:challengeCounter = 0
         }
         if ($script:correctThisRound -ge $script:roundGoal) {

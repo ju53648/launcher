@@ -3,8 +3,8 @@
     "itemType":  "game",
     "name":  "Glass Garden",
     "version":  "0.1.0",
-    "description":  "A soft memory puzzle about restoring a tiny greenhouse by matching fractured glass-bloom tiles.",
-    "developer":  "Lumorix",
+    "description":  "A cozy replayable memory puzzle about restoring a tiny greenhouse by matching fractured glass-bloom tiles across fragile seasons.",
+    "developer":  "Soft Thimble Works",
     "releaseDate":  "2026-04-29",
     "categories":  [
                        "Puzzle",
@@ -32,8 +32,8 @@
     "coverImage":  "/assets/games/glass-garden-cover.svg",
     "bannerImage":  "/assets/games/glass-garden-banner.svg",
     "iconImage":  "/assets/games/glass-garden-icon.svg",
-    "executable":  "Launch-GlassGarden.ps1",
-    "installSizeBytes":  11802157,
+    "executable":  "GlassGarden.exe",
+    "installSizeBytes":  11839088,
     "defaultInstallFolder":  "Glass Garden",
     "supportedActions":  [
                              "install",
@@ -50,18 +50,21 @@
     "download":  {
                      "kind":  "httpArchive",
                      "url":  "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/games/glass-garden/release/glass-garden-win64.zip",
-                     "sha256":  "d8b9c9d0a0421ab6d4bd3301707ee79a11646308c6ac1b71f3d1513f0906643e",
-                     "sizeBytes":  11802717
+                     "sha256":  "62973aa076d43b552ff20f4662c9ba197656ed03523733498d6f24d10d4f346d",
+                     "sizeBytes":  11815417
                  },
     "changelog":  [
                       {
                           "version":  "0.1.0",
                           "date":  "2026-04-29",
                           "items":  [
-                                        "Added a compact cozy memory game with board reset and move tracking.",
-                                        "Runs as a native PowerShell Windows Forms desktop window.",
-                                        "Ships with a local content pack above 10 MB while distributing as a compact ZIP archive."
+                                        "Expanded a compact cozy memory game with board reset and move tracking.",
+                                        "Now presented as a native Windows desktop executable with a branded Lumorix Arcade release shell.",
+                                        "Positioned as a replayable standalone release from its own studio identity inside the launcher catalog."
                                     ]
                       }
-                  ]
+                  ],
+    "requiredPaths":  [
+                          "modules"
+                      ]
 }

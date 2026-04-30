@@ -13,7 +13,7 @@ use tokio::io::AsyncWriteExt;
 use uuid::Uuid;
 
 use crate::{
-    manifest::find_manifest,
+    manifest::{find_manifest, missing_required_install_paths},
     models::{
         CatalogItemRecord, DownloadSource, InstallJob, InstallOperation, InstallPhase,
         InstallStrategy, InstalledItem, InstalledStatus, JobStatus, LibraryStatus,
@@ -135,15 +135,20 @@ pub fn verify_item(runtime: &LauncherRuntime, item_id: &str) -> Result<Installed
         .ok_or_else(|| CommandError::Install("Item is not installed".into()))?;
 
     let install_path = PathBuf::from(&installed.install_path);
-    let executable_path = safe_join(&install_path, &manifest.executable)?;
+    let missing_paths = if install_path.exists() {
+        missing_required_install_paths(&manifest, &install_path)?
+    } else {
+        vec![manifest.executable.clone()]
+    };
 
-    if !install_path.exists() || !executable_path.exists() {
+    if !install_path.exists() || !missing_paths.is_empty() {
+        let error_message = missing_install_paths_message(&missing_paths);
         installed.status = InstalledStatus::Broken;
-        installed.last_error = Some("Executable or install folder is missing".into());
+        installed.last_error = Some(error_message.clone());
         runtime.record_item_error(
             item_id,
             Some(&catalog_record_from_manifest(&manifest)),
-            "Executable or install folder is missing",
+            &error_message,
         )?;
     } else {
         installed.status = InstalledStatus::Installed;
@@ -372,11 +377,11 @@ async fn run_install_pipeline(
         manifest.install_size_bytes,
     )?;
 
-    let executable_path = safe_join(&install_path, &manifest.executable)?;
-    if !executable_path.exists() {
+    let missing_paths = missing_required_install_paths(&manifest, &install_path)?;
+    if !missing_paths.is_empty() {
         return Err(CommandError::Install(format!(
-            "Executable was not installed: {}",
-            executable_path.display()
+            "Installed item is missing required files: {}",
+            missing_paths.join(", ")
         )));
     }
 
@@ -1338,5 +1343,13 @@ fn catalog_record_from_manifest(manifest: &crate::models::ContentManifest) -> Ca
         cover_image: manifest.cover_image.clone(),
         banner_image: manifest.banner_image.clone(),
         icon_image: manifest.icon_image.clone(),
+    }
+}
+
+fn missing_install_paths_message(missing_paths: &[String]) -> String {
+    if missing_paths.is_empty() {
+        "Executable or install folder is missing".into()
+    } else {
+        format!("Installed item is missing required files: {}", missing_paths.join(", "))
     }
 }

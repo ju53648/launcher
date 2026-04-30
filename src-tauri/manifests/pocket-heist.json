@@ -1,42 +1,67 @@
 {
-  "id": "com.lumorix.pocket-heist",
-  "itemType": "game",
-  "name": "Pocket Heist",
-  "version": "0.1.0",
-  "description": "A stealthy micro-heist game about grabbing loot on a tight grid before the guard pattern closes in.",
-  "developer": "Lumorix",
-  "releaseDate": "2026-04-29",
-  "categories": ["Stealth", "Strategy", "Offline"],
-  "tags": [
-    { "id": "stealth", "weight": 3 },
-    { "id": "strategy", "weight": 3 },
-    { "id": "tactics", "weight": 2 },
-    { "id": "offline", "weight": 2 }
-  ],
-  "coverImage": "/assets/games/pocket-heist-cover.svg",
-  "bannerImage": "/assets/games/pocket-heist-banner.svg",
-  "iconImage": "/assets/games/pocket-heist-icon.svg",
-  "executable": "Launch-PocketHeist.ps1",
-  "installSizeBytes": 11803259,
-  "defaultInstallFolder": "Pocket Heist",
-  "supportedActions": ["install", "launch", "repair", "uninstall", "openFolder"],
-  "installStrategy": {
-    "kind": "directFolder",
-    "sourcePath": "C:\\Users\\julia\\Desktop\\Lumorix Launcher\\distribution\\games\\pocket-heist\\runtime"
-  },
-  "download": {
-    "kind": "localSynthetic",
-    "integrity": "embedded-pocket-heist-0.1.0"
-  },
-  "changelog": [
-    {
-      "version": "0.1.0",
-      "date": "2026-04-29",
-      "items": [
-        "Added a grid-based stealth prototype focused on route reading and escape timing.",
-        "Runs as a native PowerShell Windows Forms desktop window.",
-        "Ships with a local content pack above 10 MB to satisfy the current size floor."
-      ]
-    }
-  ]
+    "id":  "com.lumorix.pocket-heist",
+    "itemType":  "game",
+    "name":  "Pocket Heist",
+    "version":  "0.1.0",
+    "description":  "A replayable micro-stealth heist about reading patrol routes, stealing intel, and extracting clean before lockdown.",
+    "developer":  "Velvet Mile Games",
+    "releaseDate":  "2026-04-29",
+    "categories":  [
+                       "Stealth",
+                       "Strategy",
+                       "Offline"
+                   ],
+    "tags":  [
+                 {
+                     "id":  "stealth",
+                     "weight":  3
+                 },
+                 {
+                     "id":  "strategy",
+                     "weight":  3
+                 },
+                 {
+                     "id":  "tactics",
+                     "weight":  2
+                 },
+                 {
+                     "id":  "offline",
+                     "weight":  2
+                 }
+             ],
+    "coverImage":  "/assets/games/pocket-heist-cover.svg",
+    "bannerImage":  "/assets/games/pocket-heist-banner.svg",
+    "iconImage":  "/assets/games/pocket-heist-icon.svg",
+    "executable":  "PocketHeist.exe",
+    "installSizeBytes":  11842707,
+    "defaultInstallFolder":  "Pocket Heist",
+    "supportedActions":  [
+                             "install",
+                             "launch",
+                             "repair",
+                             "uninstall",
+                             "openFolder"
+                         ],
+    "installStrategy":  {
+                            "kind":  "directFolder",
+                            "sourcePath":  "C:\\Users\\julia\\Desktop\\Lumorix Launcher\\distribution\\games\\pocket-heist\\runtime"
+                        },
+    "download":  {
+                     "kind":  "localSynthetic",
+                     "integrity":  "embedded-pocket-heist-0.1.0"
+                 },
+    "changelog":  [
+                      {
+                          "version":  "0.1.0",
+                          "date":  "2026-04-29",
+                          "items":  [
+                                        "Expanded a grid-based stealth prototype focused on route reading and escape timing.",
+                                        "Now presented as a native Windows desktop executable with a branded Lumorix Arcade release shell.",
+                                        "Positioned as a replayable standalone release from its own studio identity inside the launcher catalog."
+                                    ]
+                      }
+                  ],
+    "requiredPaths":  [
+                          "modules"
+                      ]
 }

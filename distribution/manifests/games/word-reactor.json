@@ -3,8 +3,8 @@
     "itemType":  "game",
     "name":  "Word Reactor",
     "version":  "0.1.0",
-    "description":  "A typing sprint where you stabilize a failing reactor by entering volatile command words under pressure.",
-    "developer":  "Lumorix",
+    "description":  "A replayable typing-arcade containment game where volatile command words keep a failing reactor just below meltdown.",
+    "developer":  "Faultline Typing Club",
     "releaseDate":  "2026-04-29",
     "categories":  [
                        "Typing",
@@ -32,8 +32,8 @@
     "coverImage":  "/assets/games/word-reactor-cover.svg",
     "bannerImage":  "/assets/games/word-reactor-banner.svg",
     "iconImage":  "/assets/games/word-reactor-icon.svg",
-    "executable":  "Launch-WordReactor.ps1",
-    "installSizeBytes":  11803448,
+    "executable":  "WordReactor.exe",
+    "installSizeBytes":  11839848,
     "defaultInstallFolder":  "Word Reactor",
     "supportedActions":  [
                              "install",
@@ -50,18 +50,21 @@
     "download":  {
                      "kind":  "httpArchive",
                      "url":  "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/games/word-reactor/release/word-reactor-win64.zip",
-                     "sha256":  "203d3d1d864d55556b10fda3605735709e73ed80158b144888dc42658f51a03e",
-                     "sizeBytes":  11802907
+                     "sha256":  "dba64d2447c2f2040fb9b3fc2d2f89d4e808c8ff26a9cc25e9b6b78084d06d44",
+                     "sizeBytes":  11815930
                  },
     "changelog":  [
                       {
                           "version":  "0.1.0",
                           "date":  "2026-04-29",
                           "items":  [
-                                        "Added a rapid-fire typing prototype with streak and pressure scoring.",
-                                        "Runs as a native PowerShell Windows Forms desktop window.",
-                                        "Ships with a local content pack above 10 MB while distributing as a compact ZIP archive."
+                                        "Expanded a rapid-fire typing prototype with streak and pressure scoring.",
+                                        "Now presented as a native Windows desktop executable with a branded Lumorix Arcade release shell.",
+                                        "Positioned as a replayable standalone release from its own studio identity inside the launcher catalog."
                                     ]
                       }
-                  ]
+                  ],
+    "requiredPaths":  [
+                          "modules"
+                      ]
 }

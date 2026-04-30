@@ -18,5 +18,6 @@ function Get-GraveyardShiftPaths {
         ModulesRoot = $modulesRoot
         AssetManifestPath = $assetManifestPath
         SaveRoot = $saveRoot
+        BestScorePath = Join-Path $saveRoot 'best-score.txt'
     }
 }

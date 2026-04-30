@@ -1,8 +1,15 @@
 function Get-SetTitle([int]$score, [int]$phase, [int]$crowd) {
-    if ($phase -ge 4 -and $crowd -ge 70 -and $score -ge 900) { return 'encore arsonist' }
-    if ($phase -ge 4 -or $score -ge 700) { return 'club closer' }
-    if ($phase -ge 3 -or $score -ge 450) { return 'chorus instigator' }
+    if ($phase -ge 4 -and $crowd -ge 70 -and $score -ge 900) { return 'midnight detonator' }
+    if ($phase -ge 4 -or $score -ge 700) { return 'afterhours breaker' }
+    if ($phase -ge 3 -or $score -ge 450) { return 'backroom instigator' }
     return 'garage opener'
+}
+
+function Get-CrowdAssistState {
+    return [pscustomobject]@{
+        Warning = $script:crowd -le 40
+        Critical = $script:crowd -le 25
+    }
 }
 
 function Save-Progress {
@@ -19,8 +26,8 @@ function Save-Progress {
         $script:bestTitle = $candidateTitle
     }
 
-    $script:bestLabel.Text = "Best set: $($script:bestScore) score / phase $($script:bestPhase)"
-    $script:titleLabel.Text = "Set title: $($script:bestTitle)"
+    $script:bestLabel.Text = "Best crowd: $($script:bestScore) score / phase $($script:bestPhase)"
+    $script:titleLabel.Text = "Stage title: $($script:bestTitle)"
     $payload = @{
         bestScore = $script:bestScore
         bestPhase = $script:bestPhase
@@ -30,12 +37,15 @@ function Save-Progress {
 }
 
 function Get-SpawnInterval {
-    switch ($script:phase) {
-        1 { return 535 }
-        2 { return 460 }
-        3 { return 390 }
-        default { return 340 }
+    $baseInterval = switch ($script:phase) {
+        1 { 535 }
+        2 { 460 }
+        3 { 390 }
+        default { 340 }
     }
+    $momentumReduction = [int][Math]::Floor([Math]::Min(90, $script:crowdMomentum) / 15) * 6
+    $comboReduction = if ($script:combo -ge 18) { 18 } elseif ($script:combo -ge 10) { 10 } else { 0 }
+    return [Math]::Max(250, $baseInterval - $momentumReduction - $comboReduction)
 }
 
 function Get-NoteSpeed {
@@ -59,9 +69,13 @@ function Get-HitWindows {
     $baseHitWindow = switch ($script:phase) { 1 { 24 } 2 { 19 } 3 { 16 } default { 15 } }
     $basePerfectWindow = switch ($script:phase) { 1 { 9 } 2 { 7 } default { 6 } }
     $momentumAdjust = [int][Math]::Floor([Math]::Min(100, $script:crowdMomentum) / 20)
+    $assistState = Get-CrowdAssistState
+    $clutchAdjust = if ($assistState.Critical) { 4 } elseif ($assistState.Warning) { 2 } else { 0 }
+    $perfectAdjust = if ($assistState.Critical) { 1 } else { 0 }
+
     return @{
-        Hit = $baseHitWindow + $momentumAdjust
-        Perfect = $basePerfectWindow
+        Hit = $baseHitWindow + $momentumAdjust + $clutchAdjust
+        Perfect = $basePerfectWindow + $perfectAdjust
         Great = $basePerfectWindow + 4
     }
 }
@@ -77,6 +91,7 @@ function Draw-Notes {
         $lane.Controls.Clear()
     }
     [void]$script:lanePanel.Controls.SetChildIndex($script:hitLine, 0)
+    [void]$script:lanePanel.Controls.SetChildIndex($script:overlayLabel, 0)
     foreach ($note in $script:notes) {
         $notePanel = New-Object System.Windows.Forms.Panel
         $notePanel.Size = New-Object System.Drawing.Size(94, 22)
@@ -98,10 +113,29 @@ function Update-Hud {
     }
     $script:crowdLabel.Text = "Crowd: $($script:crowd)%  Hype: $($script:crowdMomentum)%  $crowdMood"
     $script:crowdBar.Value = [Math]::Min(100, [Math]::Max(0, $script:crowd))
+
+    if ($script:isPaused) {
+        $script:assistLabel.Text = 'Paused. Tap P or Space to drop back in.'
+        $script:assistLabel.ForeColor = [System.Drawing.Color]::FromArgb(255, 214, 108)
+    }
+    elseif ($script:crowd -le 25) {
+        $script:assistLabel.Text = 'CLUTCH WINDOW: timing opens up and clean hits recover more crowd.'
+        $script:assistLabel.ForeColor = [System.Drawing.Color]::FromArgb(255, 165, 86)
+    }
+    elseif ($script:combo -ge 18) {
+        $script:assistLabel.Text = 'FLOW STATE: stacked combo is feeding denser burst patterns.'
+        $script:assistLabel.ForeColor = [System.Drawing.Color]::FromArgb(86, 255, 208)
+    }
+    else {
+        $script:assistLabel.Text = 'Keep combo alive to wake the room up.'
+        $script:assistLabel.ForeColor = [System.Drawing.Color]::FromArgb(214, 214, 214)
+    }
 }
 
 function End-Set([string]$message) {
     $script:running = $false
+    $script:isPaused = $false
+    $script:overlayLabel.Visible = $false
     $script:frameTimer.Stop()
     $script:clockTimer.Stop()
     $script:spawnTimer.Stop()
@@ -109,10 +143,136 @@ function End-Set([string]$message) {
     $script:recapLabel.Text = "Last set: score $($script:score), phase $($script:phase), crowd $($script:crowd)%, rank $(Get-SetTitle $script:score $script:phase $script:crowd)"
     $script:startButton.Text = 'Restart Set'
     Save-Progress
+    Update-Hud
     $script:form.Refresh()
     $boxTitle = if ($script:timeLeft -le 0) { 'Set Survived!' } else { 'Set Over' }
     $rankLine = Get-SetTitle $script:score $script:phase $script:crowd
     [System.Windows.Forms.MessageBox]::Show("Score: $($script:score)`r`nPhase reached: $($script:phase)`r`nCrowd: $($script:crowd)%`r`nRank: $rankLine", $boxTitle) | Out-Null
+}
+
+function Flash-Lane([int]$lane, [bool]$success) {
+    if ($lane -lt 0 -or $lane -ge $script:lanes.Count) { return }
+
+    $laneIndex = $lane
+    $accentColor = if ($success) { $script:colors[$laneIndex] } else { [System.Drawing.Color]::FromArgb(255, 90, 90) }
+    $flashColor = [System.Drawing.Color]::FromArgb(
+        [int][Math]::Min(255, 28 + [int]($accentColor.R * 0.35)),
+        [int][Math]::Min(255, 28 + [int]($accentColor.G * 0.35)),
+        [int][Math]::Min(255, 28 + [int]($accentColor.B * 0.35))
+    )
+
+    $script:lanes[$laneIndex].BackColor = $flashColor
+    $script:keyHintLabels[$laneIndex].ForeColor = $accentColor
+
+    if ($null -ne $script:laneFlashResetTimers[$laneIndex]) {
+        $script:laneFlashResetTimers[$laneIndex].Stop()
+        $script:laneFlashResetTimers[$laneIndex].Dispose()
+    }
+
+    $resetTimer = New-Object System.Windows.Forms.Timer
+    $resetTimer.Interval = 90
+    $resetTimer.Add_Tick({
+        $script:lanes[$laneIndex].BackColor = $script:laneBaseColor
+        $script:keyHintLabels[$laneIndex].ForeColor = $script:colors[$laneIndex]
+        $resetTimer.Stop()
+        $resetTimer.Dispose()
+        $script:laneFlashResetTimers[$laneIndex] = $null
+    })
+    $script:laneFlashResetTimers[$laneIndex] = $resetTimer
+    $resetTimer.Start()
+}
+
+function Apply-FailurePenalty([int]$crowdLoss, [int]$scoreLoss, [int]$momentumLoss) {
+    $assistState = Get-CrowdAssistState
+    $penaltyScale = if ($assistState.Critical) { 0.72 } elseif ($assistState.Warning) { 0.86 } else { 1.0 }
+
+    $script:combo = 0
+    $script:perfectStreak = 0
+    $script:crowdMomentum = [Math]::Max(0, $script:crowdMomentum - [int][Math]::Ceiling($momentumLoss * $penaltyScale))
+    $script:crowd = [Math]::Max(0, $script:crowd - [int][Math]::Ceiling($crowdLoss * $penaltyScale))
+    $script:score = [Math]::Max(0, $script:score - [int][Math]::Ceiling($scoreLoss * $penaltyScale))
+}
+
+function Apply-ClutchRecovery {
+    $assistState = Get-CrowdAssistState
+    if (-not $assistState.Warning) { return }
+
+    $crowdGain = if ($assistState.Critical) { 5 } else { 2 }
+    $momentumGain = if ($assistState.Critical) { 6 } else { 3 }
+    $script:crowd = [Math]::Min(100, $script:crowd + $crowdGain)
+    $script:crowdMomentum = [Math]::Min(100, $script:crowdMomentum + $momentumGain)
+
+    if ($assistState.Critical -and ($script:combo % 4) -eq 0 -and $script:combo -gt 0) {
+        $script:status.Text = 'CLUTCH SAVE: the room bit back. Keep the rescue run going.'
+    }
+}
+
+function Start-NewSet {
+    foreach ($timer in $script:laneFlashResetTimers) {
+        if ($null -ne $timer) {
+            $timer.Stop()
+            $timer.Dispose()
+        }
+    }
+    $script:laneFlashResetTimers = @($null, $null, $null, $null)
+    for ($laneIndex = 0; $laneIndex -lt $script:lanes.Count; $laneIndex++) {
+        $script:lanes[$laneIndex].BackColor = $script:laneBaseColor
+        $script:keyHintLabels[$laneIndex].ForeColor = $script:colors[$laneIndex]
+    }
+
+    $script:notes.Clear()
+    $script:score = 0
+    $script:combo = 0
+    $script:timeLeft = 60
+    $script:crowd = 65
+    $script:phase = 1
+    $script:spawnBudget = 0
+    $script:beatsCleared = 0
+    $script:perfectStreak = 0
+    $script:crowdMomentum = 0
+    $script:multiplier = 1
+    $script:lastCrowdMood = ''
+    $script:lastShockTime = -999
+    $script:running = $true
+    $script:isPaused = $false
+    $script:phaseLabel.Text = 'Phase 1: warm-up riot'
+    $script:judgementLabel.Text = 'Judgement: --'
+    $script:judgementLabel.ForeColor = [System.Drawing.Color]::FromArgb(214, 214, 214)
+    $script:status.Text = 'The ugly little club is ready. Hold the floor together.'
+    $script:recapLabel.Text = 'Last set: active mix'
+    $script:startButton.Text = 'Pause Set'
+    $script:overlayLabel.Visible = $false
+    Update-Hud
+    Draw-Notes
+    $script:frameTimer.Stop(); $script:frameTimer.Start()
+    $script:clockTimer.Stop(); $script:clockTimer.Start()
+    $script:spawnTimer.Stop(); $script:spawnTimer.Start()
+}
+
+function Toggle-Pause {
+    if (-not $script:running) { return }
+
+    if ($script:isPaused) {
+        $script:isPaused = $false
+        $script:overlayLabel.Visible = $false
+        $script:startButton.Text = 'Pause Set'
+        $script:status.Text = 'Set resumed. The room is watching your first step back in.'
+        $script:frameTimer.Start()
+        $script:clockTimer.Start()
+        $script:spawnTimer.Start()
+    }
+    else {
+        $script:isPaused = $true
+        $script:overlayLabel.Text = 'PAUSED'
+        $script:overlayLabel.Visible = $true
+        $script:startButton.Text = 'Resume Set'
+        $script:status.Text = 'Set paused. Breathe, then dive back in.'
+        $script:frameTimer.Stop()
+        $script:clockTimer.Stop()
+        $script:spawnTimer.Stop()
+    }
+
+    Update-Hud
 }
 
 function Update-Phase {
@@ -199,7 +359,7 @@ function Spawn-PatternBeat {
             Add-Note -lane ($script:rng.Next(0, 4)) -speedBoost 3
             Add-Note -lane ($script:rng.Next(0, 4)) -speedBoost 3
             $script:lastShockTime = $script:timeLeft
-            $script:status.Text = 'SHOCK EVENT: Crowd demand spike — hold fast!'
+            $script:status.Text = 'SHOCK EVENT: Crowd demand spike - hold fast!'
         }
     }
 
@@ -239,37 +399,43 @@ function Set-JudgementDisplay([string]$judgement, [System.Drawing.Color]$color) 
         $script:judgementLabel.Text = 'Judgement: --'
         $script:judgementLabel.ForeColor = [System.Drawing.Color]::FromArgb(214, 214, 214)
         $script:judgementResetTimer.Stop()
+        $script:judgementResetTimer.Dispose()
+        $script:judgementResetTimer = $null
     })
     $script:judgementResetTimer.Start()
 }
 
 function Handle-Hit([int]$lane) {
-    if (-not $script:running) { return }
+    if (-not $script:running -or $script:isPaused) { return }
 
     $candidate = $script:notes | Where-Object { $_.Lane -eq $lane } | Sort-Object { [Math]::Abs($_.Y - 516) } | Select-Object -First 1
     if ($null -ne $candidate) {
-        # Ignore taps when the note is still in the upper half of the lane — pressing
-        # that early should not break a combo; it is almost certainly a stray input.
+        # Ignore taps when the note is still in the upper half of the lane - this is
+        # most likely a stray input and should not break the flow.
         if ($candidate.Y -lt 280) { return }
+
         $offset = [int]($candidate.Y - 516)
         $distance = [Math]::Abs($offset)
         $windows = Get-HitWindows
         $hitWindow = [int]$windows.Hit
         $perfectWindow = [int]$windows.Perfect
         $greatWindow = [int]$windows.Great
+
         if ($distance -le $hitWindow) {
             $script:notes.Remove($candidate) | Out-Null
             $script:combo += 1
+            Flash-Lane -lane $lane -success $true
+
             $bonus = 0
             if ($distance -le $perfectWindow) {
-                Set-JudgementDisplay 'PERFECT' ([System.Drawing.Color]::FromArgb(86, 255, 208))
+                Set-JudgementDisplay ("PERFECT  {0}" -f $distance) ([System.Drawing.Color]::FromArgb(86, 255, 208))
                 $bonus = 22
                 $script:perfectStreak += 1
                 $script:crowd = [Math]::Min(100, $script:crowd + 6)
                 $script:crowdMomentum = [Math]::Min(100, $script:crowdMomentum + 9)
             }
             elseif ($distance -le $greatWindow) {
-                Set-JudgementDisplay 'GREAT' ([System.Drawing.Color]::FromArgb(255, 214, 108))
+                Set-JudgementDisplay ("GREAT  {0}" -f $distance) ([System.Drawing.Color]::FromArgb(255, 214, 108))
                 $bonus = 14
                 $script:perfectStreak = 0
                 $script:crowd = [Math]::Min(100, $script:crowd + 4)
@@ -277,16 +443,18 @@ function Handle-Hit([int]$lane) {
             }
             else {
                 if ($offset -lt 0) {
-                    Set-JudgementDisplay 'EARLY' ([System.Drawing.Color]::FromArgb(255, 165, 86))
+                    Set-JudgementDisplay ("EARLY  {0}" -f $distance) ([System.Drawing.Color]::FromArgb(255, 165, 86))
                 }
                 else {
-                    Set-JudgementDisplay 'LATE' ([System.Drawing.Color]::FromArgb(255, 165, 86))
+                    Set-JudgementDisplay ("LATE  {0}" -f $distance) ([System.Drawing.Color]::FromArgb(255, 165, 86))
                 }
                 $bonus = 10
                 $script:perfectStreak = 0
                 $script:crowd = [Math]::Min(100, $script:crowd + 3)
                 $script:crowdMomentum = [Math]::Min(100, $script:crowdMomentum + 3)
             }
+
+            Apply-ClutchRecovery
 
             if ($script:perfectStreak -ge 6) {
                 $script:crowd = [Math]::Min(100, $script:crowd + 4)
@@ -298,37 +466,33 @@ function Handle-Hit([int]$lane) {
                 $script:crowdMomentum = [Math]::Min(100, $script:crowdMomentum + 5)
                 $script:status.Text = 'Combo pulse. You pulled the floor back in sync.'
             }
-            # No fallback status overwrite — milestone and event messages stay visible.
 
             Update-Multiplier
-            $baseScore = 12 + $bonus + ([int][Math]::Floor($script:combo * 1.7)) + ($script:phase * 4)
+            $assistState = Get-CrowdAssistState
+            $clutchScore = if ($assistState.Critical) { 10 } elseif ($assistState.Warning) { 4 } else { 0 }
+            $baseScore = 12 + $bonus + ([int][Math]::Floor($script:combo * 1.7)) + ($script:phase * 4) + $clutchScore
             $script:score += [int]($baseScore * $script:multiplier)
         }
         else {
-            $script:combo = 0
-            $script:perfectStreak = 0
-            $script:crowdMomentum = [Math]::Max(0, $script:crowdMomentum - (14 + $script:phase))
-            $script:crowd = [Math]::Max(0, $script:crowd - (8 + ($script:phase * 2)))
-            $script:score = [Math]::Max(0, $script:score - (8 + ($script:phase * 2)))
+            Flash-Lane -lane $lane -success $false
+            Apply-FailurePenalty -crowdLoss (8 + ($script:phase * 2)) -scoreLoss (8 + ($script:phase * 2)) -momentumLoss (14 + $script:phase)
             if ($offset -lt 0) {
-                Set-JudgementDisplay 'TOO EARLY' ([System.Drawing.Color]::FromArgb(255, 90, 90))
+                Set-JudgementDisplay ("TOO EARLY  {0}" -f $distance) ([System.Drawing.Color]::FromArgb(255, 90, 90))
                 $script:status.Text = 'Jumped the beat. The booth started to boo.'
             }
             else {
-                Set-JudgementDisplay 'TOO LATE' ([System.Drawing.Color]::FromArgb(255, 90, 90))
+                Set-JudgementDisplay ("TOO LATE  {0}" -f $distance) ([System.Drawing.Color]::FromArgb(255, 90, 90))
                 $script:status.Text = 'Dragged behind. The booth started to boo.'
             }
         }
     }
     else {
-        $script:combo = 0
-        $script:perfectStreak = 0
-        $script:crowdMomentum = [Math]::Max(0, $script:crowdMomentum - (16 + $script:phase))
-        $script:crowd = [Math]::Max(0, $script:crowd - (9 + ($script:phase * 2)))
-        $script:score = [Math]::Max(0, $script:score - (9 + ($script:phase * 2)))
+        Flash-Lane -lane $lane -success $false
+        Apply-FailurePenalty -crowdLoss (9 + ($script:phase * 2)) -scoreLoss (9 + ($script:phase * 2)) -momentumLoss (16 + $script:phase)
         Set-JudgementDisplay 'MISS' ([System.Drawing.Color]::FromArgb(255, 90, 90))
         $script:status.Text = 'Whiff. The crowd lost the beat.'
     }
+
     Draw-Notes
     Update-Hud
 

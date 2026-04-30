@@ -1,42 +1,67 @@
 {
-  "id": "com.lumorix.glass-garden",
-  "itemType": "game",
-  "name": "Glass Garden",
-  "version": "0.1.0",
-  "description": "A soft memory puzzle about restoring a tiny greenhouse by matching fractured glass-bloom tiles.",
-  "developer": "Lumorix",
-  "releaseDate": "2026-04-29",
-  "categories": ["Puzzle", "Cozy", "Offline"],
-  "tags": [
-    { "id": "puzzle", "weight": 3 },
-    { "id": "cozy", "weight": 3 },
-    { "id": "memory", "weight": 2 },
-    { "id": "offline", "weight": 2 }
-  ],
-  "coverImage": "/assets/games/glass-garden-cover.svg",
-  "bannerImage": "/assets/games/glass-garden-banner.svg",
-  "iconImage": "/assets/games/glass-garden-icon.svg",
-  "executable": "Launch-GlassGarden.ps1",
-  "installSizeBytes": 11802157,
-  "defaultInstallFolder": "Glass Garden",
-  "supportedActions": ["install", "launch", "repair", "uninstall", "openFolder"],
-  "installStrategy": {
-    "kind": "directFolder",
-    "sourcePath": "C:\\Users\\julia\\Desktop\\Lumorix Launcher\\distribution\\games\\glass-garden\\runtime"
-  },
-  "download": {
-    "kind": "localSynthetic",
-    "integrity": "embedded-glass-garden-0.1.0"
-  },
-  "changelog": [
-    {
-      "version": "0.1.0",
-      "date": "2026-04-29",
-      "items": [
-        "Added a compact cozy memory game with board reset and move tracking.",
-        "Runs as a native PowerShell Windows Forms desktop window.",
-        "Ships with a local content pack above 10 MB to satisfy the current size floor."
-      ]
-    }
-  ]
+    "id":  "com.lumorix.glass-garden",
+    "itemType":  "game",
+    "name":  "Glass Garden",
+    "version":  "0.1.0",
+    "description":  "A cozy replayable memory puzzle about restoring a tiny greenhouse by matching fractured glass-bloom tiles across fragile seasons.",
+    "developer":  "Soft Thimble Works",
+    "releaseDate":  "2026-04-29",
+    "categories":  [
+                       "Puzzle",
+                       "Cozy",
+                       "Offline"
+                   ],
+    "tags":  [
+                 {
+                     "id":  "puzzle",
+                     "weight":  3
+                 },
+                 {
+                     "id":  "cozy",
+                     "weight":  3
+                 },
+                 {
+                     "id":  "memory",
+                     "weight":  2
+                 },
+                 {
+                     "id":  "offline",
+                     "weight":  2
+                 }
+             ],
+    "coverImage":  "/assets/games/glass-garden-cover.svg",
+    "bannerImage":  "/assets/games/glass-garden-banner.svg",
+    "iconImage":  "/assets/games/glass-garden-icon.svg",
+    "executable":  "GlassGarden.exe",
+    "installSizeBytes":  11839088,
+    "defaultInstallFolder":  "Glass Garden",
+    "supportedActions":  [
+                             "install",
+                             "launch",
+                             "repair",
+                             "uninstall",
+                             "openFolder"
+                         ],
+    "installStrategy":  {
+                            "kind":  "directFolder",
+                            "sourcePath":  "C:\\Users\\julia\\Desktop\\Lumorix Launcher\\distribution\\games\\glass-garden\\runtime"
+                        },
+    "download":  {
+                     "kind":  "localSynthetic",
+                     "integrity":  "embedded-glass-garden-0.1.0"
+                 },
+    "changelog":  [
+                      {
+                          "version":  "0.1.0",
+                          "date":  "2026-04-29",
+                          "items":  [
+                                        "Expanded a compact cozy memory game with board reset and move tracking.",
+                                        "Now presented as a native Windows desktop executable with a branded Lumorix Arcade release shell.",
+                                        "Positioned as a replayable standalone release from its own studio identity inside the launcher catalog."
+                                    ]
+                      }
+                  ],
+    "requiredPaths":  [
+                          "modules"
+                      ]
 }

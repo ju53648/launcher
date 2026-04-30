@@ -1,3 +1,28 @@
+function Test-GateSpawnCandidate($candidate) {
+    $playerCenterX = $player.X + ($player.Size / 2)
+    $playerCenterY = $player.Y + ($player.Size / 2)
+    $candidateCenterX = $candidate.X + ($candidate.Size / 2)
+    $candidateCenterY = $candidate.Y + ($candidate.Size / 2)
+    $playerPadding = if ($candidate.Type -eq 'danger') { 124 } else { 84 }
+
+    if ([Math]::Abs($candidateCenterX - $playerCenterX) -lt $playerPadding -and
+        [Math]::Abs($candidateCenterY - $playerCenterY) -lt $playerPadding) {
+        return $false
+    }
+
+    foreach ($existingGate in $gates) {
+        $existingCenterX = $existingGate.X + ($existingGate.Size / 2)
+        $existingCenterY = $existingGate.Y + ($existingGate.Size / 2)
+        $spacing = [Math]::Ceiling((($candidate.Size + $existingGate.Size) / 2) + 16)
+        if ([Math]::Abs($candidateCenterX - $existingCenterX) -lt $spacing -and
+            [Math]::Abs($candidateCenterY - $existingCenterY) -lt $spacing) {
+            return $false
+        }
+    }
+
+    return $true
+}
+
 function New-Gate {
     $size = 26 + $rng.Next(0, 22)
     $roll = $rng.NextDouble()
@@ -22,14 +47,42 @@ function New-Gate {
         $type = 'charge'
     }
 
-    return [pscustomobject]@{
-        X = $rng.Next(28, 560)
-        Y = $rng.Next(28, 516)
-        Size = $size
-        Type = $type
-        DriftX = $rng.Next(-2, 3)
-        DriftY = $rng.Next(-2, 3)
+    $fallbackGate = $null
+    for ($attempt = 0; $attempt -lt 18; $attempt += 1) {
+        $candidate = [pscustomobject]@{
+            X = $rng.Next(28, 560)
+            Y = $rng.Next(28, 516)
+            Size = $size
+            Type = $type
+            DriftX = $rng.Next(-2, 3)
+            DriftY = $rng.Next(-2, 3)
+        }
+        $fallbackGate = $candidate
+        if (Test-GateSpawnCandidate $candidate) {
+            return $candidate
+        }
     }
+
+    return $fallbackGate
+}
+
+function Grant-ComboMilestone {
+    if ($script:combo -lt 5) {
+        return
+    }
+
+    $milestone = [Math]::Floor($script:combo / 5)
+    if ($milestone -le $script:comboMilestone) {
+        return
+    }
+
+    $script:comboMilestone = $milestone
+    $script:timeLeft = [Math]::Min(60, $script:timeLeft + 2)
+    $script:energy = [Math]::Min(100, $script:energy + 7)
+    $script:pulse = [Math]::Min(100, $script:pulse + 10)
+    $script:feedbackTicks = [Math]::Max($script:feedbackTicks, 5)
+    $script:feedbackColor = [System.Drawing.Color]::FromArgb(255, 214, 108)
+    $statusLabel.Text = 'COMBO BANK: +2s, +7 stability, +10 pulse.'
 }
 
 function Fill-Gates {
@@ -43,6 +96,15 @@ function Fill-Gates {
 }
 
 function Capture-Gate($gate, [bool]$fromPulse) {
+    if ($fromPulse) {
+        if ($gate.Type -eq 'danger') {
+            $script:lastPulseDangerHits += 1
+        }
+        else {
+            $script:lastPulseHits += 1
+        }
+    }
+
     switch ($gate.Type) {
         'spark' {
             $script:combo += 1
@@ -51,6 +113,8 @@ function Capture-Gate($gate, [bool]$fromPulse) {
             $script:score += $sparkBonus
             $script:pulse = [Math]::Min(100, $script:pulse + 30)
             $script:energy = [Math]::Min(100, $script:energy + 6)
+            $script:feedbackTicks = [Math]::Max($script:feedbackTicks, 5)
+            $script:feedbackColor = [System.Drawing.Color]::FromArgb(255, 200, 70)
             $statusLabel.Text = 'SIGNAL SPARK: Rare quantum event!'
         }
         'sync' {
@@ -63,6 +127,10 @@ function Capture-Gate($gate, [bool]$fromPulse) {
             }
             $script:score += $gain * $multiplier
             $script:energy = [Math]::Min(100, $script:energy + 8)
+            if ($fromPulse) {
+                $script:feedbackTicks = [Math]::Max($script:feedbackTicks, 3)
+                $script:feedbackColor = $chargeColor
+            }
             $statusLabel.Text = 'Clean sync. Keep the route alive.'
         }
         'charge' {
@@ -81,6 +149,8 @@ function Capture-Gate($gate, [bool]$fromPulse) {
             }
             $script:score += 8 + ($script:wave * 2)
             $script:pulse = [Math]::Min(100, $script:pulse + $pulseGain)
+            $script:feedbackTicks = [Math]::Max($script:feedbackTicks, 4)
+            $script:feedbackColor = $chargeColor
         }
         'resonance' {
             $script:combo += 1
@@ -89,10 +159,13 @@ function Capture-Gate($gate, [bool]$fromPulse) {
             $script:pulse = [Math]::Min(100, $script:pulse + $resonancePulse)
             $script:score += 32 + ($script:wave * 4)
             $script:energy = [Math]::Min(100, $script:energy + 12)
+            $script:feedbackTicks = [Math]::Max($script:feedbackTicks, 6)
+            $script:feedbackColor = $resonanceColor
             $statusLabel.Text = 'RESONANCE GATE: Massive pulse spike!'
         }
         'danger' {
             $script:combo = 0
+            $script:comboMilestone = 0
             $script:chargeStreak = 0
             if ($fromPulse) {
                 $script:score += 4
@@ -103,7 +176,13 @@ function Capture-Gate($gate, [bool]$fromPulse) {
                 $script:energy = [Math]::Max(0, $script:energy - 18)
                 $statusLabel.Text = 'Overload spike. Back off the red nodes.'
             }
+            $script:feedbackTicks = [Math]::Max($script:feedbackTicks, 7)
+            $script:feedbackColor = $warning
         }
+    }
+
+    if ($gate.Type -ne 'danger') {
+        Grant-ComboMilestone
     }
 
     $gates.Remove($gate) | Out-Null

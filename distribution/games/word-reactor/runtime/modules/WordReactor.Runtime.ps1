@@ -6,6 +6,7 @@ function Register-WordReactorRuntime {
             $eventArgs.SuppressKeyPress = $true
         }
     })
+    $entryBox.Add_TextChanged({ Update-EntryFeedback })
 
     $submitButton.Add_Click({ Submit-Word })
 
@@ -72,5 +73,6 @@ function Start-WordReactorRuntime {
     Register-WordReactorRuntime
     Refresh-QueueDisplay
     Update-Hud
+    Update-EntryFeedback
     [void]$form.ShowDialog()
 }

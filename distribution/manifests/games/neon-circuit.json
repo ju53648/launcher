@@ -3,8 +3,8 @@
     "itemType":  "game",
     "name":  "Neon Circuit",
     "version":  "0.1.0",
-    "description":  "A compact reflex arcade game about routing a glowing signal through unstable neon lanes before the board overloads.",
-    "developer":  "Lumorix",
+    "description":  "A fast replayable reflex arcade game about routing a glowing signal through unstable neon lanes before the board overloads.",
+    "developer":  "Static Current Lab",
     "releaseDate":  "2026-04-29",
     "categories":  [
                        "Arcade",
@@ -32,8 +32,8 @@
     "coverImage":  "/assets/games/neon-circuit-cover.svg",
     "bannerImage":  "/assets/games/neon-circuit-banner.svg",
     "iconImage":  "/assets/games/neon-circuit-icon.svg",
-    "executable":  "Launch-NeonCircuit.ps1",
-    "installSizeBytes":  11809232,
+    "executable":  "NeonCircuit.exe",
+    "installSizeBytes":  11846001,
     "defaultInstallFolder":  "Neon Circuit",
     "supportedActions":  [
                              "install",
@@ -50,18 +50,21 @@
     "download":  {
                      "kind":  "httpArchive",
                      "url":  "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/games/neon-circuit/release/neon-circuit-win64.zip",
-                     "sha256":  "7cb59ac000897756acdde097e040489d6daa6d8b45b9b5e75af91380f9ceffcb",
-                     "sizeBytes":  11804106
+                     "sha256":  "58cdc8f38ebb2fe50aea1f4c0567757fc55ba5b7dc5f6b78b395a0b0ede566c5",
+                     "sizeBytes":  11816179
                  },
     "changelog":  [
                       {
                           "version":  "0.1.0",
                           "date":  "2026-04-29",
                           "items":  [
-                                        "Introduced a new fast arcade prototype built for archive-based public launcher installs.",
-                                        "Uses a PowerShell Windows Forms runtime so it launches as a native desktop window.",
-                                        "Ships with a local content pack above 10 MB while distributing as a compact ZIP archive."
+                                        "Expanded a new fast arcade prototype built for archive-based public launcher installs.",
+                                        "Now presented as a native Windows desktop executable with a branded Lumorix Arcade release shell.",
+                                        "Positioned as a replayable standalone release from its own studio identity inside the launcher catalog."
                                     ]
                       }
-                  ]
+                  ],
+    "requiredPaths":  [
+                          "modules"
+                      ]
 }

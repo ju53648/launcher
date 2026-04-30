@@ -26,7 +26,7 @@ $hud.Location = New-Object System.Drawing.Point(612, 48)
 $form.Controls.Add($hud)
 
 $status = New-Object System.Windows.Forms.Label
-$status.Text = 'Use arrow keys. Space drops smoke. Clear the floor, then reach EXIT.'
+$status.Text = 'Use arrow keys. Space drops smoke. Fill the bags, steal the read, then hit EXIT clean.'
 $status.ForeColor = [System.Drawing.Color]::FromArgb(130, 236, 255)
 $status.MaximumSize = New-Object System.Drawing.Size(300, 0)
 $status.AutoSize = $true
@@ -48,45 +48,61 @@ $alarmBar.Maximum = 100
 $alarmBar.Value = 0
 $form.Controls.Add($alarmBar)
 
+$threatLabel = New-Object System.Windows.Forms.Label
+$threatLabel.Text = 'Threat scan: orange borders show where patrol pressure lands next turn.'
+$threatLabel.ForeColor = [System.Drawing.Color]::FromArgb(255, 194, 94)
+$threatLabel.MaximumSize = New-Object System.Drawing.Size(300, 0)
+$threatLabel.AutoSize = $true
+$threatLabel.Location = New-Object System.Drawing.Point(612, 228)
+$form.Controls.Add($threatLabel)
+
 $floorLabel = New-Object System.Windows.Forms.Label
-$floorLabel.Text = 'Floor 1: office shell'
+$floorLabel.Text = 'Floor 1: shell office'
 $floorLabel.ForeColor = [System.Drawing.Color]::FromArgb(255, 214, 74)
 $floorLabel.Font = New-Object System.Drawing.Font('Segoe UI', 11, [System.Drawing.FontStyle]::Bold)
 $floorLabel.AutoSize = $true
-$floorLabel.Location = New-Object System.Drawing.Point(612, 248)
+$floorLabel.Location = New-Object System.Drawing.Point(612, 268)
 $form.Controls.Add($floorLabel)
 
 $legend = New-Object System.Windows.Forms.Label
-$legend.Text = 'YOU = you  |  G = guard  |  $ = loot  |  I = intel  |  C = camera  |  # = wall  |  E = exit'
+$legend.Text = 'YOU = runner  |  G = patrol  |  $ = bag  |  I = intel  |  C = camera  |  # = wall  |  E = exit  |  ! = hot tile'
 $legend.ForeColor = [System.Drawing.Color]::FromArgb(214, 214, 214)
 $legend.MaximumSize = New-Object System.Drawing.Size(300, 0)
 $legend.AutoSize = $true
-$legend.Location = New-Object System.Drawing.Point(612, 286)
+$legend.Location = New-Object System.Drawing.Point(612, 306)
 $form.Controls.Add($legend)
 
 $bestLabel = New-Object System.Windows.Forms.Label
-$bestLabel.Text = 'Best job: 0 score / floor 1'
+$bestLabel.Text = 'Best score: 0 / floor 1'
 $bestLabel.ForeColor = [System.Drawing.Color]::FromArgb(255, 214, 74)
 $bestLabel.Font = New-Object System.Drawing.Font('Segoe UI', 10, [System.Drawing.FontStyle]::Bold)
 $bestLabel.AutoSize = $true
-$bestLabel.Location = New-Object System.Drawing.Point(612, 332)
+$bestLabel.Location = New-Object System.Drawing.Point(612, 352)
 $form.Controls.Add($bestLabel)
 
 $startButton = New-Object System.Windows.Forms.Button
-$startButton.Text = 'Start Job'
-$startButton.Location = New-Object System.Drawing.Point(612, 360)
+$startButton.Text = 'Breach Floor'
+$startButton.Location = New-Object System.Drawing.Point(612, 380)
 $startButton.Size = New-Object System.Drawing.Size(180, 42)
 $startButton.FlatStyle = 'Flat'
 $startButton.BackColor = [System.Drawing.Color]::FromArgb(255, 214, 74)
 $form.Controls.Add($startButton)
 
 $recapLabel = New-Object System.Windows.Forms.Label
-$recapLabel.Text = 'Last job: none yet'
+$recapLabel.Text = 'Last breach: none yet'
 $recapLabel.ForeColor = [System.Drawing.Color]::FromArgb(214, 214, 214)
 $recapLabel.MaximumSize = New-Object System.Drawing.Size(300, 0)
 $recapLabel.AutoSize = $true
-$recapLabel.Location = New-Object System.Drawing.Point(612, 416)
+$recapLabel.Location = New-Object System.Drawing.Point(612, 436)
 $form.Controls.Add($recapLabel)
+
+$controlsLabel = New-Object System.Windows.Forms.Label
+$controlsLabel.Text = 'Controls: Arrows move | Space smoke | Enter breach/retry | R scrub the current job'
+$controlsLabel.ForeColor = [System.Drawing.Color]::FromArgb(176, 188, 205)
+$controlsLabel.MaximumSize = New-Object System.Drawing.Size(300, 0)
+$controlsLabel.AutoSize = $true
+$controlsLabel.Location = New-Object System.Drawing.Point(612, 490)
+$form.Controls.Add($controlsLabel)
 
 $size = 7
 $buttons = @()
@@ -114,6 +130,7 @@ $exit = '6,0'
 $script:intelTile = ''
 $script:intelCollected = $false
 $script:cameraGrace = 0
+$script:cameraBypass = 0
 $script:floorModifier = ''
 $script:zoneRule = ''
 $script:collected = 0
@@ -175,18 +192,20 @@ function Handle-Move([int]$nextRow, [int]$nextCol) {
     if (-not $script:intelCollected -and $destination -eq $script:intelTile) {
         $script:intelCollected = $true
         $script:score += 24 + ($script:floor * 10)
+        $ghostPasses = if ($script:floor -ge 3) { 2 } else { 1 }
+        $script:cameraBypass = [Math]::Min(3, $script:cameraBypass + $ghostPasses)
         if ($script:floorModifier -like '*smoke refill*') {
             $script:smoke = 3
-            $status.Text = 'Intel lifted. Executive codes gave a full smoke refill.'
+            $status.Text = "Intel lifted. Executive codes gave a full smoke refill and $ghostPasses ghost pass$(if ($ghostPasses -ne 1) { 'es' })."
         }
         elseif ($script:floor -ge 5) {
             $script:alarm = [Math]::Max(0, $script:alarm - 16)
             $script:score += 12
-            $status.Text = 'Intel pulled from the roof. Patrol window cracked open.'
+            $status.Text = "Intel pulled from the roof. Patrol window cracked open and you banked $ghostPasses ghost pass$(if ($ghostPasses -ne 1) { 'es' })."
         }
         else {
             $script:alarm = [Math]::Max(0, $script:alarm - 10)
-            $status.Text = 'Intel secured. Patrol timing got easier to read.'
+            $status.Text = "Intel secured. Patrol timing got easier to read and you banked $ghostPasses ghost pass$(if ($ghostPasses -ne 1) { 'es' })."
         }
     }
 

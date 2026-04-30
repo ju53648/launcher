@@ -55,6 +55,7 @@ function Update-Hud {
 
 function End-Run([string]$message) {
     $script:gameActive = $false
+    $script:gamePaused = $false
     $tickTimer.Stop()
     $startButton.Text = 'Restart Run'
     Save-BestScore
@@ -72,11 +73,18 @@ function Reset-Board {
     $script:timeLeft = 60
     $script:energy = 100
     $script:combo = 0
+    $script:comboMilestone = 0
     $script:chargeStreak = 0
     $script:wave = 1
     $script:pulse = 0
     $script:surgeTicks = 0
     $script:nearMissCooldown = 0
+    $script:gamePaused = $false
+    $script:feedbackTicks = 0
+    $script:pulseBurstTicks = 0
+    $script:pulseBurstRadius = 0
+    $script:lastPulseHits = 0
+    $script:lastPulseDangerHits = 0
     Fill-Gates
     Update-Hud
     $statusLabel.Text = 'Board synced. Chain gates and bank pulse.'

@@ -1,6 +1,7 @@
 function Update-Hud {
-    $hud.Text = "Matches: $($script:matches) / 8    Moves: $($script:moves)    Combo: $($script:combo)    Score: $($script:score)"
+    $hud.Text = "Matches: $($script:matches) / 8    Moves: $($script:moves)    Combo: $($script:combo)    Focus: $($script:focusCharges)    Decay: x$($script:timeDecayMultiplier)    Score: $($script:score)"
     Update-CrackLabel
+    Update-FocusButton
 }
 
 function Update-TimeLabel {
@@ -40,5 +41,47 @@ function Show-AllCards([bool]$faceUp) {
         else {
             $button.Text = 'BLOOM'
         }
+    }
+}
+
+function Set-CardState([System.Windows.Forms.Button]$button, [string]$state) {
+    switch ($state) {
+        'Selected' {
+            $button.BackColor = $script:cardSelectedColor
+        }
+        'Matched' {
+            $button.BackColor = $script:cardMatchedColor
+        }
+        'Mismatch' {
+            $button.BackColor = $script:cardMismatchColor
+        }
+        default {
+            $button.BackColor = $script:cardBaseColor
+        }
+    }
+}
+
+function Update-FocusButton {
+    if ($null -eq $focusButton) {
+        return
+    }
+
+    $focusButton.Text = "Garden Focus ($($script:focusCharges))"
+    $focusButton.Enabled = (
+        -not $script:revealed -and
+        -not $script:busy -and
+        $null -eq $script:firstPick -and
+        $script:focusCharges -gt 0 -and
+        $script:seasonTimeLeft -gt $script:focusCost
+    )
+
+    if ($script:focusCharges -le 0) {
+        $focusHintLabel.Text = 'No Focus charges left this season.'
+    }
+    elseif ($script:seasonTimeLeft -le $script:focusCost) {
+        $focusHintLabel.Text = "Need more than $($script:focusCost)s sunlight to trigger Focus."
+    }
+    else {
+        $focusHintLabel.Text = "Reveal all hidden beds for $([Math]::Round($script:focusDurationMs / 1000, 1))s at a cost of $($script:focusCost)s sunlight."
     }
 }

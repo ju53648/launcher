@@ -231,6 +231,8 @@ pub struct ContentManifest {
     pub banner_image: String,
     pub icon_image: String,
     pub executable: String,
+    #[serde(default, alias = "required_paths")]
+    pub required_paths: Vec<String>,
     pub install_size_bytes: u64,
     pub default_install_folder: String,
     pub supported_actions: Vec<ContentAction>,

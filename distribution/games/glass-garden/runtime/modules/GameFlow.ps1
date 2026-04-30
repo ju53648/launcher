@@ -2,6 +2,7 @@ function Trigger-RunFailure([string]$recapText, [string]$messageText, [string]$s
     $previewTimer.Stop()
     $gameplayTimer.Stop()
     $hideTimer.Stop()
+    $focusTimer.Stop()
     $script:revealed = $true
     $script:busy = $true
     Show-AllCards $true
@@ -21,7 +22,7 @@ function Start-Preview {
     $script:revealed = $true
     $gameplayTimer.Stop()
     Show-AllCards $true
-    $previewLabel.Text = "Preview: $($script:previewSeconds)s  |  Sunlight budget: $($script:seasonTimeLimit)s"
+    $previewLabel.Text = "Preview: $($script:previewSeconds)s  |  Sunlight budget: $($script:seasonTimeLimit)s  |  Focus: $($script:focusCharges)"
     $previewTimer.Start()
 }
 
@@ -38,6 +39,9 @@ function Setup-Season {
     $script:seasonTimeLimit = [Math]::Max(30, 50 - (($script:season - 1) * 9))
     $script:seasonTimeLeft = $script:seasonTimeLimit
     $script:previewSeconds = [Math]::Max(5, 8 - $script:season)
+    $script:focusCharges = if ($script:season -ge 3) { 1 } else { 2 }
+    $script:focusCost = if ($script:season -ge 3) { 4 } else { 5 }
+    $script:pendingHideButtons = @()
     $script:revealed = $false
     $script:deck = @($pool.Symbols + $pool.Symbols | Get-Random -Count 16)
     $script:firstPick = $null
@@ -46,23 +50,55 @@ function Setup-Season {
         $button = $buttons[$index]
         $button.Text = 'BLOOM'
         $button.Enabled = $true
-        $button.BackColor = [System.Drawing.Color]::FromArgb(182, 227, 205)
+        Set-CardState $button 'Default'
         $button.Tag = $script:deck[$index]
     }
-    $previewLabel.Text = "Preview: memorize the beds. Sunlight budget: $($script:seasonTimeLimit)s"
+    $previewLabel.Text = "Preview: memorize the beds. Sunlight budget: $($script:seasonTimeLimit)s  |  Focus: $($script:focusCharges)"
     Update-TimeLabel
     Update-Hud
     Start-Preview
+}
+
+function Use-GardenFocus {
+    if ($script:revealed -or $script:busy -or $null -ne $script:firstPick) {
+        return
+    }
+
+    if ($script:focusCharges -le 0) {
+        $status.Text = 'Garden Focus is spent for this season.'
+        Update-Hud
+        return
+    }
+
+    if ($script:seasonTimeLeft -le $script:focusCost) {
+        $status.Text = "Not enough sunlight for Garden Focus. Keep more than $($script:focusCost)s in reserve."
+        Update-Hud
+        return
+    }
+
+    $script:focusCharges -= 1
+    $script:seasonTimeLeft = [Math]::Max(0, $script:seasonTimeLeft - $script:focusCost)
+    $script:combo = 0
+    $script:busy = $true
+    $script:revealed = $true
+    Show-AllCards $true
+    $status.Text = "Garden Focus reveals every hidden bed for $([Math]::Round($script:focusDurationMs / 1000, 1))s. Sunlight drops by $($script:focusCost)s."
+    $previewLabel.Text = "Garden Focus active. Rebuild the pattern before the shimmer fades."
+    Update-Hud
+    Update-TimeLabel
+    $focusTimer.Interval = $script:focusDurationMs
+    $focusTimer.Start()
 }
 
 function Reset-Run {
     $previewTimer.Stop()
     $gameplayTimer.Stop()
     $hideTimer.Stop()
+    $focusTimer.Stop()
     $script:score = 0
     $script:cracks = 0
     $script:season = 1
-    $status.Text = 'Memorize the beds during preview. Clear 3 seasons before stress or sunlight collapse.'
+    $status.Text = 'Memorize the beds during preview. Use Garden Focus sparingly and clear 3 seasons before stress or sunlight collapse.'
     $recapLabel.Text = 'Last bloom: fresh season reset'
     Setup-Season
     Update-Hud

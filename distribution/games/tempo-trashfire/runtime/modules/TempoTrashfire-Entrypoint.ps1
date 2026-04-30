@@ -32,6 +32,7 @@ function Start-TempoTrashfireRuntime {
     $script:notes = New-Object System.Collections.Generic.List[object]
     $script:rng = [System.Random]::new()
     $script:running = $false
+    $script:isPaused = $false
 
     $script:patternSets = @(
         @(@(0), @(1), @(2), @(3), @(1), @(2), @(0), @(3), @(2), @(0), @(3), @(1)),
@@ -62,6 +63,14 @@ function Start-TempoTrashfireRuntime {
             'S' { Handle-Hit 1 }
             'D' { Handle-Hit 2 }
             'F' { Handle-Hit 3 }
+            'P' { Toggle-Pause }
+            'Space' { Toggle-Pause }
+            'R' { Start-NewSet }
+            'Enter' {
+                if (-not $script:running) {
+                    Start-NewSet
+                }
+            }
         }
     })
 
@@ -98,9 +107,10 @@ function Start-TempoTrashfireRuntime {
 
         $script:spawnBudget += $script:spawnTimer.Interval
         $interval = Get-SpawnInterval
-        if ($script:spawnBudget -ge $interval) {
-            $script:spawnBudget = 0
+        while ($script:spawnBudget -ge $interval) {
+            $script:spawnBudget -= $interval
             Spawn-PatternBeat
+            $interval = Get-SpawnInterval
         }
     })
 
@@ -123,29 +133,12 @@ function Start-TempoTrashfireRuntime {
     })
 
     $script:startButton.Add_Click({
-        $script:notes.Clear()
-        $script:score = 0
-        $script:combo = 0
-        $script:timeLeft = 60
-        $script:crowd = 65
-        $script:phase = 1
-        $script:spawnBudget = 0
-        $script:beatsCleared = 0
-        $script:perfectStreak = 0
-        $script:crowdMomentum = 0
-        $script:multiplier = 1
-        $script:lastCrowdMood = ''
-        $script:lastShockTime = -999
-        $script:running = $true
-        $script:phaseLabel.Text = 'Phase 1: warm-up riot'
-        $script:judgementLabel.Text = 'Judgement: --'
-        $script:status.Text = 'The ugly little club is ready. Hold the floor together.'
-        $script:recapLabel.Text = 'Last set: active mix'
-        Update-Hud
-        Draw-Notes
-        $script:frameTimer.Stop(); $script:frameTimer.Start()
-        $script:clockTimer.Stop(); $script:clockTimer.Start()
-        $script:spawnTimer.Stop(); $script:spawnTimer.Start()
+        if ($script:running) {
+            Toggle-Pause
+        }
+        else {
+            Start-NewSet
+        }
     })
 
     [void]$script:form.ShowDialog()

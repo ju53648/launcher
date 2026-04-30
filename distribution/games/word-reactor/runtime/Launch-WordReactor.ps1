@@ -12,9 +12,9 @@ $form.FormBorderStyle = 'FixedSingle'
 $form.MaximizeBox = $false
 
 $wordPools = @{
-    1 = @('voltage','coolant','reactor','cascade','plasma','vector','thermal','failsafe','uplink','containment','conduit','exhaust','pressure','circuit','fission','turbine','gridcore','dampener','override','sequence')
-    2 = @('stabilize','override','switchyard','gridlock','pressure','relaycore','ionstorm','phasecoil','backdraft','signalpath','lockstep','fluxgate','powercell','meltpoint','throttle','vent cycle','safeguard','resonance','burnpath','isolate')
-    3 = @('conductive','sparkstorm','counterflow','afterimage','breakerline','shockfront','overclocked','oscillator','blackstart','recalibrate','hyperflux','detonation','wireframe','fieldpulse','supercycle','discharge','coldstart','slipstream','radiant','core breach')
+    1 = @('coolant','reactor','vector','thermal','failsafe','uplink','containment','conduit','pressure','circuit','dampener','override','sequence','spillway','relay','gridline','cooldown','checklock','feedback','staging')
+    2 = @('stabilize','switchyard','gridlock','signalpath','lockstep','fluxgate','powercell','meltpoint','safeguard','resonance','burnpath','isolate','surgewall','phasecoil','backdraft','bridgecode','vent cycle','lag field','loopbreak','primewave')
+    3 = @('counterflow','shockfront','overclocked','oscillator','blackstart','recalibrate','hyperflux','detonation','fieldpulse','supercycle','discharge','coldstart','slipstream','core breach','containment crack','plasma rebound','breakerline','afterimage','heat storm','cascade drift')
 }
 
 $rng = [System.Random]::new()
@@ -35,6 +35,8 @@ $script:running = $false
 $script:comboMilestone = 0
 $script:specialEventActive = $null
 $script:challengeCounter = 0
+$script:defaultEntryBackColor = [System.Drawing.Color]::White
+$script:defaultEntryForeColor = [System.Drawing.Color]::Black
 
 $title = New-Object System.Windows.Forms.Label
 $title.Text = 'WORD REACTOR'
@@ -45,7 +47,7 @@ $title.Location = New-Object System.Drawing.Point(26, 18)
 $form.Controls.Add($title)
 
 $prompt = New-Object System.Windows.Forms.Label
-$prompt.Text = 'Manage the live command queue before reactor heat reaches critical.'
+$prompt.Text = 'Manage the live command queue before containment drift turns the whole stack into slag.'
 $prompt.ForeColor = [System.Drawing.Color]::White
 $prompt.Font = New-Object System.Drawing.Font('Segoe UI', 10)
 $prompt.AutoSize = $true
@@ -83,7 +85,7 @@ $roundLabel.Location = New-Object System.Drawing.Point(32, 154)
 $wordPanel.Controls.Add($roundLabel)
 
 $commandHint = New-Object System.Windows.Forms.Label
-$commandHint.Text = 'Commands: FLUSH (skip word, +22 heat) | VENT (emergency cooldown, -heat) | GAMBIT (risk/reward burst)'
+$commandHint.Text = 'Commands: FLUSH (skip word, +22 heat) | VENT (emergency bleed-off, -heat) | GAMBIT (volatile score burst)'
 $commandHint.ForeColor = [System.Drawing.Color]::FromArgb(255, 212, 145)
 $commandHint.Font = New-Object System.Drawing.Font('Segoe UI', 9)
 $commandHint.AutoSize = $true
@@ -95,6 +97,15 @@ $entryBox.Location = New-Object System.Drawing.Point(30, 350)
 $entryBox.Size = New-Object System.Drawing.Size(598, 38)
 $entryBox.Font = New-Object System.Drawing.Font('Segoe UI', 16)
 $form.Controls.Add($entryBox)
+
+$signalLabel = New-Object System.Windows.Forms.Label
+$signalLabel.Text = 'Signal trace: standby'
+$signalLabel.ForeColor = [System.Drawing.Color]::FromArgb(203, 214, 255)
+$signalLabel.Font = New-Object System.Drawing.Font('Segoe UI', 9, [System.Drawing.FontStyle]::Bold)
+$signalLabel.AutoSize = $true
+$signalLabel.MaximumSize = New-Object System.Drawing.Size(600, 0)
+$signalLabel.Location = New-Object System.Drawing.Point(32, 392)
+$form.Controls.Add($signalLabel)
 
 $submitButton = New-Object System.Windows.Forms.Button
 $submitButton.Text = 'Commit'
@@ -121,7 +132,7 @@ $hud.Location = New-Object System.Drawing.Point(30, 412)
 $form.Controls.Add($hud)
 
 $bestLabel = New-Object System.Windows.Forms.Label
-$bestLabel.Text = 'Best: 0'
+$bestLabel.Text = 'Best containment: 0'
 $bestLabel.ForeColor = [System.Drawing.Color]::FromArgb(255, 196, 68)
 $bestLabel.Font = New-Object System.Drawing.Font('Segoe UI', 11, [System.Drawing.FontStyle]::Bold)
 $bestLabel.AutoSize = $true
@@ -129,7 +140,7 @@ $bestLabel.Location = New-Object System.Drawing.Point(30, 446)
 $form.Controls.Add($bestLabel)
 
 $recapLabel = New-Object System.Windows.Forms.Label
-$recapLabel.Text = 'Last run: none yet'
+$recapLabel.Text = 'Last containment: none yet'
 $recapLabel.ForeColor = [System.Drawing.Color]::FromArgb(203, 214, 255)
 $recapLabel.Font = New-Object System.Drawing.Font('Segoe UI', 10)
 $recapLabel.AutoSize = $true
@@ -162,7 +173,7 @@ $heatBar.Value = 18
 $form.Controls.Add($heatBar)
 
 $status = New-Object System.Windows.Forms.Label
-$status.Text = 'Containment idle.'
+$status.Text = 'Containment cold. Prime the queue when ready.'
 $status.ForeColor = [System.Drawing.Color]::FromArgb(255, 196, 68)
 $status.Font = New-Object System.Drawing.Font('Segoe UI', 11, [System.Drawing.FontStyle]::Bold)
 $status.MaximumSize = New-Object System.Drawing.Size(900, 0)

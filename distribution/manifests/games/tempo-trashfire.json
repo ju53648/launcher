@@ -3,8 +3,8 @@
     "itemType":  "game",
     "name":  "Tempo Trashfire",
     "version":  "0.1.0",
-    "description":  "A scrappy rhythm game where collapsing club hardware still expects perfect timing on four loud lanes.",
-    "developer":  "Lumorix",
+    "description":  "A replayable four-lane rhythm brawler where collapsing club hardware still expects clean timing and crowd control.",
+    "developer":  "Basement Broadcast",
     "releaseDate":  "2026-04-29",
     "categories":  [
                        "Rhythm",
@@ -32,8 +32,8 @@
     "coverImage":  "/assets/games/tempo-trashfire-cover.svg",
     "bannerImage":  "/assets/games/tempo-trashfire-banner.svg",
     "iconImage":  "/assets/games/tempo-trashfire-icon.svg",
-    "executable":  "Launch-TempoTrashfire.ps1",
-    "installSizeBytes":  11802965,
+    "executable":  "TempoTrashfire.exe",
+    "installSizeBytes":  11849302,
     "defaultInstallFolder":  "Tempo Trashfire",
     "supportedActions":  [
                              "install",
@@ -50,18 +50,21 @@
     "download":  {
                      "kind":  "httpArchive",
                      "url":  "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/games/tempo-trashfire/release/tempo-trashfire-win64.zip",
-                     "sha256":  "1052dc16808f70b75f1b8be5446e3ef98b7383e7ab49e1714dc61f51dca6dfd1",
-                     "sizeBytes":  11802883
+                     "sha256":  "e2e13b199001671113fb04926c0b50a1809ee0bcab4c0d2fee874e44da2247c9",
+                     "sizeBytes":  11816654
                  },
     "changelog":  [
                       {
                           "version":  "0.1.0",
                           "date":  "2026-04-29",
                           "items":  [
-                                        "Added a four-lane timing prototype with score, streak, and accuracy pressure.",
-                                        "Runs as a native PowerShell Windows Forms desktop window.",
-                                        "Ships with a local content pack above 10 MB while distributing as a compact ZIP archive."
+                                        "Expanded a four-lane timing prototype with score, streak, and accuracy pressure.",
+                                        "Now presented as a native Windows desktop executable with a branded Lumorix Arcade release shell.",
+                                        "Positioned as a replayable standalone release from its own studio identity inside the launcher catalog."
                                     ]
                       }
-                  ]
+                  ],
+    "requiredPaths":  [
+                          "modules"
+                      ]
 }

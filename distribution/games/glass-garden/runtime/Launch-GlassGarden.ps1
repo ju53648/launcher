@@ -7,14 +7,15 @@ $form = New-Object System.Windows.Forms.Form
 $form.Text = 'Glass Garden'
 $form.StartPosition = 'CenterScreen'
 $form.ClientSize = New-Object System.Drawing.Size(980, 700)
-$form.BackColor = [System.Drawing.Color]::FromArgb(226, 244, 235)
+$form.BackColor = [System.Drawing.Color]::FromArgb(236, 247, 240)
 $form.FormBorderStyle = 'FixedSingle'
 $form.MaximizeBox = $false
+$form.KeyPreview = $true
 
 $seasonPools = @(
-    @{ Name = 'Spring Glass'; Symbols = @('ROSE','MOSS','IVY','LILY','FERN','IRIS','REED','SAGE') },
-    @{ Name = 'Summer House'; Symbols = @('ORCHID','MYRTLE','LOTUS','THYME','BASIL','LAUREL','CLOVER','CUMIN') },
-    @{ Name = 'Night Bloom'; Symbols = @('ASTER','ALOE','CEDAR','POPPY','BRIAR','MAPLE','HEATHER','JUNIPER') }
+    @{ Name = 'Spring Conservatory'; Symbols = @('ROSE','MOSS','IVY','LILY','FERN','IRIS','REED','SAGE') },
+    @{ Name = 'Amber Glasshouse'; Symbols = @('ORCHID','MYRTLE','LOTUS','THYME','BASIL','LAUREL','CLOVER','CUMIN') },
+    @{ Name = 'Moon Orchard'; Symbols = @('ASTER','ALOE','CEDAR','POPPY','BRIAR','MAPLE','HEATHER','JUNIPER') }
 )
 
 $script:deck = @()
@@ -39,6 +40,14 @@ $script:seasonTimeLeft = 0
 $script:stressThreshold = 5
 $script:comboMilestones = 0
 $script:timeDecayMultiplier = 1
+$script:focusCharges = 0
+$script:focusCost = 5
+$script:focusDurationMs = 1800
+$script:pendingHideButtons = @()
+$script:cardBaseColor = [System.Drawing.Color]::FromArgb(182, 227, 205)
+$script:cardSelectedColor = [System.Drawing.Color]::FromArgb(244, 220, 154)
+$script:cardMatchedColor = [System.Drawing.Color]::FromArgb(122, 191, 155)
+$script:cardMismatchColor = [System.Drawing.Color]::FromArgb(226, 143, 143)
 
 $title = New-Object System.Windows.Forms.Label
 $title.Text = 'GLASS GARDEN'
@@ -65,7 +74,7 @@ $seasonLabel.Location = New-Object System.Drawing.Point(30, 94)
 $form.Controls.Add($seasonLabel)
 
 $previewLabel = New-Object System.Windows.Forms.Label
-$previewLabel.Text = 'Preview: memorize the beds'
+$previewLabel.Text = 'Preview: read the planting pattern'
 $previewLabel.ForeColor = [System.Drawing.Color]::FromArgb(90, 143, 112)
 $previewLabel.Font = New-Object System.Drawing.Font('Segoe UI', 10, [System.Drawing.FontStyle]::Bold)
 $previewLabel.AutoSize = $true
@@ -73,7 +82,7 @@ $previewLabel.Location = New-Object System.Drawing.Point(30, 124)
 $form.Controls.Add($previewLabel)
 
 $crackLabel = New-Object System.Windows.Forms.Label
-$crackLabel.Text = 'Glass stress: 0 / 5'
+$crackLabel.Text = 'Canopy stress: 0 / 5'
 $crackLabel.ForeColor = [System.Drawing.Color]::FromArgb(170, 96, 96)
 $crackLabel.Font = New-Object System.Drawing.Font('Segoe UI', 11, [System.Drawing.FontStyle]::Bold)
 $crackLabel.AutoSize = $true
@@ -97,7 +106,7 @@ $resetButton.BackColor = [System.Drawing.Color]::FromArgb(137, 212, 176)
 $form.Controls.Add($resetButton)
 
 $bestLabel = New-Object System.Windows.Forms.Label
-$bestLabel.Text = 'Best bloom: 0 score / season 1'
+$bestLabel.Text = 'Best house: 0 score / season 1'
 $bestLabel.ForeColor = [System.Drawing.Color]::FromArgb(39, 108, 75)
 $bestLabel.Font = New-Object System.Drawing.Font('Segoe UI', 10, [System.Drawing.FontStyle]::Bold)
 $bestLabel.AutoSize = $true
@@ -105,7 +114,7 @@ $bestLabel.Location = New-Object System.Drawing.Point(740, 132)
 $form.Controls.Add($bestLabel)
 
 $status = New-Object System.Windows.Forms.Label
-$status.Text = 'Memorize the beds during preview. Three clean seasons restores the glasshouse.'
+$status.Text = 'Read the beds during preview. Three clean seasons stabilize the whole conservatory.'
 $status.ForeColor = [System.Drawing.Color]::FromArgb(39, 108, 75)
 $status.MaximumSize = New-Object System.Drawing.Size(220, 0)
 $status.AutoSize = $true
@@ -113,12 +122,36 @@ $status.Location = New-Object System.Drawing.Point(740, 168)
 $form.Controls.Add($status)
 
 $recapLabel = New-Object System.Windows.Forms.Label
-$recapLabel.Text = 'Last bloom: none yet'
+$recapLabel.Text = 'Last house: none yet'
 $recapLabel.ForeColor = [System.Drawing.Color]::FromArgb(90, 143, 112)
 $recapLabel.MaximumSize = New-Object System.Drawing.Size(220, 0)
 $recapLabel.AutoSize = $true
 $recapLabel.Location = New-Object System.Drawing.Point(740, 240)
 $form.Controls.Add($recapLabel)
+
+$focusButton = New-Object System.Windows.Forms.Button
+$focusButton.Text = 'Glass Focus (0)'
+$focusButton.Location = New-Object System.Drawing.Point(740, 326)
+$focusButton.Size = New-Object System.Drawing.Size(180, 40)
+$focusButton.FlatStyle = 'Flat'
+$focusButton.BackColor = [System.Drawing.Color]::FromArgb(189, 228, 211)
+$form.Controls.Add($focusButton)
+
+$focusHintLabel = New-Object System.Windows.Forms.Label
+$focusHintLabel.Text = 'Reveal every hidden bed for a short burst by spending sunlight.'
+$focusHintLabel.ForeColor = [System.Drawing.Color]::FromArgb(90, 143, 112)
+$focusHintLabel.MaximumSize = New-Object System.Drawing.Size(220, 0)
+$focusHintLabel.AutoSize = $true
+$focusHintLabel.Location = New-Object System.Drawing.Point(740, 374)
+$form.Controls.Add($focusHintLabel)
+
+$shortcutLabel = New-Object System.Windows.Forms.Label
+$shortcutLabel.Text = 'Shortcuts: H = Glass Focus, R = fresh conservatory run'
+$shortcutLabel.ForeColor = [System.Drawing.Color]::FromArgb(39, 108, 75)
+$shortcutLabel.MaximumSize = New-Object System.Drawing.Size(220, 0)
+$shortcutLabel.AutoSize = $true
+$shortcutLabel.Location = New-Object System.Drawing.Point(740, 430)
+$form.Controls.Add($shortcutLabel)
 
 foreach ($module in @('StatePersistence.ps1', 'UiHelpers.ps1', 'GameFlow.ps1', 'EntryPoint.ps1')) {
     $modulePath = Join-Path $script:runtimeRoot (Join-Path 'modules' $module)
@@ -135,7 +168,7 @@ for ($index = 0; $index -lt 16; $index++) {
     $button.Size = New-Object System.Drawing.Size(170, 110)
     $button.Location = New-Object System.Drawing.Point(30 + (($index % 4) * 170), 170 + ([Math]::Floor($index / 4) * 118))
     $button.FlatStyle = 'Flat'
-    $button.BackColor = [System.Drawing.Color]::FromArgb(182, 227, 205)
+    $button.BackColor = $script:cardBaseColor
     $button.Font = New-Object System.Drawing.Font('Segoe UI', 13, [System.Drawing.FontStyle]::Bold)
     $buttons += $button
     $form.Controls.Add($button)
@@ -145,9 +178,28 @@ $hideTimer = New-Object System.Windows.Forms.Timer
 $hideTimer.Interval = 900
 $hideTimer.Add_Tick({
     $hideTimer.Stop()
-    Show-AllCards $false
+    foreach ($pendingButton in $script:pendingHideButtons) {
+        if ($pendingButton.Enabled) {
+            $pendingButton.Text = 'BLOOM'
+            Set-CardState $pendingButton 'Default'
+        }
+    }
+    $script:pendingHideButtons = @()
     $script:firstPick = $null
     $script:busy = $false
+    Update-Hud
+})
+
+$focusTimer = New-Object System.Windows.Forms.Timer
+$focusTimer.Interval = $script:focusDurationMs
+$focusTimer.Add_Tick({
+    $focusTimer.Stop()
+    $script:revealed = $false
+    $script:busy = $false
+    Show-AllCards $false
+    $previewLabel.Text = 'Garden Focus fades. Tend the beds before sunlight fades.'
+    $status.Text = 'Garden Focus settled. Trust the pattern and keep the canopy steady.'
+    Update-Hud
 })
 
 $previewTimer = New-Object System.Windows.Forms.Timer
@@ -162,7 +214,7 @@ $previewTimer.Add_Tick({
         $gameplayTimer.Start()
     }
     else {
-        $previewLabel.Text = "Preview: $($script:previewSeconds)s  |  Sunlight budget: $($script:seasonTimeLimit)s"
+        $previewLabel.Text = "Preview: $($script:previewSeconds)s  |  Sunlight budget: $($script:seasonTimeLimit)s  |  Focus: $($script:focusCharges)"
     }
 })
 
@@ -180,6 +232,22 @@ $gameplayTimer.Add_Tick({
     }
 })
 
+$focusButton.Add_Click({ Use-GardenFocus })
+$form.Add_KeyDown({
+    param($sender, $eventArgs)
+
+    switch ($eventArgs.KeyCode) {
+        'H' {
+            Use-GardenFocus
+            $eventArgs.SuppressKeyPress = $true
+        }
+        'R' {
+            Reset-Run
+            $eventArgs.SuppressKeyPress = $true
+        }
+    }
+})
+
 foreach ($button in $buttons) {
     $button.Add_Click({
         param($sender, $eventArgs)
@@ -191,6 +259,9 @@ foreach ($button in $buttons) {
         $sender.Text = [string]$sender.Tag
         if ($null -eq $script:firstPick) {
             $script:firstPick = $sender
+            Set-CardState $sender 'Selected'
+            $status.Text = 'Bloom selected. Trace its twin before the glass cools.'
+            Update-Hud
             return
         }
 
@@ -198,13 +269,18 @@ foreach ($button in $buttons) {
         if ([string]$script:firstPick.Tag -eq [string]$sender.Tag) {
             $script:firstPick.Enabled = $false
             $sender.Enabled = $false
-            $script:firstPick.BackColor = [System.Drawing.Color]::FromArgb(122, 191, 155)
-            $sender.BackColor = [System.Drawing.Color]::FromArgb(122, 191, 155)
+            Set-CardState $script:firstPick 'Matched'
+            Set-CardState $sender 'Matched'
             $script:matches += 1
             $script:combo += 1
             $timeGain = 2 + [Math]::Min(2, [Math]::Floor($script:combo / 3))
             $comboBonus = 0
             $specialStatus = $false
+            $decayRecovered = $false
+            if ($script:timeDecayMultiplier -gt 1 -and $script:combo -ge 2) {
+                $script:timeDecayMultiplier = [Math]::Max(1, $script:timeDecayMultiplier - 1)
+                $decayRecovered = $true
+            }
             if ($script:combo -eq 4 -or $script:combo -eq 9 -or $script:combo -eq 15) {
                 $comboBonus = 40 + ($script:season * 5)
                 $timeGain += 1
@@ -233,6 +309,9 @@ foreach ($button in $buttons) {
             }
             elseif (-not $specialStatus) {
                 $status.Text = "Healthy bloom. +$timeGain s sunlight banked."
+            }
+            if ($decayRecovered) {
+                $status.Text += " Decay eased to x$($script:timeDecayMultiplier)."
             }
             $script:firstPick = $null
             if ($script:matches -ge 8) {
@@ -284,11 +363,14 @@ foreach ($button in $buttons) {
             $script:cracks += 1
             $script:seasonMismatches += 1
             $timeLoss = 2
+            Set-CardState $script:firstPick 'Mismatch'
+            Set-CardState $sender 'Mismatch'
+            $script:pendingHideButtons = @($script:firstPick, $sender)
             if ($script:seasonMismatches -gt $script:season) {
-                $timeLoss = 4
-                $script:timeDecayMultiplier = [Math]::Min(3, $script:timeDecayMultiplier + ($script:seasonMismatches - $script:season))
+                $timeLoss = 3
+                $script:timeDecayMultiplier = [Math]::Min(3, $script:timeDecayMultiplier + 1)
                 $stressLeft = [Math]::Max(0, $script:stressThreshold - $script:cracks)
-                $status.Text = "TIMEBOMB! Decay x$($script:timeDecayMultiplier). -4s penalty. $stressLeft stress until collapse."
+                $status.Text = "Canopy unstable! Decay x$($script:timeDecayMultiplier). -3s penalty. $stressLeft stress until collapse."
             }
             else {
                 $stressLeft = [Math]::Max(0, $script:stressThreshold - $script:cracks)

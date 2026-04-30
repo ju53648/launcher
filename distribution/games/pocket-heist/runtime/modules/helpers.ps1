@@ -6,7 +6,7 @@ function Save-Progress {
         $script:bestFloor = $script:floor
     }
 
-    $bestLabel.Text = "Best job: $($script:bestScore) score / floor $($script:bestFloor)"
+    $bestLabel.Text = "Best score: $($script:bestScore) / floor $($script:bestFloor)"
     $payload = @{
         bestScore = $script:bestScore
         bestFloor = $script:bestFloor
@@ -15,11 +15,14 @@ function Save-Progress {
 }
 
 function Update-Board {
+    $threatTiles = Get-ProjectedThreatTiles
     for ($row = 0; $row -lt $size; $row++) {
         for ($col = 0; $col -lt $size; $col++) {
             $button = $buttons[$row][$col]
             $button.Text = ''
             $button.BackColor = [System.Drawing.Color]::FromArgb(34, 37, 46)
+            $button.FlatAppearance.BorderSize = 1
+            $button.FlatAppearance.BorderColor = [System.Drawing.Color]::FromArgb(58, 62, 74)
             $key = "$row,$col"
             if ($walls.Contains($key)) {
                 $button.Text = '#'
@@ -55,11 +58,19 @@ function Update-Board {
                 $button.Text = 'YOU'
                 $button.BackColor = [System.Drawing.Color]::FromArgb(255, 214, 74)
             }
+            if ($threatTiles.Contains($key) -and -not $walls.Contains($key) -and -not ($player.Row -eq $row -and $player.Col -eq $col)) {
+                $button.FlatAppearance.BorderSize = 3
+                $button.FlatAppearance.BorderColor = [System.Drawing.Color]::FromArgb(255, 174, 82)
+                if ([string]::IsNullOrEmpty($button.Text)) {
+                    $button.Text = '!'
+                    $button.BackColor = [System.Drawing.Color]::FromArgb(88, 58, 36)
+                }
+            }
         }
     }
     $extractText = if ($script:extractionTimer -gt 0) { [string]$script:extractionTimer } else { '--' }
     $intelText = if ($script:intelCollected) { 'YES' } else { '--' }
-    $hud.Text = "Loot: $($script:collected) / 3    Intel: $intelText    Alarm: $($script:alarm)    Floor: $($script:floor)    Smoke: $($script:smoke)    Extract: $extractText    Score: $($script:score)"
+    $hud.Text = "Loot: $($script:collected) / 3    Intel: $intelText    Bypass: $($script:cameraBypass)    Alarm: $($script:alarm)    Floor: $($script:floor)    Smoke: $($script:smoke)    Extract: $extractText    Score: $($script:score)"
     $alarmLabel.Text = "Alarm Heat: $($script:alarm)%"
     $alarmBar.Value = [Math]::Min(100, [Math]::Max(0, $script:alarm))
     $alarmLabel.ForeColor = if ($script:alarm -ge 75) {
@@ -68,6 +79,20 @@ function Update-Board {
         [System.Drawing.Color]::FromArgb(255, 160, 40)
     } else {
         [System.Drawing.Color]::FromArgb(130, 200, 130)
+    }
+
+    $threatCount = $threatTiles.Count
+    if ($threatCount -eq 0) {
+        $threatLabel.Text = 'Threat scan: no direct guard reach next turn.'
+        $threatLabel.ForeColor = [System.Drawing.Color]::FromArgb(130, 200, 130)
+    }
+    elseif ($threatCount -le 4) {
+        $threatLabel.Text = "Threat scan: $threatCount hot tile$(if ($threatCount -ne 1) { 's' }) outlined in orange."
+        $threatLabel.ForeColor = [System.Drawing.Color]::FromArgb(255, 194, 94)
+    }
+    else {
+        $threatLabel.Text = "Threat scan: $threatCount hot tiles. Patrol net is tightening."
+        $threatLabel.ForeColor = [System.Drawing.Color]::FromArgb(255, 132, 96)
     }
 }
 

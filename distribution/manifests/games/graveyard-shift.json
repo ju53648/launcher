@@ -3,8 +3,8 @@
     "itemType":  "game",
     "name":  "Graveyard Shift",
     "version":  "0.1.0",
-    "description":  "A tiny horror-clicker where you keep a cemetery lantern line alive while things keep crawling back out.",
-    "developer":  "Lumorix",
+    "description":  "A reactive horror-arcade survival game where you keep a cemetery lantern line alive while the dead keep surging back.",
+    "developer":  "Wake Chapel Arcade",
     "releaseDate":  "2026-04-29",
     "categories":  [
                        "Horror",
@@ -32,8 +32,8 @@
     "coverImage":  "/assets/games/graveyard-shift-cover.svg",
     "bannerImage":  "/assets/games/graveyard-shift-banner.svg",
     "iconImage":  "/assets/games/graveyard-shift-icon.svg",
-    "executable":  "Launch-GraveyardShift.ps1",
-    "installSizeBytes":  11802468,
+    "executable":  "GraveyardShift.exe",
+    "installSizeBytes":  11835871,
     "defaultInstallFolder":  "Graveyard Shift",
     "supportedActions":  [
                              "install",
@@ -50,18 +50,21 @@
     "download":  {
                      "kind":  "httpArchive",
                      "url":  "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/games/graveyard-shift/release/graveyard-shift-win64.zip",
-                     "sha256":  "f04f75fbb5f219bdf04c7d072c8a74bd8b06df408877b896ce1915905b751439",
-                     "sizeBytes":  11802687
+                     "sha256":  "be00d08d9df6752e8e1d6627d7fbeb345fb7feca71410d361c45f4c4479d53cd",
+                     "sizeBytes":  11813766
                  },
     "changelog":  [
                       {
                           "version":  "0.1.0",
                           "date":  "2026-04-29",
                           "items":  [
-                                        "Added a compact reactive cemetery defense game with click-based survival loops.",
-                                        "Runs as a native PowerShell Windows Forms desktop window.",
-                                        "Ships with a local content pack above 10 MB while distributing as a compact ZIP archive."
+                                        "Expanded a compact reactive cemetery defense game with click-based survival loops.",
+                                        "Now presented as a native Windows desktop executable with a branded Lumorix Arcade release shell.",
+                                        "Positioned as a replayable standalone release from its own studio identity inside the launcher catalog."
                                     ]
                       }
-                  ]
+                  ],
+    "requiredPaths":  [
+                          "modules"
+                      ]
 }

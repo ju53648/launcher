@@ -3,8 +3,8 @@
     "itemType":  "game",
     "name":  "Frostline Courier",
     "version":  "0.1.0",
-    "description":  "A compact route-planning game about moving scarce cargo across frozen stations before the weather eats your margin.",
-    "developer":  "Lumorix",
+    "description":  "A replayable route-planning strategy game about hauling scarce cargo across frozen stations under shifting dispatch conditions.",
+    "developer":  "North Lantern Cartography",
     "releaseDate":  "2026-04-29",
     "categories":  [
                        "Strategy",
@@ -32,8 +32,8 @@
     "coverImage":  "/assets/games/frostline-courier-cover.svg",
     "bannerImage":  "/assets/games/frostline-courier-banner.svg",
     "iconImage":  "/assets/games/frostline-courier-icon.svg",
-    "executable":  "Launch-FrostlineCourier.ps1",
-    "installSizeBytes":  11803019,
+    "executable":  "FrostlineCourier.exe",
+    "installSizeBytes":  11840519,
     "defaultInstallFolder":  "Frostline Courier",
     "supportedActions":  [
                              "install",
@@ -50,18 +50,21 @@
     "download":  {
                      "kind":  "httpArchive",
                      "url":  "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/games/frostline-courier/release/frostline-courier-win64.zip",
-                     "sha256":  "6a78a07e67e9eca9645ab50d6b177b36789a5ed6724841db6b5b782183d3cbc5",
-                     "sizeBytes":  11802957
+                     "sha256":  "7311be8c2b7e829790f8b45e808e640384d0a10d5e26e95b0696cc29ae6520bd",
+                     "sizeBytes":  11815022
                  },
     "changelog":  [
                       {
                           "version":  "0.1.0",
                           "date":  "2026-04-29",
                           "items":  [
-                                        "Added a compact route-planning strategy prototype with fuel pressure and contract selection.",
-                                        "Runs as a native PowerShell Windows Forms desktop window.",
-                                        "Ships with a local content pack above 10 MB while distributing as a compact ZIP archive."
+                                        "Expanded a compact route-planning strategy prototype with fuel pressure and contract selection.",
+                                        "Now presented as a native Windows desktop executable with a branded Lumorix Arcade release shell.",
+                                        "Positioned as a replayable standalone release from its own studio identity inside the launcher catalog."
                                     ]
                       }
-                  ]
+                  ],
+    "requiredPaths":  [
+                          "modules"
+                      ]
 }

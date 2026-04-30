@@ -915,7 +915,7 @@ namespace EchoProtocol
 
         public EchoForm()
         {
-            Text = L("Echo Protocol // Atmosphere Build 0.6", "Echo Protocol // Atmosphere Build 0.6");
+            Text = L("Echo Protocol // Case Spiral Build 0.8", "Echo Protocol // Case Spiral Build 0.8");
             StartPosition = FormStartPosition.CenterScreen;
             Size = new Size(1640, 980);
             MinimumSize = new Size(1360, 860);
@@ -1012,12 +1012,12 @@ namespace EchoProtocol
 
         private void BuildScenes()
         {
-            AddScene("office", "Akt I / Nachtschicht", "Polizeibuero bei Nacht", "Mordkommission / 02:13 Uhr",
-                "Waehle die erste Spur und lege fest, wie tief du in dieser Schicht graben willst.",
-                "Regen haemmert gegen die Scheiben.\n\nZu laut.\nZu konstant.\n\nMiras Akte liegt auf deinem Tisch.\n\nZu sauber.\nZu duenn.\nZu falsch.\n\nDie Uhr zeigt 02:13.\n\nSie zeigt immer 02:13.",
-                "Die Akte liegt wieder vor dir.\n\nDu hast sie weggeschlossen.\nDu hast den Schluessel behalten.\n\nTrotzdem liegt sie da.\n\nAm Rand steht deine Handschrift:\n\nNicht die erste Nacht.\nNicht der erste Elias.",
-                "\"Mira Hartmann. 11 Tage vermisst. Letzter Kontakt: du.\"",
-                "\"Wenn du das hier liest, bist du wieder am Anfang.\"",
+            AddScene("office", "Akt I / Ruecklauf", "Buerofenster, 02:13", "Ermittlungszelle / Nordfluegel",
+                "Lege fest, welche erste Spur du diesem Ruecklauf diesmal glaubst.",
+                "Der Regen kratzt nicht an der Scheibe. Er tastet.\n\nZu gleichmaessig.\nZu absichtlich.\n\nMiras Akte liegt offen unter der Schreibtischlampe.\n\nZu duenn fuer elf verlorene Tage.\nZu sauber fuer einen echten Fall.\n\nDie Digitaluhr springt nicht weiter.\n\n02:13. Wieder.",
+                "Die Akte wartet schon, als haette sie dich vor dir erreicht.\n\nDer Schrank ist abgeschlossen.\nDer Schluessel steckt in deiner Tasche.\n\nTrotzdem liegt sie aufgeschlagen da.\n\nAuf dem Deckblatt steht in deiner Handschrift:\n\nBeim zweiten Blick beginnt der Fehler.",
+                "\"Mira Hartmann. 11 Tage vermisst. Letzter gesicherter Kontakt: du.\"",
+                "\"Wenn du wieder hier bist, hat der Fall dich erneut ausgespuckt.\"",
                 2,
                 C("open", "Akte oeffnen", "Der offizielle Weg. Sicher. Kontrolliert. Genau deshalb falsch.", "file",
                     Flag("openedFile", true), Shift(1), Time(1), Note("clue", "Akte geoeffnet", "Der erste Ordner ist zu sauber fuer ein echtes Vermisstenverfahren.")),
@@ -1783,7 +1783,7 @@ namespace EchoProtocol
             header.Controls.Add(_objective);
 
             _buildMark.AutoSize = true;
-            _buildMark.Text = "ATMOSPHERE BUILD 0.7";
+            _buildMark.Text = "CASE SPIRAL 0.8";
             _buildMark.ForeColor = Color.FromArgb(245, 205, 112);
             _buildMark.Font = new Font("Consolas", 10f, FontStyle.Bold);
             _buildMark.Location = new Point(760, 22);

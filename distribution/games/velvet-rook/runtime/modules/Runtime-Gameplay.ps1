@@ -4,6 +4,8 @@ function Update-Board {
             $button = $buttons[$row][$col]
             $key = "$row,$col"
             $button.Text = ''
+            $button.FlatAppearance.BorderSize = 1
+            $button.FlatAppearance.BorderColor = [System.Drawing.Color]::FromArgb(112, 78, 120)
             $button.BackColor = if (($row + $col) % 2 -eq 0) {
                 [System.Drawing.Color]::FromArgb(58, 32, 64)
             }
@@ -48,6 +50,11 @@ function Update-Board {
             if ($rook.Row -eq $row -and $rook.Col -eq $col) {
                 $button.Text = 'R'
                 $button.BackColor = [System.Drawing.Color]::FromArgb(255, 189, 226)
+            }
+
+            if ($script:hoverPreview -eq $key) {
+                $button.FlatAppearance.BorderSize = 3
+                $button.FlatAppearance.BorderColor = [System.Drawing.Color]::FromArgb(139, 196, 255)
             }
         }
     }
@@ -100,6 +107,8 @@ function Build-Level {
     $script:moves = 7 + [Math]::Min(5, [Math]::Floor(($script:level - 1) * 0.8))
     $script:maxShields = [Math]::Min(2, [Math]::Max(1, [Math]::Floor($script:level / 3)))
     $script:shieldCharges = 0
+    $script:hoverPreview = $null
+    Clear-UndoSnapshot
 
     while ($targets.Count -lt 4) {
         $cell = "$($rng.Next(0,6)),$($rng.Next(0,6))"
@@ -158,6 +167,7 @@ function Build-Level {
 
     Rebuild-DangerTiles
     Update-Board
+    Update-PreviewText
 }
 
 function Lose-Board([string]$message) {
@@ -221,6 +231,7 @@ function Move-Rook([string]$key) {
         }
     }
 
+    Save-UndoSnapshot
     $rook.Row = $row
     $rook.Col = $col
     $script:moves -= $moveCost
@@ -300,4 +311,99 @@ function Move-Rook([string]$key) {
     }
 
     Update-Board
+    Update-PreviewText
+}
+
+function Get-PreviewSummary([int]$row, [int]$col) {
+    if ($row -eq $rook.Row -and $col -eq $rook.Col) {
+        return 'Current square. Hover a straight lane to inspect move cost and threats.'
+    }
+
+    if ($row -ne $rook.Row -and $col -ne $rook.Col) {
+        return 'Invalid lane. The rook can only travel horizontally or vertically.'
+    }
+
+    $distance = [Math]::Abs($row - $rook.Row) + [Math]::Abs($col - $rook.Col)
+    $moveCost = [Math]::Ceiling([double]$distance / 2)
+    $key = "$row,$col"
+    $rowStep = 0
+    $colStep = 0
+    if ($row -eq $rook.Row) {
+        $colStep = if ($col -gt $rook.Col) { 1 } else { -1 }
+    }
+    else {
+        $rowStep = if ($row -gt $rook.Row) { 1 } else { -1 }
+    }
+
+    $checkRow = $rook.Row + $rowStep
+    $checkCol = $rook.Col + $colStep
+    while ($checkRow -ne $row -or $checkCol -ne $col) {
+        foreach ($sentinel in $sentinels) {
+            if ($sentinel.Row -eq $checkRow -and $sentinel.Col -eq $checkCol) {
+                return "Blocked lane. A sentinel cuts this route before the destination. Cost would be $moveCost."
+            }
+        }
+        $checkRow += $rowStep
+        $checkCol += $colStep
+    }
+
+    foreach ($sentinel in $sentinels) {
+        if ($sentinel.Row -eq $row -and $sentinel.Col -eq $col) {
+            return "Destination occupied by a sentinel. Choose another square. Cost would be $moveCost."
+        }
+    }
+
+    $pickup = if ($targets.Contains($key)) {
+        'Sigil'
+    }
+    elseif ($breakerTargets.Contains($key)) {
+        'Breaker'
+    }
+    elseif ($bonusSanctuaries.Contains($key)) {
+        'Bonus haven'
+    }
+    elseif ($sanctuaries.Contains($key)) {
+        'Haven'
+    }
+    else {
+        'Empty square'
+    }
+
+    $danger = if ($dangerTiles.Contains($key) -and -not $sanctuaries.Contains($key)) {
+        'threatened'
+    }
+    elseif ($sanctuaries.Contains($key)) {
+        'safe haven'
+    }
+    else {
+        'currently safe'
+    }
+
+    $fuelText = if ($script:moves -lt $moveCost) {
+        "Need $moveCost moves, only $($script:moves) left."
+    }
+    else {
+        "Costs $moveCost move(s), $($script:moves - $moveCost) left after landing."
+    }
+
+    return "$pickup ahead. $fuelText Destination is $danger."
+}
+
+function Set-HoverPreview([string]$key) {
+    $script:hoverPreview = $key
+    $parts = $key.Split(',')
+    $row = [int]$parts[0]
+    $col = [int]$parts[1]
+    $previewLabel.Text = Get-PreviewSummary $row $col
+    Update-Board
+}
+
+function Clear-HoverPreview {
+    $script:hoverPreview = $null
+    Update-PreviewText
+    Update-Board
+}
+
+function Update-PreviewText {
+    $previewLabel.Text = 'Hover a lane to preview cost, blockers and current danger.'
 }

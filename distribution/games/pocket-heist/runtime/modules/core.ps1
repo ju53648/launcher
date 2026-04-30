@@ -8,6 +8,7 @@ function Load-Floor([int]$floorNumber) {
     $script:smoke = [Math]::Max(1, 3 - [Math]::Floor(($floorNumber - 1) / 2))
     $script:intelCollected = $false
     $script:cameraGrace = if ($floorNumber -eq 1) { 1 } else { 0 }
+    $script:cameraBypass = 0
     $script:zoneRule = if (($floorNumber % 2) -eq 0) {
         'Asymmetry active: west wing gives cover, east wing is exposed.'
     }
@@ -50,22 +51,32 @@ function Load-Floor([int]$floorNumber) {
     Update-Board
 }
 
-function Move-Guard-Once([object]$guard) {
-    $guardKey = "$($guard.Row),$($guard.Col)"
+function Get-GuardMoveCount {
+    if ($script:alarm -ge 85) {
+        return 3
+    }
+    if ($script:alarm -ge 65) {
+        return 2
+    }
+    return 1
+}
+
+function Get-GuardMoveTarget([int]$guardRow, [int]$guardCol) {
+    $guardKey = "$guardRow,$guardCol"
     if ($smokeTiles.ContainsKey($guardKey)) {
-        return
+        return $guardKey
     }
 
-    $rowDelta = $player.Row - $guard.Row
-    $colDelta = $player.Col - $guard.Col
+    $rowDelta = $player.Row - $guardRow
+    $colDelta = $player.Col - $guardCol
     $candidateSteps = @()
 
-    # At high alarm, guards prioritize both axes aggressively
     $isHighAlarm = $script:alarm -ge 60
     if ($isHighAlarm) {
         if ($rowDelta -ne 0) { $candidateSteps += ,@([Math]::Sign($rowDelta), 0) }
         if ($colDelta -ne 0) { $candidateSteps += ,@(0, [Math]::Sign($colDelta)) }
-    } elseif ([Math]::Abs($rowDelta) -ge [Math]::Abs($colDelta)) {
+    }
+    elseif ([Math]::Abs($rowDelta) -ge [Math]::Abs($colDelta)) {
         if ($rowDelta -ne 0) {
             $candidateSteps += ,@([Math]::Sign($rowDelta), 0)
         }
@@ -81,14 +92,15 @@ function Move-Guard-Once([object]$guard) {
             $candidateSteps += ,@([Math]::Sign($rowDelta), 0)
         }
     }
+
     $candidateSteps += ,@(1,0)
     $candidateSteps += ,@(-1,0)
     $candidateSteps += ,@(0,1)
     $candidateSteps += ,@(0,-1)
 
     foreach ($step in $candidateSteps) {
-        $nextRow = $guard.Row + [int]$step[0]
-        $nextCol = $guard.Col + [int]$step[1]
+        $nextRow = $guardRow + [int]$step[0]
+        $nextCol = $guardCol + [int]$step[1]
         $nextKey = "$nextRow,$nextCol"
         if ($nextRow -lt 0 -or $nextRow -ge $size -or $nextCol -lt 0 -or $nextCol -ge $size) {
             continue
@@ -96,10 +108,39 @@ function Move-Guard-Once([object]$guard) {
         if ($walls.Contains($nextKey)) {
             continue
         }
-        $guard.Row = $nextRow
-        $guard.Col = $nextCol
-        break
+        return $nextKey
     }
+
+    return $guardKey
+}
+
+function Get-ProjectedThreatTiles {
+    $threatTiles = New-Object System.Collections.Generic.HashSet[string]
+    $moveCount = Get-GuardMoveCount
+
+    foreach ($guard in $guards) {
+        $guardRow = [int]$guard.Row
+        $guardCol = [int]$guard.Col
+        for ($stepIndex = 0; $stepIndex -lt $moveCount; $stepIndex++) {
+            $nextKey = Get-GuardMoveTarget $guardRow $guardCol
+            if ($nextKey -eq "$guardRow,$guardCol") {
+                break
+            }
+            [void]$threatTiles.Add($nextKey)
+            $parts = $nextKey.Split(',')
+            $guardRow = [int]$parts[0]
+            $guardCol = [int]$parts[1]
+        }
+    }
+
+    return $threatTiles
+}
+
+function Move-Guard-Once([object]$guard) {
+    $nextKey = Get-GuardMoveTarget ([int]$guard.Row) ([int]$guard.Col)
+    $parts = $nextKey.Split(',')
+    $guard.Row = [int]$parts[0]
+    $guard.Col = [int]$parts[1]
 }
 
 function Move-Guards {
@@ -123,11 +164,20 @@ function Move-Guards {
 
 function Trigger-Cameras {
     $key = "$($player.Row),$($player.Col)"
+    $cameraTriggered = $false
+    $guardPressureTriggered = $false
+
     if ($cameras.Contains($key)) {
-        if ($script:cameraGrace -gt 0) {
+        if ($script:cameraBypass -gt 0) {
+            $script:cameraBypass -= 1
+            $status.Text = "Ghost pass burned. Camera trace spoofed clean ($($script:cameraBypass) left)."
+            $cameraTriggered = $true
+        }
+        elseif ($script:cameraGrace -gt 0) {
             $script:cameraGrace -= 1
             $script:alarm = [Math]::Min(100, $script:alarm + 8)
             $status.Text = 'Glitchy camera sweep. You bought a softer trace.'
+            $cameraTriggered = $true
         }
         else {
             $cameraHit = if ($script:floorModifier -like '*22 alarm*') { 22 } else { 18 }
@@ -142,6 +192,7 @@ function Trigger-Cameras {
                 $script:alarm = [Math]::Min(100, $script:alarm + $cameraHit)
                 $status.Text = 'Camera sweep. The building knows you are here.'
             }
+            $cameraTriggered = $true
         }
     }
     $playerInSmoke = $smokeTiles.ContainsKey("$($player.Row),$($player.Col)")
@@ -157,11 +208,29 @@ function Trigger-Cameras {
             if ($distance -le $pressureRange) {
                 $alarmDelta = if ($distance -le 1) { 14 } else { 10 }
                 $script:alarm = [Math]::Min(100, $script:alarm + $alarmDelta)
+                $guardPressureTriggered = $true
             }
         }
     }
-    # Patrol rhythm: every move raises alarm steadily
-    $script:alarm = [Math]::Min(100, $script:alarm + 2)
+
+    $patrolHeat = 2
+    if (($script:floor % 2) -eq 0) {
+        if ($player.Col -le 2) {
+            $patrolHeat = 1
+        }
+        elseif ($player.Col -ge 4) {
+            $patrolHeat = 3
+        }
+    }
+    if ($playerInSmoke) {
+        $patrolHeat = [Math]::Max(0, $patrolHeat - 1)
+    }
+
+    $script:alarm = [Math]::Min(100, $script:alarm + $patrolHeat)
+
+    if (-not $cameraTriggered -and -not $guardPressureTriggered -and $patrolHeat -le 1) {
+        $status.Text = 'Quiet lane. You are moving under the building noise.'
+    }
 }
 
 function End-Run([string]$message) {
@@ -191,6 +260,14 @@ function Drop-Smoke {
     Update-Board
 }
 
+function Start-Job {
+    $script:running = $true
+    $script:score = 0
+    Load-Floor 1
+    $status.Text = 'MISSION: Grab 3 loot | Collect intel for bypass | Reach EXIT | Avoid guards & cameras'
+    $recapLabel.Text = 'Last job: active infiltration'
+}
+
 function Start-PocketHeistRuntime {
     $form.Add_KeyDown({
         param($sender, $eventArgs)
@@ -200,15 +277,13 @@ function Start-PocketHeistRuntime {
             'Up'    { Handle-Move ($player.Row - 1) $player.Col }
             'Down'  { Handle-Move ($player.Row + 1) $player.Col }
             'Space' { Drop-Smoke }
+            'Enter' { Start-Job }
+            'R'     { Start-Job }
         }
     })
 
     $startButton.Add_Click({
-        $script:running = $true
-        $script:score = 0
-        Load-Floor 1
-        $status.Text = 'MISSION: Grab 3 loot | Collect intel for bonus | Reach EXIT | Avoid guards & cameras'
-        $recapLabel.Text = 'Last job: active infiltration'
+        Start-Job
     })
 
     Load-Floor 1

@@ -3,8 +3,8 @@
     "itemType":  "game",
     "name":  "Pocket Heist",
     "version":  "0.1.0",
-    "description":  "A stealthy micro-heist game about grabbing loot on a tight grid before the guard pattern closes in.",
-    "developer":  "Lumorix",
+    "description":  "A replayable micro-stealth heist about reading patrol routes, stealing intel, and extracting clean before lockdown.",
+    "developer":  "Velvet Mile Games",
     "releaseDate":  "2026-04-29",
     "categories":  [
                        "Stealth",
@@ -32,8 +32,8 @@
     "coverImage":  "/assets/games/pocket-heist-cover.svg",
     "bannerImage":  "/assets/games/pocket-heist-banner.svg",
     "iconImage":  "/assets/games/pocket-heist-icon.svg",
-    "executable":  "Launch-PocketHeist.ps1",
-    "installSizeBytes":  11803259,
+    "executable":  "PocketHeist.exe",
+    "installSizeBytes":  11842707,
     "defaultInstallFolder":  "Pocket Heist",
     "supportedActions":  [
                              "install",
@@ -50,18 +50,21 @@
     "download":  {
                      "kind":  "httpArchive",
                      "url":  "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/games/pocket-heist/release/pocket-heist-win64.zip",
-                     "sha256":  "80df65e99d14850e115490e2e6b313f3c3a895aabc856ff29cd42bcfd7546aff",
-                     "sizeBytes":  11802925
+                     "sha256":  "873d4d7db0c6379a53ec56127ff0d42a103ce4dc80c42556bc37955807e9bba3",
+                     "sizeBytes":  11816290
                  },
     "changelog":  [
                       {
                           "version":  "0.1.0",
                           "date":  "2026-04-29",
                           "items":  [
-                                        "Added a grid-based stealth prototype focused on route reading and escape timing.",
-                                        "Runs as a native PowerShell Windows Forms desktop window.",
-                                        "Ships with a local content pack above 10 MB while distributing as a compact ZIP archive."
+                                        "Expanded a grid-based stealth prototype focused on route reading and escape timing.",
+                                        "Now presented as a native Windows desktop executable with a branded Lumorix Arcade release shell.",
+                                        "Positioned as a replayable standalone release from its own studio identity inside the launcher catalog."
                                     ]
                       }
-                  ]
+                  ],
+    "requiredPaths":  [
+                          "modules"
+                      ]
 }

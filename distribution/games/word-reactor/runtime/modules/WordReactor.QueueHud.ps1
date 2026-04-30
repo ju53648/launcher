@@ -19,6 +19,61 @@ function Fill-Queue {
     }
 }
 
+function Update-EntryFeedback {
+    if (-not $entryBox) {
+        return
+    }
+
+    $entryBox.BackColor = $script:defaultEntryBackColor
+    $entryBox.ForeColor = $script:defaultEntryForeColor
+    $activeWordLabel.ForeColor = [System.Drawing.Color]::FromArgb(88, 255, 214)
+
+    if (-not $script:running -or $script:queue.Count -eq 0) {
+        $signalLabel.Text = 'Trace monitor: standby'
+        return
+    }
+
+    $typed = $entryBox.Text.ToLowerInvariant()
+    if ([string]::IsNullOrWhiteSpace($typed)) {
+        $signalLabel.Text = 'Trace monitor: ready for next command'
+        return
+    }
+
+    $targetWord = $script:queue[0]
+    if ($targetWord.StartsWith($typed, [System.StringComparison]::OrdinalIgnoreCase)) {
+        $matchedCount = $typed.Length
+        $entryBox.BackColor = [System.Drawing.Color]::FromArgb(230, 255, 245)
+        $entryBox.ForeColor = [System.Drawing.Color]::FromArgb(17, 65, 49)
+        if ($matchedCount -ge $targetWord.Length) {
+            $signalLabel.Text = "Trace monitor: exact lock on $($targetWord.ToUpperInvariant()). Commit now."
+            $activeWordLabel.ForeColor = [System.Drawing.Color]::FromArgb(255, 230, 156)
+        }
+        else {
+            $nextCharacter = $targetWord.Substring($matchedCount, 1).ToUpperInvariant()
+            $signalLabel.Text = "Trace monitor: lock $matchedCount/$($targetWord.Length)  |  next: $nextCharacter"
+        }
+        return
+    }
+
+    $mismatchIndex = 0
+    $comparisonLength = [Math]::Min($typed.Length, $targetWord.Length)
+    while ($mismatchIndex -lt $comparisonLength -and $typed[$mismatchIndex] -eq $targetWord[$mismatchIndex]) {
+        $mismatchIndex += 1
+    }
+
+    $expectedCharacter = if ($mismatchIndex -lt $targetWord.Length) {
+        $targetWord.Substring($mismatchIndex, 1).ToUpperInvariant()
+    }
+    else {
+        'END'
+    }
+
+    $entryBox.BackColor = [System.Drawing.Color]::FromArgb(255, 234, 236)
+    $entryBox.ForeColor = [System.Drawing.Color]::FromArgb(104, 26, 36)
+    $activeWordLabel.ForeColor = [System.Drawing.Color]::FromArgb(255, 156, 108)
+    $signalLabel.Text = "Trace monitor: drift at slot $($mismatchIndex + 1). Expected $expectedCharacter."
+}
+
 function Refresh-QueueDisplay {
     Fill-Queue
     $activeWordLabel.Text = $script:queue[0].ToUpperInvariant()
@@ -28,11 +83,18 @@ function Refresh-QueueDisplay {
     }
     $queueWordLabel.Text = "QUEUE: " + ($preview -join '  |  ')
     $roundLabel.Text = "Round $($script:round) objective: $($script:roundGoal) clean commits  |  Completed: $($script:correctThisRound)"
+    Update-EntryFeedback
 }
 
 function Update-Hud {
     $ventDisplay = if ($script:ventCooldown -eq 0) { 'VENT:RDY' } else { "VentCD:$($script:ventCooldown)s" }
-    $hud.Text = "Score: $($script:score)    Time: $($script:timeLeft)s    Heat: $($script:heat)%    Streak: $($script:streak)    Round: $($script:round)    Obj: $($script:correctThisRound)/$($script:roundGoal)    $ventDisplay"
+    $directiveDisplay = if ($null -eq $script:specialEventActive) {
+        'Directive: none'
+    }
+    else {
+        "Directive: $($script:specialEventActive.Name) [$($script:specialEventActive.Remaining)]"
+    }
+    $hud.Text = "Score: $($script:score)    Time: $($script:timeLeft)s    Heat: $($script:heat)%    Streak: $($script:streak)    Round: $($script:round)    Obj: $($script:correctThisRound)/$($script:roundGoal)    $ventDisplay    $directiveDisplay"
     $heatLabel.Text = "Heat: $($script:heat)%"
     $heatBar.Value = [Math]::Min(100, [Math]::Max(0, $script:heat))
 

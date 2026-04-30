@@ -3,8 +3,8 @@
     "itemType":  "game",
     "name":  "Echo Protocol",
     "version":  "0.4.4",
-    "description":  "You don\u0027t remember this case. But it remembers you. A native psychological mystery app with deep archive progression and large investigation content.",
-    "developer":  "Lumorix",
+    "description":  "You don\u0027t remember this case, but it remembers every loop. A native psychological mystery with shifting evidence, archive dives, and escalating reality drift.",
+    "developer":  "Hinterland Signal",
     "releaseDate":  "2026-04-28",
     "categories":  [
                        "Mystery",
@@ -46,7 +46,7 @@
     "bannerImage":  "/assets/games/echo-protocol-banner.svg",
     "iconImage":  "/assets/games/echo-protocol-icon.svg",
     "executable":  "EchoProtocol.exe",
-    "installSizeBytes":  179200,
+    "installSizeBytes":  179712,
     "defaultInstallFolder":  "Echo Protocol",
     "supportedActions":  [
                              "install",
@@ -63,16 +63,16 @@
     "download":  {
                      "kind":  "httpArchive",
                      "url":  "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/games/echo-protocol/release/echo-protocol-win64.zip",
-                     "sha256":  "46769438bd2a1bac51c3fae65757110e71a97ebe60bbf8f2e2ecf0381f629a44",
-                     "sizeBytes":  54848
+                     "sha256":  "c82e905b3fd9adfaaa27ca095a04174a6d8d515d9e6a44e0a8bc9c5d02a34117",
+                     "sizeBytes":  58725
                  },
     "changelog":  [
                       {
                           "version":  "0.4.4",
                           "date":  "2026-04-28",
                           "items":  [
-                                        "Prepared archive-based delivery for launcher-driven game updates.",
-                                        "Kept native executable launch and local save behavior unchanged."
+                                        "Retuned the opening case framing and presentation for the Case Spiral build.",
+                                        "Kept native executable launch while refreshing the in-app mystery atmosphere."
                                     ]
                       },
                       {

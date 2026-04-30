@@ -14,7 +14,7 @@ function Load-BestScore {
         $saveData = Get-Content $script:highScorePath -Raw | ConvertFrom-Json
         if ($null -ne $saveData.bestScore) {
             $script:bestScore = [int]$saveData.bestScore
-            $bestLabel.Text = "Best: $($script:bestScore)"
+            $bestLabel.Text = "Best containment: $($script:bestScore)"
         }
         if ($null -ne $saveData.bestTitle) {
             $script:bestTitle = [string]$saveData.bestTitle
@@ -35,5 +35,5 @@ function Save-BestScore {
     $payload = @{ bestScore = $script:score; bestTitle = $script:bestTitle } | ConvertTo-Json
     Set-Content -Path $script:highScorePath -Value $payload -Encoding UTF8
     $script:bestScore = $script:score
-    $bestLabel.Text = "Best: $($script:bestScore)"
+    $bestLabel.Text = "Best containment: $($script:bestScore)"
 }

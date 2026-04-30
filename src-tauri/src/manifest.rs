@@ -1,4 +1,8 @@
-use std::{collections::{BTreeMap, BTreeSet}, fs};
+use std::{
+    collections::{BTreeMap, BTreeSet},
+    fs,
+    path::Path,
+};
 
 use url::Url;
 
@@ -165,6 +169,9 @@ pub fn validate_manifest(manifest: &ContentManifest) -> Result<()> {
 
     let install_root = std::path::Path::new("C:\\LumorixValidation");
     safe_join(install_root, &manifest.executable)?;
+    for required_path in &manifest.required_paths {
+        safe_join(install_root, required_path)?;
+    }
 
     match &manifest.install_strategy {
         InstallStrategy::Synthetic {
@@ -222,4 +229,31 @@ pub fn validate_manifest(manifest: &ContentManifest) -> Result<()> {
     }
 
     Ok(())
+}
+
+pub fn missing_required_install_paths(
+    manifest: &ContentManifest,
+    install_root: &Path,
+) -> Result<Vec<String>> {
+    let mut missing = Vec::new();
+    let mut seen = BTreeSet::new();
+
+    let executable = safe_join(install_root, &manifest.executable)?;
+    if !executable.exists() {
+        missing.push(manifest.executable.clone());
+        seen.insert(manifest.executable.clone());
+    }
+
+    for required_path in &manifest.required_paths {
+        if !seen.insert(required_path.clone()) {
+            continue;
+        }
+
+        let path = safe_join(install_root, required_path)?;
+        if !path.exists() {
+            missing.push(required_path.clone());
+        }
+    }
+
+    Ok(missing)
 }
