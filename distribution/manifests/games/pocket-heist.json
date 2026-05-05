@@ -41,15 +41,9 @@
                              "repair",
                              "uninstall",
                              "openFolder",
-                             "update"
-                         ],
-    "installStrategy":  {
-                            "kind":  "zipArchive",
-                            "rootFolder":  "."
-                        },
-    "download":  {
-                     "kind":  "httpArchive",
-                     "url":  "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/games/pocket-heist/release/pocket-heist-win64.zip",
+                             "update",
+                             "moveInstall"
+                         ],/release/pocket-heist-win64.zip",
                      "sha256":  "873d4d7db0c6379a53ec56127ff0d42a103ce4dc80c42556bc37955807e9bba3",
                      "sizeBytes":  11816290
                  },

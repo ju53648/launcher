@@ -40,7 +40,8 @@
                              "update",
                              "repair",
                              "uninstall",
-                             "openFolder"
+                             "openFolder",
+                             "moveInstall"
                          ],
     "installStrategy":  {
                             "kind":  "zipArchive",

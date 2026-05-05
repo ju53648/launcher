@@ -32,6 +32,7 @@
       "verifyRepair": "Verify / Repair",
       "uninstall": "Uninstall",
       "showFiles": "Show files",
+      "moveInstall": "Move install",
       "chooseFolder": "Choose folder",
       "useRecommended": "Use recommended",
       "addLibrary": "Add library",
@@ -576,6 +577,13 @@
     "targetLabel": "Install target",
     "noLibrariesTitle": "No available library folders",
     "noLibrariesBody": "Add or reconnect a library in Settings before installing this item."
+  },
+  "moveDialog": {
+    "eyebrow": "Move install",
+    "currentLibrary": "Currently in: {{name}}",
+    "noLibrariesTitle": "No other library folders available",
+    "noLibrariesBody": "Add a second library in Settings to move this game to a different location.",
+    "savesPreserved": "Game saves and progress are preserved during the move."
   },
   "updater": {
     "title": "Launcher update",

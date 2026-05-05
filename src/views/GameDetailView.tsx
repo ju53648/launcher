@@ -1,8 +1,9 @@
-import { ArrowLeft, Download, FolderOpen, Play, Plus, RefreshCw, Trash2, Wrench, X } from "lucide-react";
+import { ArrowLeft, Download, FolderInput, FolderOpen, Play, Plus, RefreshCw, Trash2, Wrench, X } from "lucide-react";
 import { useState } from "react";
 
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { InstallDialog } from "../components/InstallDialog";
+import { MoveDialog } from "../components/MoveDialog";
 import { ProgressBar } from "../components/ProgressBar";
 import { RecommendationSection } from "../components/RecommendationSection";
 import { StatusBadge } from "../components/StatusBadge";
@@ -31,11 +32,13 @@ export function GameDetailView({
     closeItem,
     updateItem,
     repairItem,
+    moveInstallItem,
     uninstallItem,
     removeItemFromLibrary,
     openInstallFolder
   } = useLauncher();
   const [installOpen, setInstallOpen] = useState(false);
+  const [moveOpen, setMoveOpen] = useState(false);
   const [removeOpen, setRemoveOpen] = useState(false);
   const [uninstallOpen, setUninstallOpen] = useState(false);
 
@@ -155,6 +158,15 @@ export function GameDetailView({
             <button className="button button--secondary" onClick={() => openInstallFolder(item.catalog.id)} type="button">
               <FolderOpen size={16} />
               {t("common.actions.showFiles")}
+            </button>
+            <button
+              className="button button--secondary"
+              disabled={hasActiveJob || item.isRunning || snapshot.config.libraries.filter(l => l.status === "available" && l.id !== item.installed?.libraryId).length === 0}
+              onClick={() => setMoveOpen(true)}
+              type="button"
+            >
+              <FolderInput size={16} />
+              {t("common.actions.moveInstall")}
             </button>
             <button
               className="button button--danger"
@@ -304,6 +316,17 @@ export function GameDetailView({
           onClose={() => setInstallOpen(false)}
           onInstall={async (libraryId) => {
             await installItem(item.catalog.id, libraryId);
+          }}
+        />
+      )}
+
+      {moveOpen && (
+        <MoveDialog
+          item={item}
+          libraries={snapshot.config.libraries}
+          onClose={() => setMoveOpen(false)}
+          onMove={async (targetLibraryId) => {
+            await moveInstallItem(item.catalog.id, targetLibraryId);
           }}
         />
       )}

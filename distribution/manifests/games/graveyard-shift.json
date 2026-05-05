@@ -41,15 +41,9 @@
                              "repair",
                              "uninstall",
                              "openFolder",
-                             "update"
-                         ],
-    "installStrategy":  {
-                            "kind":  "zipArchive",
-                            "rootFolder":  "."
-                        },
-    "download":  {
-                     "kind":  "httpArchive",
-                     "url":  "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/games/graveyard-shift/release/graveyard-shift-win64.zip",
+                             "update",
+                             "moveInstall"
+                         ],/release/graveyard-shift-win64.zip",
                      "sha256":  "be00d08d9df6752e8e1d6627d7fbeb345fb7feca71410d361c45f4c4479d53cd",
                      "sizeBytes":  11813766
                  },

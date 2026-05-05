@@ -2188,6 +2188,16 @@
   color: var(--color-text);
 }
 
+.move-dialog__saves-note {
+  border: 1px solid rgba(0, 223, 160, 0.22);
+  border-radius: var(--radius-md);
+  background: rgba(0, 223, 160, 0.06);
+  color: #8fffe0;
+  font-size: 13px;
+  padding: var(--space-3) var(--space-4);
+  margin: 0;
+}
+
 .modal__actions {
   justify-content: flex-end;
 }

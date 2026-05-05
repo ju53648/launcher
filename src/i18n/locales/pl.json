@@ -32,6 +32,7 @@
       "verifyRepair": "Sprawdz / Napraw",
       "uninstall": "Odinstaluj",
       "showFiles": "Pokaz pliki",
+      "moveInstall": "Przenos instalacje",
       "chooseFolder": "Wybierz folder",
       "useRecommended": "Uzyj zalecanej lokalizacji",
       "addLibrary": "Dodaj biblioteke",
@@ -596,6 +597,13 @@
     "targetLabel": "Cel instalacji",
     "noLibrariesTitle": "Brak dostepnych folderow bibliotek",
     "noLibrariesBody": "Dodaj biblioteke w Ustawieniach albo przywroc jej dostepnosc przed instalacja tego elementu."
+  },
+  "moveDialog": {
+    "eyebrow": "Przenies instalacje",
+    "currentLibrary": "Aktualnie w: {{name}}",
+    "noLibrariesTitle": "Brak innych dostepnych folderow bibliotek",
+    "noLibrariesBody": "Dodaj druga biblioteke w Ustawieniach, aby przeniesc gre w inne miejsce.",
+    "savesPreserved": "Zapisy gry i postep sa zachowane podczas przenoszenia."
   },
   "updater": {
     "title": "Aktualizacja launchera",

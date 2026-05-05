@@ -69,6 +69,7 @@ interface LauncherContextValue {
   installItem: (itemId: string, libraryId: string | null) => Promise<InstallJob | null>;
   updateItem: (itemId: string) => Promise<InstallJob | null>;
   repairItem: (itemId: string) => Promise<InstallJob | null>;
+  moveInstallItem: (itemId: string, targetLibraryId: string) => Promise<InstallJob | null>;
   uninstallItem: (itemId: string) => Promise<void>;
   launchItem: (itemId: string) => Promise<void>;
   closeItem: (itemId: string) => Promise<void>;
@@ -314,6 +315,8 @@ export function LauncherProvider({ children }: { children: ReactNode }) {
         runJobAction("update-item", () => launcherApi.startUpdateItem(itemId)),
       repairItem: async (itemId) =>
         runJobAction("repair-item", () => launcherApi.repairItem(itemId)),
+      moveInstallItem: async (itemId, targetLibraryId) =>
+        runJobAction("move-install", () => launcherApi.moveInstallItem(itemId, targetLibraryId)),
       uninstallItem: (itemId) =>
         runSnapshotAction("uninstall-item", () => launcherApi.uninstallItem(itemId)),
       launchItem: (itemId) => runCommandAction("launch-item", () => launcherApi.launchItem(itemId)),

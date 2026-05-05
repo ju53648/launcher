@@ -32,6 +32,7 @@
       "verifyRepair": "Prufen / Reparieren",
       "uninstall": "Deinstallieren",
       "showFiles": "Dateien anzeigen",
+      "moveInstall": "Installation verschieben",
       "chooseFolder": "Ordner auswahlen",
       "useRecommended": "Empfohlenen Pfad verwenden",
       "addLibrary": "Bibliothek hinzufugen",
@@ -576,6 +577,13 @@
     "targetLabel": "Installationsziel",
     "noLibrariesTitle": "Keine verfugbaren Bibliotheksordner",
     "noLibrariesBody": "Fuge in den Einstellungen eine Bibliothek hinzu oder stelle die Verbindung wieder her, bevor du diesen Eintrag installierst."
+  },
+  "moveDialog": {
+    "eyebrow": "Installation verschieben",
+    "currentLibrary": "Aktuell in: {{name}}",
+    "noLibrariesTitle": "Kein anderer Bibliotheksordner verfugbar",
+    "noLibrariesBody": "Fuge in den Einstellungen eine zweite Bibliothek hinzu, um das Spiel an einen anderen Ort zu verschieben.",
+    "savesPreserved": "Spielstande und Fortschritt bleiben beim Verschieben erhalten."
   },
   "updater": {
     "title": "Launcher-Update",
