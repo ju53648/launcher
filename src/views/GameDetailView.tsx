@@ -1,4 +1,4 @@
-import { ArrowLeft, Download, FolderInput, FolderOpen, Play, Plus, RefreshCw, Trash2, Wrench, X } from "lucide-react";
+import { ArrowLeft, Download, FolderInput, FolderOpen, Play, Plus, RefreshCw, Star, Trash2, Wrench, X } from "lucide-react";
 import { useState } from "react";
 
 import { ConfirmDialog } from "../components/ConfirmDialog";
@@ -26,6 +26,8 @@ export function GameDetailView({
   const { locale, t } = useI18n();
   const {
     snapshot,
+    personalization,
+    setFavoriteItem,
     addItemToLibrary,
     installItem,
     launchItem,
@@ -37,6 +39,7 @@ export function GameDetailView({
     removeItemFromLibrary,
     openInstallFolder
   } = useLauncher();
+  const isFavorite = personalization.favoriteItemId === item.catalog.id;
   const [installOpen, setInstallOpen] = useState(false);
   const [moveOpen, setMoveOpen] = useState(false);
   const [removeOpen, setRemoveOpen] = useState(false);
@@ -104,58 +107,66 @@ export function GameDetailView({
           </div>
           <div className="detail-hero__badges">
             <StatusBadge status={gameStatus} type="game" />
+            {isFavorite && (
+              <span className="detail-favorite-badge">
+                <Star size={12} />
+                {t("detail.favoriteLabel")}
+              </span>
+            )}
           </div>
         </div>
       </section>
 
       <section className="detail-actions">
-        {item.collectionStatus === "notAdded" && manifest && (
-          <button
-            className="button button--primary"
-            onClick={() => addItemToLibrary(item.catalog.id)}
-            type="button"
-          >
-            <Plus size={16} />
-            {t("common.actions.addToLibrary")}
-          </button>
-        )}
-        {item.collectionStatus !== "notAdded" && primaryAction === "install" && manifest && (
-          <button className="button button--primary" onClick={() => setInstallOpen(true)} type="button">
-            <Download size={16} />
-            {t("common.actions.install")}
-          </button>
-        )}
-        {primaryAction === "launch" &&
-          (item.isRunning ? (
-            <button className="button button--danger" onClick={() => closeItem(item.catalog.id)} type="button">
-              <X size={16} />
-              {t("common.actions.closeGame")}
+        <div className="detail-actions__row">
+          {item.collectionStatus === "notAdded" && manifest && (
+            <button
+              className="button button--primary"
+              onClick={() => addItemToLibrary(item.catalog.id)}
+              type="button"
+            >
+              <Plus size={16} />
+              {t("common.actions.addToLibrary")}
             </button>
-          ) : (
-            <button className="button button--primary" onClick={() => launchItem(item.catalog.id)} type="button">
-              <Play size={16} />
-              {t("common.actions.launch")}
+          )}
+          {item.collectionStatus !== "notAdded" && primaryAction === "install" && manifest && (
+            <button className="button button--primary" onClick={() => setInstallOpen(true)} type="button">
+              <Download size={16} />
+              {t("common.actions.install")}
             </button>
-          ))}
-        {primaryAction === "update" && (
-          <button className="button button--primary" onClick={() => updateItem(item.catalog.id)} type="button">
-            <RefreshCw size={16} />
-            {t("common.actions.update")}
-          </button>
-        )}
-        {primaryAction === "repair" && (
-          <button className="button button--primary" onClick={() => repairItem(item.catalog.id)} type="button">
-            <Wrench size={16} />
-            {t("common.actions.repair")}
-          </button>
-        )}
+          )}
+          {primaryAction === "launch" &&
+            (item.isRunning ? (
+              <button className="button button--danger" onClick={() => closeItem(item.catalog.id)} type="button">
+                <X size={16} />
+                {t("common.actions.closeGame")}
+              </button>
+            ) : (
+              <button className="button button--primary" onClick={() => launchItem(item.catalog.id)} type="button">
+                <Play size={16} />
+                {t("common.actions.launch")}
+              </button>
+            ))}
+          {primaryAction === "update" && (
+            <button className="button button--primary" onClick={() => updateItem(item.catalog.id)} type="button">
+              <RefreshCw size={16} />
+              {t("common.actions.update")}
+            </button>
+          )}
+          {primaryAction === "repair" && (
+            <button className="button button--primary" onClick={() => repairItem(item.catalog.id)} type="button">
+              <Wrench size={16} />
+              {t("common.actions.repair")}
+            </button>
+          )}
+        </div>
         {isInstalled && (
-          <>
-            <button className="button button--secondary" onClick={() => repairItem(item.catalog.id)} type="button">
+          <div className="detail-actions__row">
+            <button className="button button--secondary" disabled={hasActiveJob || item.isRunning} onClick={() => repairItem(item.catalog.id)} type="button">
               <Wrench size={16} />
               {t("common.actions.verifyRepair")}
             </button>
-            <button className="button button--secondary" onClick={() => openInstallFolder(item.catalog.id)} type="button">
+            <button className="button button--secondary" disabled={hasActiveJob || item.isRunning} onClick={() => openInstallFolder(item.catalog.id)} type="button">
               <FolderOpen size={16} />
               {t("common.actions.showFiles")}
             </button>
@@ -177,19 +188,42 @@ export function GameDetailView({
               <Trash2 size={16} />
               {t("common.actions.uninstall")}
             </button>
-          </>
+            {item.collectionStatus !== "notAdded" && (
+              <button
+                className="button button--ghost"
+                disabled={hasActiveJob || item.isRunning}
+                onClick={() => setRemoveOpen(true)}
+                type="button"
+              >
+                <Trash2 size={16} />
+                {t("common.actions.removeFromLibrary")}
+              </button>
+            )}
+          </div>
         )}
-        {item.collectionStatus !== "notAdded" && (
+        {!isInstalled && item.collectionStatus !== "notAdded" && (
+          <div className="detail-actions__row">
+            <button
+              className="button button--ghost"
+              disabled={hasActiveJob || item.isRunning}
+              onClick={() => setRemoveOpen(true)}
+              type="button"
+            >
+              <Trash2 size={16} />
+              {t("common.actions.removeFromLibrary")}
+            </button>
+          </div>
+        )}
+        <div className="detail-actions__row">
           <button
-            className="button button--ghost"
-            disabled={isInstalled || hasActiveJob || item.isRunning}
-            onClick={() => setRemoveOpen(true)}
+            className={`button ${isFavorite ? "button--primary" : "button--ghost"}`}
+            onClick={() => void setFavoriteItem(isFavorite ? null : item.catalog.id)}
             type="button"
           >
-            <Trash2 size={16} />
-            {t("common.actions.removeFromLibrary")}
+            <Star size={16} />
+            {isFavorite ? t("detail.removeFavorite") : t("detail.addFavorite")}
           </button>
-        )}
+        </div>
         {hasActiveJob && <p className="detail-actions__hint">{t("library.card.transferHint")}</p>}
       </section>
 

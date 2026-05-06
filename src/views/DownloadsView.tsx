@@ -7,8 +7,9 @@ import { formatBytes, jobProgressLabel } from "../domain/format";
 import { getActiveJobs, getFinishedJobs, getQueuedJobs } from "../domain/selectors";
 import { useI18n } from "../i18n";
 import { useLauncher } from "../store/LauncherStore";
+import type { AppRoute } from "../components/AppShell";
 
-export function DownloadsView() {
+export function DownloadsView({ setRoute }: { setRoute: (route: AppRoute) => void }) {
   const { locale, t } = useI18n();
   const { snapshot, cancelJob, clearCompletedJobs } = useLauncher();
   if (!snapshot) return null;
@@ -22,6 +23,16 @@ export function DownloadsView() {
       <EmptyState
         title={t("downloads.emptyState.title")}
         body={t("downloads.emptyState.body")}
+        action={
+          <div className="empty-state__actions">
+            <button className="button button--primary" onClick={() => setRoute("shop")} type="button">
+              {t("common.actions.browseShop")}
+            </button>
+            <button className="button button--ghost" onClick={() => setRoute("library")} type="button">
+              {t("common.actions.openLibrary")}
+            </button>
+          </div>
+        }
       />
     );
   }

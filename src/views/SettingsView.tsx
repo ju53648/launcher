@@ -1,19 +1,32 @@
 import {
   Check,
+  Database,
   FolderPlus,
   Languages,
+  Monitor,
+  Moon,
+  Palette,
   RefreshCw,
   Save,
   ShieldCheck,
-  Trash2
+  Sun,
+  Trash2,
+  UserRound,
+  Users
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
+import { LauncherAvatar } from "../components/LauncherAvatar";
 import { StatusBadge } from "../components/StatusBadge";
 import { LauncherUpdatePanel } from "../components/LauncherUpdatePanel";
 import { GameRefreshPanel } from "../components/GameRefreshPanel";
+import { LAUNCHER_AVATAR_IDS, LAUNCHER_THEME_IDS } from "../domain/personalization";
 import { formatDate } from "../domain/format";
+import { getLibraryItems } from "../domain/selectors";
+import { loadColorMode, saveColorMode, type ColorMode } from "../domain/colorMode";
+import type { LauncherSnapshot } from "../domain/types";
 import { SUPPORTED_LOCALES, useI18n } from "../i18n";
+import { exportBackup, getBackupMeta } from "../services/backup";
 import { chooseDirectory } from "../services/tauri";
 import { useLauncher } from "../store/LauncherStore";
 
@@ -32,11 +45,26 @@ export function SettingsView() {
     checkItemUpdates,
     busyAction,
     updateProgress,
-    gameRefreshFeedback
+    gameRefreshFeedback,
+    personalization,
+    saveDisplayName,
+    setLauncherTheme,
+    setLauncherAvatar,
+    setFavoriteItem,
+    setAccentColor,
+    profiles,
+    activeProfileId,
+    switchProfile,
+    createNewProfile,
+    deleteProfile
   } = useLauncher();
   const [newLibraryName, setNewLibraryName] = useState("");
   const [newLibraryPath, setNewLibraryPath] = useState("");
   const [libraryNames, setLibraryNames] = useState<Record<string, string>>({});
+  const [displayNameDraft, setDisplayNameDraft] = useState(personalization.displayName);
+  const [newProfileName, setNewProfileName] = useState("");
+  const [creatingProfile, setCreatingProfile] = useState(false);
+  const [colorMode, setColorMode] = useState<ColorMode>(() => loadColorMode());
 
   const preferences = useMemo(() => {
     if (!snapshot) return null;
@@ -54,9 +82,21 @@ export function SettingsView() {
     setDraftPreferences(preferences);
   }, [preferences]);
 
+  useEffect(() => {
+    setDisplayNameDraft(personalization.displayName);
+  }, [personalization.displayName]);
+
   if (!snapshot || !preferences) return null;
 
   const prefs = draftPreferences ?? preferences;
+  const favoriteOptions = getLibraryItems(snapshot)
+    .filter((item) => item.catalog.itemType === "game")
+    .sort((left, right) => left.catalog.name.localeCompare(right.catalog.name));
+  const displayNameLocked = Boolean(personalization.displayName) && !personalization.canEditDisplayName;
+  const canSaveDisplayName =
+    displayNameDraft.trim().length > 0 &&
+    displayNameDraft.trim() !== personalization.displayName &&
+    !displayNameLocked;
   const languageOptions = SUPPORTED_LOCALES.map((value) => ({
     value,
     label: t(`common.languages.${value}`),
@@ -65,6 +105,332 @@ export function SettingsView() {
 
   return (
     <div className="settings-layout">
+      <section className="settings-section">
+        <div className="section-toolbar">
+          <div>
+            <p className="eyebrow">{t("settings.personalization.eyebrow")}</p>
+            <h2>{t("settings.personalization.title")}</h2>
+            <p className="muted">{t("settings.personalization.description")}</p>
+          </div>
+          <Palette size={18} />
+        </div>
+
+        <div className="identity-grid">
+          <div className="identity-card">
+            <div className="identity-card__header">
+              <UserRound size={18} />
+              <div>
+                <strong>{t("settings.personalization.nameTitle")}</strong>
+                <p className="muted">{t("settings.personalization.nameDescription")}</p>
+              </div>
+            </div>
+
+            <label className="identity-field">
+              <span>{t("common.labels.name")}</span>
+              <input
+                disabled={displayNameLocked}
+                maxLength={32}
+                value={displayNameDraft}
+                onChange={(event) => setDisplayNameDraft(event.target.value)}
+                placeholder={t("settings.personalization.namePlaceholder")}
+              />
+            </label>
+
+            <p className="muted">
+              {personalization.displayName
+                ? displayNameLocked
+                  ? t("settings.personalization.nameLockedUntil", {
+                      date: formatDate(personalization.nextDisplayNameChangeAt, locale, t)
+                    })
+                  : t("settings.personalization.nameReady")
+                : t("settings.personalization.nameMissing")}
+            </p>
+
+            <div className="identity-card__actions">
+              <button
+                className="button button--primary"
+                disabled={!canSaveDisplayName}
+                onClick={() => {
+                  void saveDisplayName(displayNameDraft).catch(() => undefined);
+                }}
+                type="button"
+              >
+                <Save size={16} />
+                {t("settings.personalization.saveName")}
+              </button>
+            </div>
+          </div>
+
+          <div className="identity-card">
+            <div className="identity-card__header">
+              <Palette size={18} />
+              <div>
+                <strong>{t("settings.personalization.themeTitle")}</strong>
+                <p className="muted">{t("settings.personalization.themeDescription")}</p>
+              </div>
+            </div>
+
+            <div className="theme-grid">
+              {LAUNCHER_THEME_IDS.map((themeId) => {
+                const active = personalization.themeId === themeId;
+                return (
+                  <button
+                    key={themeId}
+                    className={`theme-option ${active ? "is-active" : ""}`}
+                    onClick={() => {
+                      void setLauncherTheme(themeId);
+                    }}
+                    type="button"
+                    aria-pressed={active}
+                  >
+                    <span className={`theme-swatch theme-swatch--${themeId}`} aria-hidden="true" />
+                    <strong>{t(`settings.personalization.themes.${themeId}.name`)}</strong>
+                    <small>{t(`settings.personalization.themes.${themeId}.description`)}</small>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="identity-card identity-card--wide">
+            <div className="identity-card__header">
+              <Palette size={18} />
+              <div>
+                <strong>{t("settings.personalization.avatarTitle")}</strong>
+                <p className="muted">{t("settings.personalization.avatarDescription")}</p>
+              </div>
+            </div>
+
+            <div className="avatar-grid">
+              {LAUNCHER_AVATAR_IDS.map((avatarId) => {
+                const active = personalization.avatarId === avatarId;
+                return (
+                  <button
+                    key={avatarId}
+                    className={`avatar-option ${active ? "is-active" : ""}`}
+                    onClick={() => {
+                      void setLauncherAvatar(avatarId);
+                    }}
+                    type="button"
+                    aria-pressed={active}
+                  >
+                    <LauncherAvatar avatarId={avatarId} size="lg" />
+                    <strong>{t(`settings.personalization.avatars.${avatarId}.name`)}</strong>
+                    <small>{t(`settings.personalization.avatars.${avatarId}.description`)}</small>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="identity-card identity-card--wide">
+            <div className="identity-card__header">
+              <Palette size={18} />
+              <div>
+                <strong>{t("settings.personalization.favoriteTitle")}</strong>
+                <p className="muted">{t("settings.personalization.favoriteDescription")}</p>
+              </div>
+            </div>
+
+            <label className="identity-field">
+              <span>{t("settings.personalization.favoriteLabel")}</span>
+              <select
+                value={personalization.favoriteItemId ?? ""}
+                onChange={(event) => {
+                  void setFavoriteItem(event.target.value || null);
+                }}
+              >
+                <option value="">{t("settings.personalization.favoriteNone")}</option>
+                {favoriteOptions.map((item) => (
+                  <option key={item.catalog.id} value={item.catalog.id}>
+                    {item.catalog.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <p className="muted">
+              {favoriteOptions.length > 0
+                ? t("settings.personalization.favoriteHint")
+                : t("settings.personalization.favoriteEmpty")}
+            </p>
+          </div>
+
+          <div className="identity-card identity-card--wide">
+            <div className="identity-card__header">
+              <Palette size={18} />
+              <div>
+                <strong>{t("settings.personalization.accentColor.title")}</strong>
+                <p className="muted">{t("settings.personalization.accentColor.description")}</p>
+              </div>
+            </div>
+            <div className="accent-picker">
+              <input
+                type="color"
+                className="accent-picker__input"
+                value={personalization.accentColor ?? "#a78bfa"}
+                onChange={(e) => void setAccentColor(e.target.value)}
+                aria-label={t("settings.personalization.accentColor.title")}
+              />
+              <span className="accent-picker__hex">{personalization.accentColor ?? t("settings.personalization.accentColor.default")}</span>
+              {personalization.accentColor && (
+                <button
+                  className="button button--ghost"
+                  onClick={() => void setAccentColor(null)}
+                  type="button"
+                >
+                  {t("settings.personalization.accentColor.reset")}
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div className="identity-card identity-card--wide">
+            <div className="identity-card__header">
+              <Monitor size={18} />
+              <div>
+                <strong>{t("settings.personalization.colorMode.title")}</strong>
+                <p className="muted">{t("settings.personalization.colorMode.description")}</p>
+              </div>
+            </div>
+            <div className="color-mode-picker" role="radiogroup" aria-label={t("settings.personalization.colorMode.title")}>
+              {([
+                { value: "system", icon: Monitor },
+                { value: "dark", icon: Moon },
+                { value: "light", icon: Sun }
+              ] as const).map((option) => {
+                const Icon = option.icon;
+                const active = colorMode === option.value;
+                return (
+                  <button
+                    key={option.value}
+                    className={`color-mode-option ${active ? "is-active" : ""}`}
+                    type="button"
+                    role="radio"
+                    aria-checked={active}
+                    onClick={() => {
+                      setColorMode(option.value);
+                      saveColorMode(option.value);
+                    }}
+                  >
+                    <Icon size={16} />
+                    <span>{t(`settings.personalization.colorMode.${option.value}`)}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="settings-section">
+        <div className="section-toolbar">
+          <div>
+            <p className="eyebrow">{t("settings.profiles.eyebrow")}</p>
+            <h2>{t("settings.profiles.title")}</h2>
+            <p className="muted">{t("settings.profiles.description")}</p>
+          </div>
+          <Users size={18} />
+        </div>
+
+        <div className="profiles-list">
+          {profiles.map((profile) => {
+            const isActive = profile.id === activeProfileId;
+            return (
+              <div key={profile.id} className={`profile-settings-item ${isActive ? "is-active" : ""}`}>
+                <LauncherAvatar avatarId={profile.avatarId} size="sm" />
+                <div className="profile-settings-item__info">
+                  <strong>{profile.displayName}</strong>
+                  {isActive && (
+                    <small>{t("settings.profiles.active")}</small>
+                  )}
+                </div>
+                <div className="profile-settings-item__actions">
+                  {!isActive && (
+                    <button
+                      className="button button--secondary"
+                      onClick={() => void switchProfile(profile.id)}
+                      type="button"
+                    >
+                      {t("settings.profiles.switchTo")}
+                    </button>
+                  )}
+                  {profiles.length > 1 && !isActive && (
+                    <button
+                      className="icon-button"
+                      onClick={() => void deleteProfile(profile.id)}
+                      type="button"
+                      aria-label={t("profiles.delete", { name: profile.displayName })}
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {creatingProfile ? (
+          <div className="profile-create-form" style={{ marginTop: "var(--space-4)" }}>
+            <label className="identity-field">
+              <span>{t("settings.profiles.newNameLabel")}</span>
+              <input
+                autoFocus
+                maxLength={32}
+                placeholder={t("profiles.newNamePlaceholder")}
+                value={newProfileName}
+                onChange={(e) => setNewProfileName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && newProfileName.trim()) {
+                    void createNewProfile(newProfileName).then(() => {
+                      setCreatingProfile(false);
+                      setNewProfileName("");
+                    });
+                  }
+                  if (e.key === "Escape") {
+                    setCreatingProfile(false);
+                    setNewProfileName("");
+                  }
+                }}
+              />
+            </label>
+            <div className="action-row">
+              <button
+                className="button button--primary"
+                disabled={!newProfileName.trim()}
+                onClick={() => {
+                  void createNewProfile(newProfileName).then(() => {
+                    setCreatingProfile(false);
+                    setNewProfileName("");
+                  });
+                }}
+                type="button"
+              >
+                {t("profiles.create")}
+              </button>
+              <button
+                className="button button--ghost"
+                onClick={() => { setCreatingProfile(false); setNewProfileName(""); }}
+                type="button"
+              >
+                {t("common.actions.cancel")}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button
+            className="button button--secondary"
+            onClick={() => setCreatingProfile(true)}
+            style={{ marginTop: "var(--space-4)", width: "100%" }}
+            type="button"
+          >
+            <UserRound size={16} />
+            {t("settings.profiles.addProfile")}
+          </button>
+        )}
+      </section>
+
       <section className="settings-section">
         <div className="section-toolbar">
           <div>
@@ -330,6 +696,59 @@ export function SettingsView() {
           </div>
         </dl>
       </section>
+
+      <BackupSection snapshot={snapshot} t={t} />
     </div>
+  );
+}
+
+function BackupSection({
+  snapshot,
+  t
+}: {
+  snapshot: LauncherSnapshot;
+  t: (key: string, params?: Record<string, string | number | null | undefined>) => string;
+}) {
+  const { locale } = useI18n();
+  const [busy, setBusy] = useState(false);
+  const [meta, setMeta] = useState(() => getBackupMeta());
+
+  async function doBackup() {
+    setBusy(true);
+    try {
+      await exportBackup(snapshot);
+      setMeta(getBackupMeta());
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <section className="settings-section">
+      <div className="section-toolbar">
+        <div>
+          <p className="eyebrow">{t("backup.eyebrow")}</p>
+          <h2>{t("backup.title")}</h2>
+          <p className="muted">{t("backup.description")}</p>
+        </div>
+        <Database size={18} />
+      </div>
+      <div className="settings-card">
+        <p className="muted">
+          {meta.lastBackupAt
+            ? t("backup.lastBackup", { date: formatDate(meta.lastBackupAt, locale, t) })
+            : t("backup.neverBacked")}
+        </p>
+        <button
+          className="button button--primary"
+          disabled={busy}
+          onClick={() => void doBackup()}
+          type="button"
+        >
+          <Save size={16} />
+          {busy ? t("backup.exporting") : t("backup.exportNow")}
+        </button>
+      </div>
+    </section>
   );
 }

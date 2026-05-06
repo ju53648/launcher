@@ -1,4 +1,4 @@
-import { Search, SlidersHorizontal } from "lucide-react";
+import { FolderOpen, Plus, Search, SlidersHorizontal, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import type { AppRoute } from "../components/AppShell";
@@ -7,6 +7,8 @@ import { EmptyState } from "../components/EmptyState";
 import { GameCard } from "../components/GameCard";
 import { InstallDialog } from "../components/InstallDialog";
 import { formatDate, resolveIntlLocale } from "../domain/format";
+import { createLibraryGroup, loadLibraryGroups, saveLibraryGroups, type LibraryGroup } from "../domain/libraryGroups";
+import { getProfileScopedStorageKey } from "../domain/profileStorage";
 import { getGameStatus, getLibraryItems } from "../domain/selectors";
 import { getTagLabel, sortTagsByWeight } from "../domain/tags";
 import type { CatalogItemType, ContentView } from "../domain/types";
@@ -17,6 +19,7 @@ type LibrarySortKey = "name" | "lastPlayed" | "installed" | "recentlyAdded" | "p
 type InstallFilter = "all" | "installed" | "notInstalled";
 type UpdateFilter = "all" | "updates";
 type TypeFilter = "all" | CatalogItemType;
+type DisplayMode = "grid" | "compact";
 
 interface LibraryPreferences {
   search: string;
@@ -26,6 +29,7 @@ interface LibraryPreferences {
   typeFilter: TypeFilter;
   category: string;
   tag: string;
+  displayMode: DisplayMode;
 }
 
 const LIBRARY_PREFERENCES_KEY = "lumorix.library.preferences";
@@ -36,7 +40,8 @@ const DEFAULT_PREFERENCES: LibraryPreferences = {
   updateFilter: "all",
   typeFilter: "all",
   category: "all",
-  tag: "all"
+  tag: "all",
+  displayMode: "grid"
 };
 
 export function LibraryView({ setRoute }: { setRoute: (route: AppRoute) => void }) {
@@ -44,6 +49,7 @@ export function LibraryView({ setRoute }: { setRoute: (route: AppRoute) => void 
   const intlLocale = resolveIntlLocale(locale);
   const {
     snapshot,
+    activeProfileId,
     installItem,
     launchItem,
     closeItem,
@@ -52,15 +58,31 @@ export function LibraryView({ setRoute }: { setRoute: (route: AppRoute) => void 
     uninstallItem,
     removeItemFromLibrary
   } = useLauncher();
-  const [preferences, setPreferences] = useState<LibraryPreferences>(() => loadLibraryPreferences());
+  const [preferences, setPreferences] = useState<LibraryPreferences>(() => loadLibraryPreferences(activeProfileId));
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [installTarget, setInstallTarget] = useState<ContentView | null>(null);
   const [removeTarget, setRemoveTarget] = useState<ContentView | null>(null);
   const [uninstallTarget, setUninstallTarget] = useState<ContentView | null>(null);
+  const [groups, setGroups] = useState<LibraryGroup[]>(() => loadLibraryGroups(activeProfileId));
+  const [showGroups, setShowGroups] = useState(false);
+  const [newGroupName, setNewGroupName] = useState("");
+
+  const persistGroups = (next: LibraryGroup[]) => {
+    setGroups(next);
+    saveLibraryGroups(next, activeProfileId);
+  };
 
   useEffect(() => {
-    window.localStorage.setItem(LIBRARY_PREFERENCES_KEY, JSON.stringify(preferences));
-  }, [preferences]);
+    window.localStorage.setItem(
+      getProfileScopedStorageKey(LIBRARY_PREFERENCES_KEY, activeProfileId),
+      JSON.stringify(preferences)
+    );
+  }, [activeProfileId, preferences]);
+
+  useEffect(() => {
+    setPreferences(loadLibraryPreferences(activeProfileId));
+    setGroups(loadLibraryGroups(activeProfileId));
+  }, [activeProfileId]);
 
   const collator = useMemo(
     () => new Intl.Collator(intlLocale, { sensitivity: "base" }),
@@ -295,16 +317,48 @@ export function LibraryView({ setRoute }: { setRoute: (route: AppRoute) => void 
               {t("library.toolbar.results", { count: items.length })}
             </span>
             <div className="library-toolbar__actions">
+              <div className="library-display-mode toolbar-chip-group" role="radiogroup" aria-label={t("library.toolbar.viewMode")}>
+                <button
+                  className={`toolbar-chip ${preferences.displayMode === "grid" ? "is-active" : ""}`}
+                  onClick={() =>
+                    setPreferences((current) => ({ ...current, displayMode: "grid" }))
+                  }
+                  type="button"
+                  role="radio"
+                  aria-checked={preferences.displayMode === "grid"}
+                >
+                  {t("library.toolbar.viewGrid")}
+                </button>
+                <button
+                  className={`toolbar-chip ${preferences.displayMode === "compact" ? "is-active" : ""}`}
+                  onClick={() =>
+                    setPreferences((current) => ({ ...current, displayMode: "compact" }))
+                  }
+                  type="button"
+                  role="radio"
+                  aria-checked={preferences.displayMode === "compact"}
+                >
+                  {t("library.toolbar.viewCompact")}
+                </button>
+              </div>
               <button
-                className="text-button"
+                className={`toolbar-chip ${showAdvancedFilters ? "is-active" : ""}`}
                 onClick={() => setShowAdvancedFilters((current) => !current)}
                 type="button"
               >
                 {showAdvancedFilters ? "Weniger Filter" : "Mehr Filter"}
               </button>
+              <button
+                className={`toolbar-chip ${showGroups ? "is-active" : ""}`}
+                onClick={() => setShowGroups((v) => !v)}
+                type="button"
+              >
+                <FolderOpen size={14} />
+                {t("library.groups.toggleBtn")}
+              </button>
               {hasActiveFilters ? (
                 <button
-                  className="text-button"
+                  className="toolbar-chip"
                   onClick={() => setPreferences((current) => ({ ...DEFAULT_PREFERENCES, sortBy: current.sortBy }))}
                   type="button"
                 >
@@ -348,7 +402,11 @@ export function LibraryView({ setRoute }: { setRoute: (route: AppRoute) => void 
           }
         />
       ) : (
-        <section className="library-grid">
+        <section
+          className={`library-grid ${
+            preferences.displayMode === "compact" ? "library-grid--compact" : ""
+          }`}
+        >
           {items.map((item) => (
             <GameCard
               key={item.catalog.id}
@@ -411,19 +469,121 @@ export function LibraryView({ setRoute }: { setRoute: (route: AppRoute) => void 
           }}
         />
       )}
+
+      {showGroups && (
+        <section className="library-groups-panel">
+          <div className="section-toolbar">
+            <h3>{t("library.groups.panelTitle")}</h3>
+          </div>
+          <div className="library-groups-create">
+            <input
+              value={newGroupName}
+              onChange={(e) => setNewGroupName(e.target.value)}
+              placeholder={t("library.groups.newGroupPlaceholder")}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && newGroupName.trim()) {
+                  persistGroups([...groups, createLibraryGroup(newGroupName)]);
+                  setNewGroupName("");
+                }
+              }}
+            />
+            <button
+              className="button button--primary"
+              onClick={() => {
+                if (!newGroupName.trim()) return;
+                persistGroups([...groups, createLibraryGroup(newGroupName)]);
+                setNewGroupName("");
+              }}
+              type="button"
+            >
+              <Plus size={14} />
+              {t("library.groups.create")}
+            </button>
+          </div>
+          {groups.map((group) => {
+            const groupItems = items.filter((item) => group.itemIds.includes(item.catalog.id));
+            const availableToAdd = items.filter((item) => !group.itemIds.includes(item.catalog.id));
+            return (
+              <div key={group.id} className="library-group">
+                <div className="library-group__header">
+                  <span className="library-group__dot" style={{ background: group.color }} />
+                  <strong>{group.name}</strong>
+                  <span className="muted">{groupItems.length}</span>
+                  <button
+                    className="icon-button"
+                    onClick={() => persistGroups(groups.filter((g) => g.id !== group.id))}
+                    type="button"
+                    aria-label={t("library.groups.delete")}
+                  >
+                    <Trash2 size={13} />
+                  </button>
+                </div>
+                <div className="library-group__chips">
+                  {groupItems.map((item) => (
+                    <span key={item.catalog.id} className="library-group-chip">
+                      {item.catalog.name}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          persistGroups(groups.map((g) =>
+                            g.id === group.id
+                              ? { ...g, itemIds: g.itemIds.filter((id) => id !== item.catalog.id) }
+                              : g
+                          ));
+                        }}
+                        aria-label="Remove"
+                      >×</button>
+                    </span>
+                  ))}
+                  {availableToAdd.length > 0 && (
+                    <select
+                      className="library-group-chip library-group-chip--add"
+                      value=""
+                      onChange={(e) => {
+                        const id = e.target.value;
+                        if (!id) return;
+                        persistGroups(groups.map((g) =>
+                          g.id === group.id ? { ...g, itemIds: [...g.itemIds, id] } : g
+                        ));
+                      }}
+                    >
+                      <option value="">{t("library.groups.addItem")}</option>
+                      {availableToAdd.map((item) => (
+                        <option key={item.catalog.id} value={item.catalog.id}>
+                          {item.catalog.name}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+          {groups.length === 0 && (
+            <p className="muted">{t("library.groups.empty")}</p>
+          )}
+        </section>
+      )}
     </div>
   );
 }
 
-function loadLibraryPreferences(): LibraryPreferences {
-  const saved = window.localStorage.getItem(LIBRARY_PREFERENCES_KEY);
+function loadLibraryPreferences(activeProfileId: string): LibraryPreferences {
+  if (typeof window === "undefined") {
+    return DEFAULT_PREFERENCES;
+  }
+
+  const saved =
+    window.localStorage.getItem(getProfileScopedStorageKey(LIBRARY_PREFERENCES_KEY, activeProfileId)) ??
+    window.localStorage.getItem(LIBRARY_PREFERENCES_KEY);
   if (!saved) return DEFAULT_PREFERENCES;
 
   try {
     const parsed = JSON.parse(saved) as Partial<LibraryPreferences>;
     return {
       ...DEFAULT_PREFERENCES,
-      ...parsed
+      ...parsed,
+      displayMode: parsed.displayMode === "compact" ? "compact" : "grid"
     };
   } catch {
     return DEFAULT_PREFERENCES;

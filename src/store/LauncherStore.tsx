@@ -28,6 +28,18 @@ import {
   type LauncherUpdateProgress
 } from "../services/appUpdater";
 import { launcherApi } from "../services/launcherApi";
+import {
+  DISPLAY_NAME_COOLDOWN_DAYS,
+  isLauncherAvatarId,
+  isLauncherThemeId,
+  type LauncherAvatarId,
+  type LauncherThemeId,
+  type Profile,
+  type ProfilesState,
+  createProfile as makeProfile,
+  loadProfilesState,
+  saveProfilesState
+} from "../domain/personalization";
 
 export interface GameRefreshSummary {
   gamesChecked: number;
@@ -43,6 +55,17 @@ export interface GameRefreshFeedback {
   errorMessage: string | null;
 }
 
+export interface LauncherPersonalization {
+  displayName: string;
+  themeId: LauncherThemeId;
+  avatarId: LauncherAvatarId;
+  favoriteItemId: string | null;
+  nameUpdatedAt: string | null;
+  canEditDisplayName: boolean;
+  nextDisplayNameChangeAt: string | null;
+  accentColor: string | null;
+}
+
 interface LauncherContextValue {
   snapshot: LauncherSnapshot | null;
   loading: boolean;
@@ -50,8 +73,19 @@ interface LauncherContextValue {
   error: LauncherError | null;
   updateProgress: LauncherUpdateProgress;
   gameRefreshFeedback: GameRefreshFeedback;
+  personalization: LauncherPersonalization;
+  profiles: Profile[];
+  activeProfileId: string;
   clearError: () => void;
   refresh: () => Promise<void>;
+  saveDisplayName: (name: string) => Promise<void>;
+  setLauncherTheme: (themeId: LauncherThemeId) => Promise<void>;
+  setLauncherAvatar: (avatarId: LauncherAvatarId) => Promise<void>;
+  setFavoriteItem: (itemId: string | null) => Promise<void>;
+  setAccentColor: (color: string | null) => Promise<void>;
+  createNewProfile: (displayName: string) => Promise<void>;
+  switchProfile: (profileId: string) => Promise<void>;
+  deleteProfile: (profileId: string) => Promise<void>;
   completeOnboarding: (libraryPath: string | null) => Promise<void>;
   addLibrary: (name: string, path: string) => Promise<void>;
   renameLibrary: (libraryId: string, name: string) => Promise<void>;
@@ -84,6 +118,18 @@ interface LauncherContextValue {
 
 const LauncherContext = createContext<LauncherContextValue | undefined>(undefined);
 
+const PERSONALIZATION_STORAGE_KEY = "lumorix.launcher.personalization";
+const DISPLAY_NAME_COOLDOWN_MS = DISPLAY_NAME_COOLDOWN_DAYS * 24 * 60 * 60 * 1000;
+
+interface StoredLauncherPersonalization {
+  displayName?: string;
+  themeId?: LauncherThemeId;
+  avatarId?: LauncherAvatarId;
+  favoriteItemId?: string | null;
+  nameUpdatedAt?: string | null;
+  accentColor?: string | null;
+}
+
 export function LauncherProvider({ children }: { children: ReactNode }) {
   const { locale, setLocale } = useI18n();
   const initialLocale = useRef(locale);
@@ -102,6 +148,28 @@ export function LauncherProvider({ children }: { children: ReactNode }) {
     summary: null,
     errorMessage: null
   });
+  const [personalization, setPersonalization] = useState<LauncherPersonalization>(() =>
+    hydratePersonalization(loadStoredPersonalization())
+  );
+
+  // ─── Profiles ──────────────────────────────────────────────────────────────
+  const [profilesState, setProfilesState] = useState<ProfilesState>(() =>
+    initProfilesState(loadStoredPersonalization())
+  );
+
+  const persistProfilesState = useCallback((next: ProfilesState) => {
+    setProfilesState(next);
+    saveProfilesState(next.profiles, next.activeProfileId);
+  }, []);
+
+  const persistPersonalization = useCallback((next: StoredLauncherPersonalization) => {
+    setPersonalization(hydratePersonalization(next));
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    window.localStorage.setItem(PERSONALIZATION_STORAGE_KEY, JSON.stringify(next));
+  }, []);
 
   const publishSnapshot = useCallback((next: LauncherSnapshot) => {
     setSnapshot(normalizeLauncherSnapshot(next));
@@ -260,8 +328,157 @@ export function LauncherProvider({ children }: { children: ReactNode }) {
       error,
       updateProgress,
       gameRefreshFeedback,
+      personalization,
+      profiles: profilesState.profiles,
+      activeProfileId: profilesState.activeProfileId,
       clearError: () => setError(null),
       refresh,
+      saveDisplayName: async (name) => {
+        const trimmedName = normalizeDisplayName(name);
+        const currentName = personalization.displayName;
+
+        if (!trimmedName) {
+          throw new Error("Display name cannot be empty");
+        }
+
+        if (
+          currentName &&
+          currentName !== trimmedName &&
+          !personalization.canEditDisplayName
+        ) {
+          throw new Error("Display name change is currently locked");
+        }
+
+        if (currentName === trimmedName) {
+          return;
+        }
+
+        const nameUpdatedAt = new Date().toISOString();
+        persistPersonalization({
+          displayName: trimmedName,
+          themeId: personalization.themeId,
+          avatarId: personalization.avatarId,
+          favoriteItemId: personalization.favoriteItemId,
+          nameUpdatedAt,
+          accentColor: personalization.accentColor
+        });
+        const updated = profilesState.profiles.map((p) =>
+          p.id === profilesState.activeProfileId ? { ...p, displayName: trimmedName } : p
+        );
+        persistProfilesState({ ...profilesState, profiles: updated });
+      },
+      setLauncherTheme: async (themeId) => {
+        persistPersonalization({
+          displayName: personalization.displayName,
+          themeId,
+          avatarId: personalization.avatarId,
+          favoriteItemId: personalization.favoriteItemId,
+          nameUpdatedAt: personalization.nameUpdatedAt,
+          accentColor: personalization.accentColor
+        });
+        const updated = profilesState.profiles.map((p) =>
+          p.id === profilesState.activeProfileId ? { ...p, themeId } : p
+        );
+        persistProfilesState({ ...profilesState, profiles: updated });
+      },
+      setLauncherAvatar: async (avatarId) => {
+        persistPersonalization({
+          displayName: personalization.displayName,
+          themeId: personalization.themeId,
+          avatarId,
+          favoriteItemId: personalization.favoriteItemId,
+          nameUpdatedAt: personalization.nameUpdatedAt,
+          accentColor: personalization.accentColor
+        });
+        const updated = profilesState.profiles.map((p) =>
+          p.id === profilesState.activeProfileId ? { ...p, avatarId } : p
+        );
+        persistProfilesState({ ...profilesState, profiles: updated });
+      },
+      setFavoriteItem: async (itemId) => {
+        const normalized = normalizeFavoriteItemId(itemId);
+        persistPersonalization({
+          displayName: personalization.displayName,
+          themeId: personalization.themeId,
+          avatarId: personalization.avatarId,
+          favoriteItemId: normalized,
+          nameUpdatedAt: personalization.nameUpdatedAt,
+          accentColor: personalization.accentColor
+        });
+        // Keep the active profile in sync
+        const updated = profilesState.profiles.map((p) =>
+          p.id === profilesState.activeProfileId ? { ...p, favoriteItemId: normalized } : p
+        );
+        persistProfilesState({ ...profilesState, profiles: updated });
+      },
+      setAccentColor: async (color) => {
+        const normalized = normalizeAccentColor(color);
+        persistPersonalization({
+          displayName: personalization.displayName,
+          themeId: personalization.themeId,
+          avatarId: personalization.avatarId,
+          favoriteItemId: personalization.favoriteItemId,
+          nameUpdatedAt: personalization.nameUpdatedAt,
+          accentColor: normalized
+        });
+      },
+      createNewProfile: async (displayName) => {
+        const trimmed = displayName.trim().slice(0, 32);
+        if (!trimmed) throw new Error("Display name cannot be empty");
+        const newProfile = makeProfile(trimmed, personalization.avatarId, personalization.themeId);
+        const nextProfiles = [...profilesState.profiles, newProfile];
+        persistProfilesState({ profiles: nextProfiles, activeProfileId: newProfile.id });
+        persistPersonalization({
+          displayName: newProfile.displayName,
+          themeId: newProfile.themeId,
+          avatarId: newProfile.avatarId,
+          favoriteItemId: newProfile.favoriteItemId,
+          nameUpdatedAt: newProfile.createdAt
+        });
+      },
+      switchProfile: async (profileId) => {
+        const target = profilesState.profiles.find((p) => p.id === profileId);
+        if (!target) return;
+        // Flush current personalization back into current profile before switching
+        const flushed = profilesState.profiles.map((p) =>
+          p.id === profilesState.activeProfileId
+            ? {
+                ...p,
+                displayName: personalization.displayName,
+                avatarId: personalization.avatarId,
+                themeId: personalization.themeId,
+                favoriteItemId: personalization.favoriteItemId
+              }
+            : p
+        );
+        persistProfilesState({ profiles: flushed, activeProfileId: profileId });
+        persistPersonalization({
+          displayName: target.displayName,
+          themeId: target.themeId,
+          avatarId: target.avatarId,
+          favoriteItemId: target.favoriteItemId,
+          nameUpdatedAt: target.createdAt
+        });
+      },
+      deleteProfile: async (profileId) => {
+        if (profilesState.profiles.length <= 1) return;
+        const remaining = profilesState.profiles.filter((p) => p.id !== profileId);
+        const nextActiveId =
+          profilesState.activeProfileId === profileId
+            ? remaining[0].id
+            : profilesState.activeProfileId;
+        persistProfilesState({ profiles: remaining, activeProfileId: nextActiveId });
+        if (profilesState.activeProfileId === profileId) {
+          const next = remaining.find((p) => p.id === nextActiveId)!;
+          persistPersonalization({
+            displayName: next.displayName,
+            themeId: next.themeId,
+            avatarId: next.avatarId,
+            favoriteItemId: next.favoriteItemId,
+            nameUpdatedAt: next.createdAt
+          });
+        }
+      },
       setLanguagePreference: async (language) => {
         const previousLocale = locale;
         setLocale(language);
@@ -412,11 +629,15 @@ export function LauncherProvider({ children }: { children: ReactNode }) {
       runSnapshotAction,
       localizedSnapshot,
       gameRefreshFeedback,
+      personalization,
+      profilesState,
       updateProgress,
       locale,
       snapshot,
       publishSnapshot,
-      setLocale
+      setLocale,
+      persistPersonalization,
+      persistProfilesState
     ]
   );
 
@@ -498,3 +719,122 @@ function summarizeGameRefresh(
     newContentFound
   };
 }
+
+function loadStoredPersonalization(): StoredLauncherPersonalization {
+  if (typeof window === "undefined") {
+    return {};
+  }
+
+  try {
+    const raw = window.localStorage.getItem(PERSONALIZATION_STORAGE_KEY);
+    if (!raw) {
+      return {};
+    }
+
+    const parsed = JSON.parse(raw) as StoredLauncherPersonalization;
+    return {
+      displayName: normalizeDisplayName(parsed.displayName ?? ""),
+      themeId: isLauncherThemeId(parsed.themeId) ? parsed.themeId : "aurora",
+      avatarId: isLauncherAvatarId(parsed.avatarId) ? parsed.avatarId : "signal",
+      favoriteItemId: normalizeFavoriteItemId(parsed.favoriteItemId),
+      nameUpdatedAt: normalizeIsoDate(parsed.nameUpdatedAt),
+      accentColor: normalizeAccentColor(parsed.accentColor)
+    };
+  } catch {
+    return {};
+  }
+}
+
+function hydratePersonalization(
+  personalization: StoredLauncherPersonalization
+): LauncherPersonalization {
+  const displayName = normalizeDisplayName(personalization.displayName ?? "");
+  const themeId = isLauncherThemeId(personalization.themeId)
+    ? personalization.themeId
+    : "aurora";
+  const avatarId = isLauncherAvatarId(personalization.avatarId)
+    ? personalization.avatarId
+    : "signal";
+  const favoriteItemId = normalizeFavoriteItemId(personalization.favoriteItemId);
+  const nameUpdatedAt = normalizeIsoDate(personalization.nameUpdatedAt);
+  const nextDisplayNameChangeAt = nameUpdatedAt
+    ? new Date(new Date(nameUpdatedAt).getTime() + DISPLAY_NAME_COOLDOWN_MS).toISOString()
+    : null;
+  const canEditDisplayName =
+    !displayName ||
+    !nextDisplayNameChangeAt ||
+    new Date(nextDisplayNameChangeAt).getTime() <= Date.now();
+
+  const accentColor = normalizeAccentColor(personalization.accentColor);
+
+  return {
+    displayName,
+    themeId,
+    avatarId,
+    favoriteItemId,
+    nameUpdatedAt,
+    canEditDisplayName,
+    nextDisplayNameChangeAt,
+    accentColor
+  };
+}
+
+function normalizeDisplayName(name: string): string {
+  return name.trim().replace(/\s+/g, " ").slice(0, 32);
+}
+
+function normalizeIsoDate(value: string | null | undefined): string | null {
+  if (!value) {
+    return null;
+  }
+
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? null : parsed.toISOString();
+}
+
+function normalizeFavoriteItemId(value: string | null | undefined): string | null {
+  if (!value) {
+    return null;
+  }
+
+  const trimmed = value.trim();
+  return trimmed ? trimmed : null;
+}
+
+function normalizeAccentColor(color: string | null | undefined): string | null {
+  if (!color) return null;
+  const trimmed = color.trim();
+  // Accept only valid CSS hex colors (#RGB, #RRGGBB, #RGBA, #RRGGBBAA)
+  if (/^#[0-9a-fA-F]{3,8}$/.test(trimmed)) return trimmed;
+  return null;
+}
+
+/**
+ * On first run, migrate existing personalization into a default profile so the
+ * profile system is bootstrapped without losing the user's existing identity.
+ */
+function initProfilesState(stored: StoredLauncherPersonalization): ProfilesState {
+  const existing = loadProfilesState();
+  if (existing) return existing;
+
+  const displayName = normalizeDisplayName(stored.displayName ?? "");
+  const profile = makeProfile(
+    displayName || "Player 1",
+    isLauncherAvatarId(stored.avatarId) ? stored.avatarId : "signal",
+    isLauncherThemeId(stored.themeId) ? stored.themeId : "aurora"
+  );
+  // Carry over createdAt from saved nameUpdatedAt if available
+  const rawDate = stored.nameUpdatedAt ? new Date(stored.nameUpdatedAt) : null;
+  const createdAt = rawDate && !Number.isNaN(rawDate.getTime())
+    ? rawDate.toISOString()
+    : profile.createdAt;
+  const migrated: Profile = {
+    ...profile,
+    favoriteItemId: stored.favoriteItemId ?? null,
+    createdAt
+  };
+  const state: ProfilesState = { profiles: [migrated], activeProfileId: migrated.id };
+  saveProfilesState(state.profiles, state.activeProfileId);
+  return state;
+}
+

@@ -1,6 +1,8 @@
-import { ArrowRight, Download, HardDrive, Library, RefreshCw, Sparkles } from "lucide-react";
+import { ArrowRight, Download, HardDrive, Library, Pin, PinOff, Play, RefreshCw, Sparkles } from "lucide-react";
+import { useEffect, useState } from "react";
 
 import type { AppRoute } from "../components/AppShell";
+import { LauncherAvatar } from "../components/LauncherAvatar";
 import { LauncherUpdatePanel } from "../components/LauncherUpdatePanel";
 import { ProgressBar } from "../components/ProgressBar";
 import {
@@ -18,19 +20,46 @@ import {
   getRecentlyUsedItems
 } from "../domain/selectors";
 import type { ContentView } from "../domain/types";
+import { getProfileScopedStorageKey } from "../domain/profileStorage";
 import { useI18n } from "../i18n";
 import { describeLauncherUpdateProgress } from "../services/appUpdater";
 import { useLauncher } from "../store/LauncherStore";
+
+const PINNED_GAMES_STORAGE_KEY = "lumorix.home.pinnedGames";
+const MAX_PINNED_GAMES = 3;
 
 export function HomeView({ setRoute }: { setRoute: (route: AppRoute) => void }) {
   const { locale, t } = useI18n();
   const {
     snapshot,
+    personalization,
+    activeProfileId,
+    launchItem,
     checkLauncherUpdates,
     installLauncherUpdate,
     busyAction,
     updateProgress
   } = useLauncher();
+  const [pinnedIds, setPinnedIds] = useState<string[]>(() => loadPinnedGameIds(activeProfileId));
+
+  useEffect(() => {
+    setPinnedIds(loadPinnedGameIds(activeProfileId));
+  }, [activeProfileId]);
+
+  useEffect(() => {
+    if (!snapshot) return;
+    const validLibraryGames = new Set(
+      snapshot.items
+        .filter((item) => item.collectionStatus !== "notAdded" && item.catalog.itemType === "game")
+        .map((item) => item.catalog.id)
+    );
+    const next = pinnedIds.filter((id) => validLibraryGames.has(id)).slice(0, MAX_PINNED_GAMES);
+    if (next.length !== pinnedIds.length) {
+      setPinnedIds(next);
+      savePinnedGameIds(activeProfileId, next);
+    }
+  }, [activeProfileId, pinnedIds, snapshot]);
+
   if (!snapshot) return null;
 
   const libraryItems = getLibraryItems(snapshot);
@@ -39,7 +68,19 @@ export function HomeView({ setRoute }: { setRoute: (route: AppRoute) => void }) 
   const recentActivity = buildRecentActivity(snapshot, 6);
   const recentInstalls = getRecentlyInstalledItems(snapshot, 4);
   const recentlyUsed = getRecentlyUsedItems(snapshot, 4);
+  // The most recently played/used installed game for the "continue" hero card
+  const lastPlayedItem = getRecentlyUsedItems(snapshot, 1).find(
+    (item) => item.state.installed && item.catalog.itemType === "game"
+  ) ?? null;
+  const favoriteItem = personalization.favoriteItemId
+    ? snapshot.items.find((item) => item.catalog.id === personalization.favoriteItemId) ?? null
+    : null;
   const updateCount = libraryItems.filter((item) => item.state.updateAvailable).length;
+  const pinnedItems = pinnedIds
+    .map((id) => snapshot.items.find((item) => item.catalog.id === id))
+    .filter(
+      (item): item is ContentView => Boolean(item && item.state.installed && item.catalog.itemType === "game")
+    );
   const installedSize = installedItems.reduce(
     (total, item) =>
       total + (item.installed?.sizeOnDiskBytes ?? item.manifest?.installSizeBytes ?? 0),
@@ -58,13 +99,25 @@ export function HomeView({ setRoute }: { setRoute: (route: AppRoute) => void }) 
     updateProgress.status === "available" ||
     updateProgress.status === "restartRequired" ||
     snapshot.launcherUpdate.updateAvailable;
+  const heroTitle = personalization.displayName
+    ? t("home.hero.titlePersonalized", { name: personalization.displayName })
+    : t("home.hero.title");
+
+  const togglePinItem = (itemId: string) => {
+    const isPinned = pinnedIds.includes(itemId);
+    const next = isPinned
+      ? pinnedIds.filter((id) => id !== itemId)
+      : [itemId, ...pinnedIds].slice(0, MAX_PINNED_GAMES);
+    setPinnedIds(next);
+    savePinnedGameIds(activeProfileId, next);
+  };
 
   return (
     <div className="view-stack">
       <section className="home-dashboard">
         <div className="home-dashboard__copy">
           <p className="eyebrow">{t("home.hero.eyebrow")}</p>
-          <h2>{t("home.hero.title")}</h2>
+          <h2>{heroTitle}</h2>
           <p>{t("home.hero.body")}</p>
           <div className="hero-actions">
             <button
@@ -88,6 +141,26 @@ export function HomeView({ setRoute }: { setRoute: (route: AppRoute) => void }) 
             >
               {t("common.actions.viewDownloads")}
             </button>
+          </div>
+          <div className="persona-summary">
+            <div className="persona-summary__header">
+              <LauncherAvatar avatarId={personalization.avatarId} size="md" />
+              <div>
+                <span>{t("home.hero.profileLabel")}</span>
+                <strong>{t(`settings.personalization.themes.${personalization.themeId}.name`)}</strong>
+              </div>
+            </div>
+            <p>{t("home.hero.profileBody")}</p>
+            {favoriteItem && (
+              <button
+                className="persona-summary__favorite"
+                onClick={() => setRoute(`item:${favoriteItem.catalog.id}`)}
+                type="button"
+              >
+                <strong>{t("home.hero.favoriteLabel")}</strong>
+                <span>{favoriteItem.catalog.name}</span>
+              </button>
+            )}
           </div>
         </div>
 
@@ -132,6 +205,64 @@ export function HomeView({ setRoute }: { setRoute: (route: AppRoute) => void }) 
           </div>
         </div>
       </section>
+
+      {lastPlayedItem && (
+        <ContinuePlayingCard
+          item={lastPlayedItem}
+          onPlay={() => void launchItem(lastPlayedItem.catalog.id)}
+          onOpen={() => setRoute(`item:${lastPlayedItem.catalog.id}`)}
+          isPinned={pinnedIds.includes(lastPlayedItem.catalog.id)}
+          onTogglePin={() => togglePinItem(lastPlayedItem.catalog.id)}
+          t={t}
+          locale={locale}
+        />
+      )}
+
+      {pinnedItems.length > 0 && (
+        <section className="pinned-row">
+          <div className="section-toolbar section-toolbar--compact">
+            <div>
+              <p className="eyebrow">{t("home.pinned.eyebrow")}</p>
+              <h2>{t("home.pinned.title")}</h2>
+            </div>
+          </div>
+          <div className="pinned-row__grid">
+            {pinnedItems.map((item) => (
+              <article key={item.catalog.id} className="pinned-card">
+                <div>
+                  <strong>{item.catalog.name}</strong>
+                  <p className="muted">{item.catalog.developer}</p>
+                </div>
+                <div className="pinned-card__actions">
+                  <button
+                    className="button button--primary"
+                    type="button"
+                    onClick={() => void launchItem(item.catalog.id)}
+                  >
+                    <Play size={14} />
+                    {t("home.continuePlaying.play")}
+                  </button>
+                  <button
+                    className="button button--ghost"
+                    type="button"
+                    onClick={() => setRoute(`item:${item.catalog.id}`)}
+                  >
+                    {t("home.continuePlaying.details")}
+                  </button>
+                  <button
+                    className="icon-button"
+                    type="button"
+                    aria-label={t("home.pinned.unpin")}
+                    onClick={() => togglePinItem(item.catalog.id)}
+                  >
+                    <PinOff size={14} />
+                  </button>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+      )}
 
       <section className="dashboard-grid">
         <article className="metric-panel">
@@ -366,3 +497,98 @@ function ItemThumb({ item, compact = false }: { item: ContentView; compact?: boo
     </div>
   );
 }
+
+function ContinuePlayingCard({
+  item,
+  onPlay,
+  onOpen,
+  onTogglePin,
+  isPinned,
+  t,
+  locale
+}: {
+  item: ContentView;
+  onPlay: () => void;
+  onOpen: () => void;
+  onTogglePin: () => void;
+  isPinned: boolean;
+  t: (key: string, params?: Record<string, string | number | null | undefined>) => string;
+  locale: string;
+}) {
+  const bannerSrc = resolveCatalogImageSrc(
+    item.catalog.bannerImage,
+    item.manifest?.version ?? item.catalog.releaseDate
+  );
+  const lastUsed =
+    item.collectionEntry?.lastUsedAt ?? item.installed?.lastLaunchedAt ?? null;
+  const minutes = item.collectionEntry?.totalPlaytimeMinutes ?? 0;
+
+  return (
+    <section className="continue-card">
+      {bannerSrc && <img src={bannerSrc} alt="" className="continue-card__bg" />}
+      <div className="continue-card__overlay" />
+      <div className="continue-card__content">
+        <div>
+          <p className="eyebrow">{t("home.continuePlaying.eyebrow")}</p>
+          <div className="continue-card__title-row">
+            <h2>{item.catalog.name}</h2>
+            <button
+              className="icon-button"
+              type="button"
+              onClick={onTogglePin}
+              aria-label={isPinned ? t("home.pinned.unpin") : t("home.pinned.pin")}
+            >
+              <Pin size={14} />
+            </button>
+          </div>
+          {lastUsed && (
+            <p className="continue-card__meta">
+              {t("home.continuePlaying.lastPlayed", {
+                date: formatDate(lastUsed, locale, t)
+              })}
+              {minutes > 0 &&
+                ` · ${t("home.continuePlaying.playtime", { hours: Math.round(minutes / 60 * 10) / 10 })}`}
+            </p>
+          )}
+        </div>
+        <div className="hero-actions">
+          <button className="button button--primary" onClick={onPlay} type="button">
+            <Play size={16} />
+            {t("home.continuePlaying.play")}
+          </button>
+          <button className="button button--ghost" onClick={onOpen} type="button">
+            {t("home.continuePlaying.details")}
+          </button>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function loadPinnedGameIds(activeProfileId: string): string[] {
+  if (typeof window === "undefined") {
+    return [];
+  }
+  try {
+    const scoped = getProfileScopedStorageKey(PINNED_GAMES_STORAGE_KEY, activeProfileId);
+    const raw = window.localStorage.getItem(scoped) ?? window.localStorage.getItem(PINNED_GAMES_STORAGE_KEY);
+    if (!raw) {
+      return [];
+    }
+    const parsed = JSON.parse(raw) as unknown;
+    if (!Array.isArray(parsed)) {
+      return [];
+    }
+    return parsed.filter((entry): entry is string => typeof entry === "string").slice(0, MAX_PINNED_GAMES);
+  } catch {
+    return [];
+  }
+}
+
+function savePinnedGameIds(activeProfileId: string, ids: string[]) {
+  if (typeof window === "undefined") {
+    return;
+  }
+  window.localStorage.setItem(getProfileScopedStorageKey(PINNED_GAMES_STORAGE_KEY, activeProfileId), JSON.stringify(ids));
+}
+

@@ -197,6 +197,7 @@
     },
     "title": {
       "home": "Home",
+      "homePersonalized": "Welcome, {{name}}",
       "shop": "Shop",
       "library": "Library",
       "downloads": "Downloads",
@@ -219,6 +220,7 @@
         "one": "{{count}} active job",
         "other": "{{count}} active jobs"
       },
+      "homePersonalized": "Ready for your next session, {{name}}",
       "downloadsClear": "Queue is clear",
       "socials": "2 official platforms",
       "fallback": {
@@ -231,7 +233,11 @@
     "hero": {
       "eyebrow": "Home",
       "title": "Your local Lumorix control center",
-      "body": "Track your collection, pick up where you left off, and keep installs and launcher updates under control without accounts, ads, or friction."
+      "titlePersonalized": "Welcome back, {{name}}",
+      "body": "Track your collection, pick up where you left off, and keep installs and launcher updates under control without accounts, ads, or friction.",
+      "profileLabel": "Your current launcher style",
+      "profileBody": "Name, avatar, and style stay local to this device. You can change the look any time and update the name every 30 days.",
+      "favoriteLabel": "Favorite game in focus"
     },
     "updateCard": {
       "label": "Launcher state",
@@ -297,13 +303,37 @@
       "manageBody": "Launch, update, repair, or uninstall from your collection.",
       "settingsTitle": "Adjust local preferences",
       "settingsBody": "Review library folders, privacy defaults, and update behavior."
+    },
+    "continuePlaying": {
+      "eyebrow": "Continue",
+      "play": "Play",
+      "details": "Details",
+      "lastPlayed": "Last played {{date}}",
+      "playtime": "{{hours}}h played"
+    },
+    "pinned": {
+      "eyebrow": "Pinned",
+      "title": "Quick launch shelf",
+      "pin": "Pin game",
+      "unpin": "Unpin game"
+    },
+    "sessionSummary": {
+      "eyebrow": "Session over",
+      "duration": "Session",
+      "total": "Total",
+      "minutes": "{{count}} min",
+      "hours": "{{count}} h",
+      "streak": "{{count}}-day streak"
     }
   },
   "shop": {
     "intro": {
       "eyebrow": "Discovery",
       "title": "Find Lumorix content worth keeping locally",
-      "body": "The Shop is your discovery layer. Add what you want to your Library, then install or update it on your terms."
+      "titlePersonalized": "{{name}}, more like {{game}} is already lining up",
+      "body": "The Shop is your discovery layer. Add what you want to your Library, then install or update it on your terms.",
+      "bodyPersonalized": "We tuned the Shop a little closer to {{game}} so you can reach matching games and tools faster.",
+      "favoriteChip": "Currently tuned toward {{game}}"
     },
     "discoverableCount": {
       "one": "{{count}} discoverable item",
@@ -391,6 +421,9 @@
       "title": "Own your local platform",
       "body": "Sort, filter, launch, update, uninstall, and clean up your Library without losing track of what belongs to you.",
       "results": "{{count}} items shown",
+      "viewMode": "Display mode",
+      "viewGrid": "Grid",
+      "viewCompact": "Compact",
       "stats": {
         "total": "In Library",
         "installed": "Installed",
@@ -423,6 +456,15 @@
       "emptyBody": "Your library is empty. Discover content in the Shop.",
       "filteredTitle": "No items match this filter",
       "filteredBody": "No Library items match the current search or filters. Clear them or head back to the Shop for more content."
+    },
+    "groups": {
+      "toggleBtn": "Groups",
+      "panelTitle": "My Collections",
+      "newGroupPlaceholder": "Collection name...",
+      "create": "Create",
+      "addItem": "+ Add game",
+      "delete": "Delete group",
+      "empty": "No collections yet. Create one above!"
     }
   },
   "downloads": {
@@ -471,11 +513,18 @@
         "eyebrow": "Content",
         "title": "Content"
       }
+    },
+    "tabs": {
+      "community": "Community",
+      "feed": "Feed"
     }
   },
   "about": {
     "hero": {
-      "body": "A local-first Windows launcher for private installs, explicit updates, and clear local ownership across Lumorix games, tools, and projects."
+      "body": "A local-first Windows launcher for private installs, explicit updates, and clear local ownership across Lumorix games, tools, and projects.",
+      "personalizedTitle": "{{name}}'s local deck",
+      "fallbackTitle": "Local deck",
+      "favoriteLabel": "Currently pinned"
     },
     "updateState": {
       "eyebrow": "Launcher update state",
@@ -500,6 +549,82 @@
     }
   },
   "settings": {
+    "personalization": {
+      "eyebrow": "Personal",
+      "title": "Name and style",
+      "description": "Make the launcher feel more like yours with a personal name and theme.",
+      "nameTitle": "Display name",
+      "nameDescription": "Used in greetings and personal home copy.",
+      "namePlaceholder": "How should Lumorix greet you?",
+      "nameMissing": "No name saved yet. Lumorix will keep asking on startup until you set one.",
+      "nameReady": "Your display name can be updated now.",
+      "nameLockedUntil": "Your display name can be changed again on {{date}}.",
+      "saveName": "Save name",
+      "themeTitle": "Launcher style",
+      "themeDescription": "Switch instantly between three personal visual moods.",
+      "avatarTitle": "Avatar mark",
+      "avatarDescription": "A compact symbol for the top bar, home, and personal cards.",
+      "favoriteTitle": "Favorite game",
+      "favoriteDescription": "Used as a personal anchor in Shop and About.",
+      "favoriteLabel": "Preferred title",
+      "favoriteNone": "No favorite game selected",
+      "favoriteHint": "You can change the focus any time or leave it empty.",
+      "favoriteEmpty": "Once games are available in the launcher, you can highlight one here.",
+      "accentColor": {
+        "title": "Custom Accent Color",
+        "description": "Override the accent color used across the launcher.",
+        "default": "Theme default",
+        "reset": "Reset to default"
+      },
+      "colorMode": {
+        "title": "Color mode",
+        "description": "Choose between system, dark, or light mode.",
+        "system": "System",
+        "dark": "Dark",
+        "light": "Light"
+      },
+      "avatars": {
+        "signal": {
+          "name": "Signal",
+          "description": "Bright and light with a spark-first feel."
+        },
+        "ember": {
+          "name": "Ember",
+          "description": "Warmer, sharper, and a little more aggressive."
+        },
+        "scout": {
+          "name": "Scout",
+          "description": "Calmer and more directional than flashy."
+        },
+        "nova": {
+          "name": "Nova",
+          "description": "Denser, futuristic, and more expressive."
+        }
+      },
+      "themes": {
+        "aurora": {
+          "name": "Aurora Pulse",
+          "description": "Neon green and unmistakably Lumorix."
+        },
+        "sunset": {
+          "name": "Sunset Drift",
+          "description": "Warmer orange tones with late-night arcade energy."
+        },
+        "ocean": {
+          "name": "Ocean Signal",
+          "description": "Cool cyan-blue tones with a calmer dashboard feel."
+        }
+      }
+    },
+    "profiles": {
+      "eyebrow": "Profiles",
+      "title": "Your profiles",
+      "description": "Switch between separate identities. Each profile keeps its own name, avatar, theme, and favorite game.",
+      "active": "Active profile",
+      "switchTo": "Switch to",
+      "addProfile": "Add profile",
+      "newNameLabel": "Profile name"
+    },
     "language": {
       "eyebrow": "Language",
       "title": "Launcher language",
@@ -553,6 +678,21 @@
       "body": "Network is only used for manifest checks, downloads, and explicit update checks."
     }
   },
+  "personalizationDialog": {
+    "eyebrow": "Personal setup",
+    "title": "How should Lumorix greet you?",
+    "body": "Adjust your name and style whenever you want to retune the launcher later.",
+    "requiredBody": "Before you continue, give Lumorix your name. This dialog will return on every startup until one is saved.",
+    "nameLabel": "Your launcher name",
+    "namePlaceholder": "For example Julia, Captain, Player One",
+    "avatarLabel": "Pick an avatar mark right away",
+    "avatarBody": "This mark shows up later in the top bar and personal sections.",
+    "themeLabel": "Pick a style to start with",
+    "themeBody": "You can switch styles any time later in Settings.",
+    "note": "After the first save, display name changes are available every 30 days.",
+    "confirm": "Save personalization",
+    "saving": "Saving..."
+  },
   "detail": {
     "phaseLabel": "{{operation}} / {{phase}}",
     "discoverable": {
@@ -566,6 +706,9 @@
       "unavailable": "This item is currently unavailable in the Shop and cannot be reinstalled right now."
     },
     "changelogEmpty": "No changelog is available for this item right now.",
+    "addFavorite": "Mark as favorite",
+    "removeFavorite": "Remove favorite",
+    "favoriteLabel": "Your favorite",
     "similar": {
       "eyebrow": "Similar titles",
       "title": "More like this",
@@ -626,8 +769,48 @@
       "local_first": "Local-first"
     }
   },
+  "profiles": {
+    "eyebrow": "Profiles",
+    "switcherTitle": "Switch profile",
+    "unnamed": "Unknown",
+    "addProfile": "New profile",
+    "create": "Create profile",
+    "newNamePlaceholder": "Profile name...",
+    "delete": "Delete {{name}}",
+    "cannotDeleteActive": "Cannot delete the active profile"
+  },
   "accessibility": {
     "closeModal": "Close",
     "coverImage": "{{name}} cover"
+  },
+  "quicksearch": {
+    "title": "Quick Search",
+    "placeholder": "Search games...",
+    "noResults": "No results for \"{{query}}\"",
+    "historyTitle": "Recent searches",
+    "historyEmpty": "No recent searches yet",
+    "clearHistory": "Clear",
+    "hintNav": "Switch section",
+    "hintToggle": "Open/close search"
+  },
+  "updateNotice": {
+    "version": "Updated to v{{version}}",
+    "expandChangelog": "Show changelog",
+    "collapseChangelog": "Hide changelog"
+  },
+  "offline": {
+    "banner": "No internet connection — manifests and updates unavailable"
+  },
+  "backup": {
+    "eyebrow": "Backup",
+    "title": "Export Library Config",
+    "description": "Export your installed games list and preferences to a JSON file.",
+    "lastBackup": "Last backup: {{date}}",
+    "neverBacked": "No backup yet",
+    "exportNow": "Export now",
+    "exporting": "Exporting..."
+  },
+  "feed": {
+    "empty": "No changelogs found — install games to see update history here."
   }
 }

@@ -1,4 +1,5 @@
 import {
+  ArrowUp,
   Download,
   Gamepad2,
   Home,
@@ -7,12 +8,21 @@ import {
   MessageSquare,
   ShoppingBag,
   Settings,
-  ShieldCheck
+  ShieldCheck,
+  WifiOff
 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
+import { LauncherAvatar } from "./LauncherAvatar";
+import { ProfileSwitcher } from "./ProfileSwitcher";
+import { QuickSearch } from "./QuickSearch";
+import { SessionSummaryPanel } from "./SessionSummaryPanel";
+import { UpdateNoticeToast } from "./UpdateNoticeToast";
 import { useI18n } from "../i18n";
+import { useLauncher } from "../store/LauncherStore";
 import { getActiveJobs, getDiscoverableItems, getLibraryItems } from "../domain/selectors";
 import type { LauncherSnapshot } from "../domain/types";
+import { applyColorMode, colorModeEventName, loadColorMode } from "../domain/colorMode";
 
 export type AppRoute =
   | "home"
@@ -49,10 +59,99 @@ export function AppShell({
   children: React.ReactNode;
 }) {
   const { t } = useI18n();
+  const { personalization } = useLauncher();
   const activeJobs = getActiveJobs(snapshot);
+  const [isOnline, setIsOnline] = useState(() => navigator.onLine);
+  const [showScrollTop, setShowScrollTop] = useState(false);
+  const shellMainRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
+
+  // Numeric keyboard shortcuts 1–7 for nav
+  useEffect(() => {
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.ctrlKey || event.metaKey || event.altKey) return;
+      if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) return;
+      const idx = parseInt(event.key) - 1;
+      if (idx >= 0 && idx < navItems.length) {
+        setRoute(navItems[idx].route);
+      }
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [setRoute]);
+
+  // Apply custom accent color override to CSS variable
+  useEffect(() => {
+    if (personalization.accentColor) {
+      document.documentElement.style.setProperty("--color-accent", personalization.accentColor);
+    } else {
+      document.documentElement.style.removeProperty("--color-accent");
+    }
+    return () => {
+      document.documentElement.style.removeProperty("--color-accent");
+    };
+  }, [personalization.accentColor]);
+
+  useEffect(() => {
+    const applyCurrentMode = () => applyColorMode(loadColorMode());
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: light)");
+
+    applyCurrentMode();
+
+    const onStorage = (event: StorageEvent) => {
+      if (event.key === "lumorix.ui.colorMode") {
+        applyCurrentMode();
+      }
+    };
+    const onCustom = () => applyCurrentMode();
+    const onSystemThemeChanged = () => {
+      if (loadColorMode() === "system") {
+        applyCurrentMode();
+      }
+    };
+
+    window.addEventListener("storage", onStorage);
+    window.addEventListener(colorModeEventName(), onCustom);
+    mediaQuery.addEventListener("change", onSystemThemeChanged);
+
+    return () => {
+      window.removeEventListener("storage", onStorage);
+      window.removeEventListener(colorModeEventName(), onCustom);
+      mediaQuery.removeEventListener("change", onSystemThemeChanged);
+    };
+  }, []);
+
+  useEffect(() => {
+    const node = shellMainRef.current;
+    if (!node) return;
+
+    const onScroll = () => {
+      setShowScrollTop(node.scrollTop > 320);
+    };
+
+    onScroll();
+    node.addEventListener("scroll", onScroll, { passive: true });
+    return () => node.removeEventListener("scroll", onScroll);
+  }, [route]);
 
   return (
-    <div className="app-shell">
+    <div className={`app-shell app-shell--theme-${personalization.themeId}`}>
+      {!isOnline && (
+        <div className="offline-banner" role="alert">
+          <WifiOff size={14} />
+          <span>{t("offline.banner")}</span>
+        </div>
+      )}
       <aside className="sidebar">
         <button className="brand" onClick={() => setRoute("home")} type="button">
           <span className="brand__mark">LX</span>
@@ -81,25 +180,39 @@ export function AppShell({
           })}
         </nav>
 
+        <ProfileSwitcher />
+
         <div className="privacy-chip">
           <ShieldCheck size={18} />
           <span>{t("common.messages.noAccountNoAdsLocalFirst")}</span>
         </div>
       </aside>
 
-      <main className="shell-main">
+      <main className="shell-main" ref={shellMainRef}>
         <header className="topbar">
           <div>
             <p className="eyebrow">{subtitleForRoute(route, t)}</p>
-            <h1>{titleForRoute(route, snapshot, t)}</h1>
+            <h1>{titleForRoute(route, snapshot, t, personalization.displayName)}</h1>
           </div>
           <div className="topbar__meta">
+            <LauncherAvatar avatarId={personalization.avatarId} size="sm" />
             <Gamepad2 size={16} />
-            <span>{metaForRoute(route, snapshot, t)}</span>
+            <span>{metaForRoute(route, snapshot, t, personalization.displayName)}</span>
           </div>
         </header>
         {children}
+        <button
+          aria-label={t("common.actions.back")}
+          className={`scroll-top-btn ${showScrollTop ? "is-visible" : ""}`}
+          onClick={() => shellMainRef.current?.scrollTo({ top: 0, behavior: "smooth" })}
+          type="button"
+        >
+          <ArrowUp size={16} />
+        </button>
       </main>
+      <QuickSearch setRoute={setRoute} />
+      <UpdateNoticeToast />
+      <SessionSummaryPanel />
     </div>
   );
 }
@@ -118,11 +231,16 @@ function isNavItemActive(route: AppRoute, itemRoute: AppRoute, snapshot: Launche
 function metaForRoute(
   route: AppRoute,
   snapshot: LauncherSnapshot,
-  t: (key: string, params?: Record<string, string | number | null | undefined>) => string
+  t: (key: string, params?: Record<string, string | number | null | undefined>) => string,
+  displayName: string
 ): string {
   const discoverableCount = getDiscoverableItems(snapshot).length;
   const libraryCount = getLibraryItems(snapshot).length;
   const activeJobs = getActiveJobs(snapshot).length;
+
+  if (route === "home" && displayName) {
+    return t("shell.meta.homePersonalized", { name: displayName });
+  }
 
   if (route === "shop") {
     return t("shell.meta.shop", { count: discoverableCount });
@@ -167,7 +285,8 @@ function subtitleForRoute(
 function titleForRoute(
   route: AppRoute,
   snapshot: LauncherSnapshot,
-  t: (key: string, params?: Record<string, string | number | null | undefined>) => string
+  t: (key: string, params?: Record<string, string | number | null | undefined>) => string,
+  displayName: string
 ) {
   if (route.startsWith("item:")) {
     const id = route.slice("item:".length);
@@ -176,7 +295,7 @@ function titleForRoute(
 
   switch (route) {
     case "home":
-      return t("shell.title.home");
+      return displayName ? t("shell.title.homePersonalized", { name: displayName }) : t("shell.title.home");
     case "shop":
       return t("shell.title.shop");
     case "library":

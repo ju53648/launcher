@@ -197,6 +197,7 @@
     },
     "title": {
       "home": "Start",
+      "homePersonalized": "Witaj, {{name}}",
       "shop": "Sklep",
       "library": "Biblioteka",
       "downloads": "Pobrania",
@@ -225,6 +226,7 @@
         "many": "{{count}} aktywnych zadan",
         "other": "{{count}} aktywnych zadan"
       },
+      "homePersonalized": "Gotowe na kolejna sesje, {{name}}",
       "downloadsClear": "Kolejka jest pusta",
       "socials": "2 oficjalne platformy",
       "fallback": {
@@ -239,7 +241,11 @@
     "hero": {
       "eyebrow": "Start",
       "title": "Twoje lokalne centrum kontroli Lumorix",
-      "body": "Sledz swoja kolekcje, wracaj tam, gdzie skonczylas lub skonczyles, i zarzadzaj instalacjami oraz aktualizacjami launchera bez kont, reklam i zbednych przeszkod."
+      "titlePersonalized": "Witaj ponownie, {{name}}",
+      "body": "Sledz swoja kolekcje, wracaj tam, gdzie skonczylas lub skonczyles, i zarzadzaj instalacjami oraz aktualizacjami launchera bez kont, reklam i zbednych przeszkod.",
+      "profileLabel": "Twoj aktualny styl launchera",
+      "profileBody": "Imie, avatar i styl pozostaja lokalnie na tym urzadzeniu. Wyglad mozesz zmieniac od razu, a imie co 30 dni.",
+      "favoriteLabel": "Ulubiona gra w centrum"
     },
     "updateCard": {
       "label": "Stan launchera",
@@ -313,13 +319,37 @@
       "manageBody": "Uruchamiaj, aktualizuj, naprawiaj lub odinstalowuj bezposrednio ze swojej kolekcji.",
       "settingsTitle": "Dostosuj ustawienia lokalne",
       "settingsBody": "Sprawdz foldery bibliotek, ustawienia prywatnosci i zachowanie aktualizacji."
+    },
+    "continuePlaying": {
+      "eyebrow": "Kontynuuj",
+      "play": "Graj",
+      "details": "Szczeg\u00f3\u0142y",
+      "lastPlayed": "Ostatnio grano {{date}}",
+      "playtime": "Zagrano {{hours}} h"
+    },
+    "pinned": {
+      "eyebrow": "Przypiete",
+      "title": "Pasek szybkiego startu",
+      "pin": "Przypnij gre",
+      "unpin": "Odepnij gre"
+    },
+    "sessionSummary": {
+      "eyebrow": "Sesja zako\u0144czona",
+      "duration": "Sesja",
+      "total": "\u0141\u0105cznie",
+      "minutes": "{{count}} min",
+      "hours": "{{count}} h",
+      "streak": "Seria {{count}} dni"
     }
   },
   "shop": {
     "intro": {
       "eyebrow": "Odkrywaj",
       "title": "Znajdz tresci Lumorix warte zachowania lokalnie",
-      "body": "Sklep to warstwa odkrywania. Dodaj to, czego chcesz, do biblioteki, a potem instaluj lub aktualizuj na swoich zasadach."
+      "titlePersonalized": "{{name}}, kolejne rzeczy jak {{game}} juz czekaja",
+      "body": "Sklep to warstwa odkrywania. Dodaj to, czego chcesz, do biblioteki, a potem instaluj lub aktualizuj na swoich zasadach.",
+      "bodyPersonalized": "Dostroilismy Sklep nieco blizej {{game}}, aby szybciej prowadzil do pasujacych gier i narzedzi.",
+      "favoriteChip": "Obecnie pod {{game}}"
     },
     "discoverableCount": {
       "one": "{{count}} odkrywalny element",
@@ -409,6 +439,9 @@
       "title": "Twoja lokalna platforma",
       "body": "Sortuj, filtruj, uruchamiaj, aktualizuj, odinstalowuj i porzadkuj biblioteke bez tracenia kontroli nad tym, co nalezy do ciebie.",
       "results": "Pokazano {{count}} elementow",
+      "viewMode": "Widok",
+      "viewGrid": "Siatka",
+      "viewCompact": "Kompakt",
       "stats": {
         "total": "W bibliotece",
         "installed": "Zainstalowane",
@@ -441,6 +474,15 @@
       "emptyBody": "Twoja biblioteka jest pusta. Odkryj tresci w Sklepie.",
       "filteredTitle": "Brak elementow dla tego filtra",
       "filteredBody": "Zaden element biblioteki nie pasuje do obecnego wyszukiwania lub filtrow. Wyczysc je albo wroc do Sklepu."
+    },
+    "groups": {
+      "toggleBtn": "Grupy",
+      "panelTitle": "Moje kolekcje",
+      "newGroupPlaceholder": "Nazwa kolekcji...",
+      "create": "Utwórz",
+      "addItem": "+ Dodaj grę",
+      "delete": "Usuń grupę",
+      "empty": "Brak kolekcji. Utwórz jedną powyżej!"
     }
   },
   "downloads": {
@@ -491,11 +533,18 @@
         "eyebrow": "Content",
         "title": "Content"
       }
+    },
+    "tabs": {
+      "community": "Społeczność",
+      "feed": "Feed"
     }
   },
   "about": {
     "hero": {
-      "body": "Lokalny launcher Windows do prywatnych instalacji, swiadomych aktualizacji i pelnej lokalnej kontroli nad grami, narzedziami i projektami Lumorix."
+      "body": "Lokalny launcher Windows do prywatnych instalacji, swiadomych aktualizacji i pelnej lokalnej kontroli nad grami, narzedziami i projektami Lumorix.",
+      "personalizedTitle": "Lokalny deck {{name}}",
+      "fallbackTitle": "Lokalny deck",
+      "favoriteLabel": "Aktualnie przypiete"
     },
     "updateState": {
       "eyebrow": "Stan aktualizacji launchera",
@@ -520,6 +569,82 @@
     }
   },
   "settings": {
+    "personalization": {
+      "eyebrow": "Osobiste",
+      "title": "Imie i styl",
+      "description": "Spraw, by launcher byl bardziej twoj dzieki imieniu i wybranemu motywowi.",
+      "nameTitle": "Nazwa wyswietlana",
+      "nameDescription": "Uzywana w powitaniach i osobistych tekstach na stronie startowej.",
+      "namePlaceholder": "Jak Lumorix ma cie witac?",
+      "nameMissing": "Nie zapisano jeszcze imienia. Lumorix bedzie pytac przy kazdym starcie, dopoki go nie ustawisz.",
+      "nameReady": "Mozesz teraz zmienic nazwe wyswietlana.",
+      "nameLockedUntil": "Nazwa wyswietlana bedzie mozliwa do zmiany ponownie {{date}}.",
+      "saveName": "Zapisz imie",
+      "themeTitle": "Styl launchera",
+      "themeDescription": "Przelaczaj od razu miedzy trzema osobistymi klimatami wizualnymi.",
+      "avatarTitle": "Znak avatara",
+      "avatarDescription": "Maly symbol dla topbara, startu i osobistych kart.",
+      "favoriteTitle": "Ulubiona gra",
+      "favoriteDescription": "Uzywana jako osobisty punkt odniesienia w Sklepie i About.",
+      "favoriteLabel": "Wybrany tytul",
+      "favoriteNone": "Nie wybrano ulubionej gry",
+      "favoriteHint": "Mozesz zmieniac fokus kiedy chcesz albo zostawic to pole puste.",
+      "favoriteEmpty": "Gdy tylko w launcherze pojawia sie gry, bedziesz mogla lub mogl wyroznic jedna tutaj.",
+      "accentColor": {
+        "title": "Niestandardowy kolor akcentu",
+        "description": "Zastąp kolor akcentu używany w launcherze.",
+        "default": "Domyślny motyw",
+        "reset": "Resetuj"
+      },
+      "colorMode": {
+        "title": "Tryb kolorow",
+        "description": "Wybierz tryb systemowy, ciemny albo jasny.",
+        "system": "System",
+        "dark": "Ciemny",
+        "light": "Jasny"
+      },
+      "avatars": {
+        "signal": {
+          "name": "Signal",
+          "description": "Lekki i jasny znak z energia iskry."
+        },
+        "ember": {
+          "name": "Ember",
+          "description": "Cieplejszy, ostrzejszy i bardziej bezposredni."
+        },
+        "scout": {
+          "name": "Scout",
+          "description": "Spokojniejszy i bardziej kierunkowy niz efektowny."
+        },
+        "nova": {
+          "name": "Nova",
+          "description": "Gestszy, futurystyczny i bardziej wyrazisty."
+        }
+      },
+      "themes": {
+        "aurora": {
+          "name": "Aurora Pulse",
+          "description": "Neonowa zielen i klasyczny klimat Lumorix."
+        },
+        "sunset": {
+          "name": "Sunset Drift",
+          "description": "Cieple pomaranczowe tony z wieczorna energia arcade."
+        },
+        "ocean": {
+          "name": "Ocean Signal",
+          "description": "Chlodne odcienie cyjanu i blekitu ze spokojniejszym pulpitem."
+        }
+      }
+    },
+    "profiles": {
+      "eyebrow": "Profile",
+      "title": "Twoje profile",
+      "description": "Przelaczaj sie miedzy odrebnymi tozsamosciami. Kazdy profil zachowuje wlasna nazwe, awatar, motyw i ulubiony tytul.",
+      "active": "Aktywny profil",
+      "switchTo": "Przelacz na",
+      "addProfile": "Dodaj profil",
+      "newNameLabel": "Nazwa profilu"
+    },
     "language": {
       "eyebrow": "Jezyk",
       "title": "Jezyk launchera",
@@ -573,6 +698,21 @@
       "body": "Siec jest uzywana tylko do sprawdzania manifestow, pobran oraz jawnie uruchamianych sprawdzen aktualizacji."
     }
   },
+  "personalizationDialog": {
+    "eyebrow": "Osobista konfiguracja",
+    "title": "Jak Lumorix ma cie witac?",
+    "body": "Pozniej mozesz ponownie dopasowac imie i styl, kiedy zechcesz odswiezyc launcher.",
+    "requiredBody": "Zanim przejdziesz dalej, podaj swoje imie dla Lumorix. To okno bedzie wracac przy kazdym starcie, dopoki nic nie zapiszesz.",
+    "nameLabel": "Twoje imie w launcherze",
+    "namePlaceholder": "Na przyklad Julia, Captain, Player One",
+    "avatarLabel": "Od razu wybierz znak",
+    "avatarBody": "Ten znak pojawi sie pozniej w topbarze i osobistych sekcjach.",
+    "themeLabel": "Wybierz styl na start",
+    "themeBody": "Styl mozesz potem zmienic w dowolnym momencie w Ustawieniach.",
+    "note": "Po pierwszym zapisie zmiana imienia jest dostepna co 30 dni.",
+    "confirm": "Zapisz personalizacje",
+    "saving": "Zapisywanie..."
+  },
   "detail": {
     "phaseLabel": "{{operation}} / {{phase}}",
     "discoverable": {
@@ -586,6 +726,9 @@
       "unavailable": "Ten element jest obecnie niedostepny w Sklepie i teraz nie mozna go ponownie zainstalowac."
     },
     "changelogEmpty": "Dla tego elementu nie ma obecnie dostepnego dziennika zmian.",
+    "addFavorite": "Oznacz jako ulubiony",
+    "removeFavorite": "Usun z ulubionych",
+    "favoriteLabel": "Twoj ulubiony",
     "similar": {
       "eyebrow": "Podobne tytuly",
       "title": "Wiecej takich",
@@ -620,6 +763,16 @@
       "error": "Aktualizator zakonczyl sie bledem: {{message}}"
     }
   },
+  "profiles": {
+    "eyebrow": "Profile",
+    "switcherTitle": "Zmien profil",
+    "unnamed": "Nieznany",
+    "addProfile": "Nowy profil",
+    "create": "Utworz profil",
+    "newNamePlaceholder": "Nazwa profilu...",
+    "delete": "Usun {{name}}",
+    "cannotDeleteActive": "Nie mozna usunac aktywnego profilu"
+  },
   "accessibility": {
     "closeModal": "Zamknij",
     "coverImage": "Okaldka {{name}}"
@@ -649,5 +802,35 @@
       "offline": "Offline",
       "local_first": "Lokalnie najpierw"
     }
+  },
+  "quicksearch": {
+    "title": "Szybkie wyszukiwanie",
+    "placeholder": "Szukaj gier...",
+    "noResults": "Brak wyników dla \"{{query}}\"",
+    "historyTitle": "Ostatnie wyszukiwania",
+    "historyEmpty": "Brak ostatnich wyszukiwan",
+    "clearHistory": "Wyczysc",
+    "hintNav": "Przełącz sekcję",
+    "hintToggle": "Otwórz/zamknij wyszukiwanie"
+  },
+  "updateNotice": {
+    "version": "Zaktualizowano do v{{version}}",
+    "expandChangelog": "Pokaż zmiany",
+    "collapseChangelog": "Ukryj zmiany"
+  },
+  "offline": {
+    "banner": "Brak połączenia z internetem — manifesty i aktualizacje niedostępne"
+  },
+  "backup": {
+    "eyebrow": "Kopia zapasowa",
+    "title": "Eksportuj konfigurację",
+    "description": "Eksportuj listę zainstalowanych gier i ustawienia do pliku JSON.",
+    "lastBackup": "Ostatnia kopia: {{date}}",
+    "neverBacked": "Brak kopii zapasowej",
+    "exportNow": "Eksportuj teraz",
+    "exporting": "Eksportowanie..."
+  },
+  "feed": {
+    "empty": "Brak changelogów — zainstaluj gry, aby zobaczyć historię aktualizacji."
   }
 }

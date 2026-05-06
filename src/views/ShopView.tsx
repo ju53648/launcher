@@ -2,6 +2,7 @@ import { ArrowRight, Check, Download, Play, Plus, Search, Sparkles } from "lucid
 import { useDeferredValue, useMemo, useState } from "react";
 
 import type { AppRoute } from "../components/AppShell";
+import { LauncherAvatar } from "../components/LauncherAvatar";
 import { EmptyState } from "../components/EmptyState";
 import { StatusBadge } from "../components/StatusBadge";
 import { formatBytes, itemTypeLabel, resolveIntlLocale } from "../domain/format";
@@ -23,7 +24,7 @@ type ShopSortKey = "relevance" | "name" | "releaseDate" | "installSize" | "statu
 export function ShopView({ setRoute }: { setRoute: (route: AppRoute) => void }) {
   const { locale, t } = useI18n();
   const intlLocale = resolveIntlLocale(locale);
-  const { snapshot, addItemToLibrary, busyAction, installItem, launchItem, closeItem } = useLauncher();
+  const { snapshot, addItemToLibrary, busyAction, installItem, launchItem, closeItem, personalization } = useLauncher();
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
@@ -36,6 +37,11 @@ export function ShopView({ setRoute }: { setRoute: (route: AppRoute) => void }) 
 
   const discoverableItems = getDiscoverableItems(snapshot);
   const featuredItem = selectFeaturedItem(discoverableItems);
+  const favoriteItem = personalization.favoriteItemId
+    ? discoverableItems.find((item) => item.catalog.id === personalization.favoriteItemId) ??
+      snapshot.items.find((item) => item.catalog.id === personalization.favoriteItemId) ??
+      null
+    : null;
   const categories = getShopCategories(snapshot);
   const tags = useMemo(
     () =>
@@ -90,8 +96,26 @@ export function ShopView({ setRoute }: { setRoute: (route: AppRoute) => void }) 
       <section className="shop-intro">
         <div>
           <p className="eyebrow">{t("shop.intro.eyebrow")}</p>
-          <h2>{t("shop.intro.title")}</h2>
-          <p>{t("shop.intro.body")}</p>
+          <h2>
+            {favoriteItem && personalization.displayName
+              ? t("shop.intro.titlePersonalized", {
+                  name: personalization.displayName,
+                  game: favoriteItem.catalog.name
+                })
+              : t("shop.intro.title")}
+          </h2>
+          <p>
+            {favoriteItem
+              ? t("shop.intro.bodyPersonalized", { game: favoriteItem.catalog.name })
+              : t("shop.intro.body")}
+          </p>
+          {favoriteItem && (
+            <button className="shop-intro__favorite" onClick={() => setRoute(`item:${favoriteItem.catalog.id}`)} type="button">
+              <LauncherAvatar avatarId={personalization.avatarId} size="sm" />
+              <span>{t("shop.intro.favoriteChip", { game: favoriteItem.catalog.name })}</span>
+              <ArrowRight size={15} />
+            </button>
+          )}
         </div>
         <div className="shop-intro__stat">
           <Sparkles size={20} />
@@ -137,6 +161,26 @@ export function ShopView({ setRoute }: { setRoute: (route: AppRoute) => void }) 
             placeholder={t("shop.filters.searchPlaceholder")}
           />
         </label>
+
+        <div className="shop-quick-filters" aria-label={t("shop.filters.categories")}>
+          <button
+            className={`filter-pill ${categoryFilter === "all" ? "is-active" : ""}`}
+            onClick={() => setCategoryFilter("all")}
+            type="button"
+          >
+            {t("shop.filters.all")}
+          </button>
+          {categories.slice(0, 8).map((category) => (
+            <button
+              key={category}
+              className={`filter-pill ${categoryFilter === category ? "is-active" : ""}`}
+              onClick={() => setCategoryFilter(category)}
+              type="button"
+            >
+              {category}
+            </button>
+          ))}
+        </div>
 
         <div className="shop-controls-grid">
           <label>
@@ -200,7 +244,7 @@ export function ShopView({ setRoute }: { setRoute: (route: AppRoute) => void }) 
           <span>{t("shop.results.shown", { count: filteredItems.length })}</span>
           {hasActiveFilters ? (
             <button
-              className="text-button"
+              className="toolbar-chip"
               onClick={() => {
                 setSearch("");
                 setTypeFilter("all");

@@ -15,6 +15,9 @@ export default defineConfig({
   build: {
     target: "es2022",
     minify: "esbuild",
-    sourcemap: true
+    sourcemap: true,
+    rollupOptions: {
+      external: ["@tauri-apps/plugin-fs"]
+    }
   }
 });

@@ -3,6 +3,7 @@ import { useState } from "react";
 import { AppShell, type AppRoute } from "./components/AppShell";
 import { EmptyState } from "./components/EmptyState";
 import { ErrorToast } from "./components/ErrorToast";
+import { PersonalizationDialog } from "./components/PersonalizationDialog";
 import { useI18n } from "./i18n";
 import { AboutView } from "./views/AboutView";
 import { DownloadsView } from "./views/DownloadsView";
@@ -18,7 +19,7 @@ import type { LauncherSnapshot } from "./domain/types";
 
 export function App() {
   const { t } = useI18n();
-  const { snapshot, loading, error, clearError } = useLauncher();
+  const { snapshot, loading, error, clearError, personalization, activeProfileId } = useLauncher();
   const [route, setRoute] = useState<AppRoute>("home");
   const [manifestWarningDismissed, setManifestWarningDismissed] = useState(false);
   const manifestWarning =
@@ -77,8 +78,11 @@ export function App() {
   return (
     <>
       <AppShell route={route} setRoute={setRoute} snapshot={snapshot}>
-        {renderRoute(route, setRoute, snapshot, t)}
+        <div key={`${activeProfileId}:${route}`} className="route-scene">
+          {renderRoute(route, setRoute, snapshot, t)}
+        </div>
       </AppShell>
+      <PersonalizationDialog open={!personalization.displayName} required />
       {error && <ErrorToast error={error} onClose={clearError} />}
       {!error && manifestWarning && (
         <ErrorToast error={manifestWarning} onClose={() => setManifestWarningDismissed(true)} />
@@ -111,13 +115,13 @@ function renderRoute(
     case "library":
       return <LibraryView setRoute={setRoute} />;
     case "downloads":
-      return <DownloadsView />;
+      return <DownloadsView setRoute={setRoute} />;
     case "socials":
       return <SocialsView />;
     case "settings":
       return <SettingsView />;
     case "about":
-      return <AboutView />;
+      return <AboutView setRoute={setRoute} />;
     default:
       return <HomeView setRoute={setRoute} />;
   }

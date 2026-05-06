@@ -11,7 +11,10 @@ export function EmptyState({
 }) {
   return (
     <section className="empty-state">
-      <div>
+      <div className="empty-state__ornament" aria-hidden="true">
+        <span />
+      </div>
+      <div className="empty-state__copy">
         <h2>{title}</h2>
         <p>{body}</p>
       </div>

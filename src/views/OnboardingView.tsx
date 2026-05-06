@@ -1,12 +1,12 @@
 import { Check, FolderOpen, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 
-import { useI18n } from "../i18n";
+import { SUPPORTED_LOCALES, useI18n, type SupportedLocale } from "../i18n";
 import { chooseDirectory } from "../services/tauri";
 import { useLauncher } from "../store/LauncherStore";
 
 export function OnboardingView() {
-  const { t } = useI18n();
+  const { t, locale, setLocale } = useI18n();
   const { snapshot, completeOnboarding, busyAction } = useLauncher();
   const [selectedPath, setSelectedPath] = useState<string | null>(null);
 
@@ -23,6 +23,19 @@ export function OnboardingView() {
             <strong>{t("common.brandName")}</strong>
             <small>{t("common.brandProduct")}</small>
           </span>
+        </div>
+
+        <div className="onboarding__lang-picker">
+          {(["en", "de", "pl"] as SupportedLocale[]).map((l) => (
+            <button
+              key={l}
+              className={`button button--ghost onboarding__lang-btn${locale === l ? " onboarding__lang-btn--active" : ""}`}
+              onClick={() => setLocale(l)}
+              type="button"
+            >
+              {t(`common.languages.${l}`)}
+            </button>
+          ))}
         </div>
 
         <div className="onboarding__copy">

@@ -1,17 +1,15 @@
 {
-  "version": "0.5.6",
-  "title": "Shakespeare English Hotfix",
-  "notes": "Shakespeare English Hotfix\n\n- Shakespeare English now uses the same stable formatting and plural behavior as the other launcher languages.\n- Library cards now show playtime and support stronger sorting and filtering.\n- Shop and library views gained clearer discovery filters, improved ranking, and better status actions.\n- Running games can now be closed directly from the launcher, with live state refresh every 2 seconds.\n- Echo Protocol startup stability was fixed for the native desktop build.\n- Lumorix DropDash was migrated from a browser launch flow to a standalone native Tauri desktop runtime.\n- Release metadata, updater payload metadata, and package versions were synchronized for shipping.",
+  "version": "0.5.95",
+  "title": "Move Install",
+  "notes": "Move Install\n\n- Games can now be moved to a different library folder, just like in Steam.\n- Game saves and progress are fully preserved during the move — save files inside the install folder are copied along with the game.\n- DropDash highscores are unaffected since they are stored independently of the install path.\n- A new Move Install dialog lets you pick any available library as the target, with a clear note confirming your data is safe.\n- The Move Install button appears on the game detail page for all installed games and is disabled when another job is already running.",
   "notesList": [
-    "Shakespeare English now uses the same stable formatting and plural behavior as the other launcher languages.",
-    "Library cards now show playtime and support stronger sorting and filtering.",
-    "Shop and library views gained clearer discovery filters, improved ranking, and better status actions.",
-    "Running games can now be closed directly from the launcher, with live state refresh every 2 seconds.",
-    "Echo Protocol startup stability was fixed for the native desktop build.",
-    "Lumorix DropDash was migrated from a browser launch flow to a standalone native Tauri desktop runtime.",
-    "Release metadata, updater payload metadata, and package versions were synchronized for shipping."
+    "Games can now be moved to a different library folder, just like in Steam.",
+    "Game saves and progress are fully preserved during the move — save files inside the install folder are copied along with the game.",
+    "DropDash highscores are unaffected since they are stored independently of the install path.",
+    "A new Move Install dialog lets you pick any available library as the target, with a clear note confirming your data is safe.",
+    "The Move Install button appears on the game detail page for all installed games and is disabled when another job is already running."
   ],
-  "pub_date": "2026-04-29T00:00:00Z",
+  "pub_date": "2026-05-05T00:00:00Z",
   "platforms": {
     "windows-x86_64": {
       "url": "__GENERATED_IN_CI__",

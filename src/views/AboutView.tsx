@@ -1,5 +1,7 @@
 import { Download, ExternalLink, ShieldCheck } from "lucide-react";
 
+import type { AppRoute } from "../components/AppShell";
+import { LauncherAvatar } from "../components/LauncherAvatar";
 import { LauncherUpdatePanel } from "../components/LauncherUpdatePanel";
 import { StatusBadge } from "../components/StatusBadge";
 import { formatDate } from "../domain/format";
@@ -8,24 +10,65 @@ import { useI18n } from "../i18n";
 import { releaseInfo } from "../releaseInfo";
 import { useLauncher } from "../store/LauncherStore";
 
-export function AboutView() {
+export function AboutView({ setRoute }: { setRoute: (route: AppRoute) => void }) {
   const { locale, t } = useI18n();
-  const { snapshot, busyAction, checkLauncherUpdates, installLauncherUpdate, updateProgress } =
+  const { snapshot, busyAction, checkLauncherUpdates, installLauncherUpdate, updateProgress, personalization } =
     useLauncher();
   if (!snapshot) return null;
   const localizedReleaseInfo = localizeReleaseInfo(releaseInfo, locale);
+  const favoriteItem = personalization.favoriteItemId
+    ? snapshot.items.find((item) => item.catalog.id === personalization.favoriteItemId) ?? null
+    : null;
+  const libraryCount = snapshot.items.filter((item) => item.collectionStatus !== "notAdded").length;
+  const installedCount = snapshot.items.filter((item) => item.state.installed).length;
 
   return (
     <div className="about-layout">
       <section className="about-hero">
-        <div className="brand about-hero__brand">
-          <span className="brand__mark">LX</span>
-          <span>
-            <strong>{t("common.brandName")}</strong>
-            <small>{`${t("common.brandProduct")} v${snapshot.appVersion}`}</small>
-          </span>
+        <div className="about-hero__header">
+          <div className="brand about-hero__brand">
+            <span className="brand__mark">LX</span>
+            <span>
+              <strong>{t("common.brandName")}</strong>
+              <small>{`${t("common.brandProduct")} v${snapshot.appVersion}`}</small>
+            </span>
+          </div>
+          <div className="about-hero__persona">
+            <LauncherAvatar avatarId={personalization.avatarId} size="lg" />
+            <div>
+              <span className="about-hero__persona-label">{t("settings.profiles.active")}</span>
+              <strong>
+                {personalization.displayName
+                  ? t("about.hero.personalizedTitle", { name: personalization.displayName })
+                  : t("about.hero.fallbackTitle")}
+              </strong>
+              <small>{t(`settings.personalization.themes.${personalization.themeId}.name`)}</small>
+            </div>
+          </div>
+        </div>
+        <div className="about-hero__stats">
+          <div>
+            <span>{t("home.metrics.collection")}</span>
+            <strong>{libraryCount}</strong>
+          </div>
+          <div>
+            <span>{t("home.metrics.downloads")}</span>
+            <strong>{installedCount}</strong>
+          </div>
+          <div>
+            <span>{t("common.labels.current")}</span>
+            <strong>v{snapshot.appVersion}</strong>
+          </div>
         </div>
         <p>{t("about.hero.body")}</p>
+        {favoriteItem && (
+          <div className="about-hero__favorite">
+            <span>{t("about.hero.favoriteLabel")}</span>
+            <button className="button button--ghost" onClick={() => setRoute(`item:${favoriteItem.catalog.id}`)} type="button">
+              {favoriteItem.catalog.name}
+            </button>
+          </div>
+        )}
         <div className="action-row">
           <button
             className="button button--secondary"
