@@ -1,0 +1,120 @@
+name: release-android
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release-android:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Add Android Rust targets
+        run: rustup target add aarch64-linux-android armv7-linux-androideabi i686-linux-android x86_64-linux-android
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK components
+        shell: bash
+        run: |
+          yes | sdkmanager --licenses
+          sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0" "ndk;27.1.12297006"
+
+      - name: Export Android environment
+        shell: bash
+        run: |
+          echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> "$GITHUB_ENV"
+          echo "NDK_HOME=$ANDROID_SDK_ROOT/ndk/27.1.12297006" >> "$GITHUB_ENV"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate release-info against tag
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+
+          $releaseInfo = Get-Content -Raw "release-info.json" | ConvertFrom-Json
+          $expectedTag = "v$($releaseInfo.version)"
+          $actualTag = "${{ github.ref_name }}"
+
+          if ($actualTag -ne $expectedTag) {
+            throw "Release tag mismatch. release-info.json expects $expectedTag but workflow is running for $actualTag."
+          }
+
+      - name: Initialize Android target
+        shell: bash
+        run: |
+          if [ -d "src-tauri/gen/android" ]; then
+            echo "Android target already initialized"
+          else
+            npm exec tauri android init -- --ci --skip-targets-install
+          fi
+
+      - name: Build Android APK
+        run: npm run tauri:android:build
+
+      - name: Prepare Android release assets and updater manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          VERSION="${{ github.ref_name }}"
+          REPO="${{ github.repository }}"
+          ASSET_NAME="lumorix-launcher-android.apk"
+          RELEASE_ASSET_DIR="distribution/release-assets-android"
+          LATEST_PATH="distribution/latest-android.json"
+
+          APK_PATH=$(find src-tauri/gen/android/app/build/outputs/apk -type f -name "*.apk" ! -name "*unsigned*" ! -name "*unaligned*" | head -n 1 || true)
+          if [ -z "$APK_PATH" ]; then
+            APK_PATH=$(find src-tauri/gen/android/app/build/outputs/apk -type f -name "*.apk" | head -n 1 || true)
+          fi
+
+          if [ -z "$APK_PATH" ]; then
+            echo "No APK found under src-tauri/gen/android/app/build/outputs/apk"
+            exit 1
+          fi
+
+          mkdir -p "$RELEASE_ASSET_DIR"
+          rm -f "$RELEASE_ASSET_DIR"/*
+          cp "$APK_PATH" "$RELEASE_ASSET_DIR/$ASSET_NAME"
+
+          APK_SHA256=$(sha256sum "$RELEASE_ASSET_DIR/$ASSET_NAME" | awk '{print $1}')
+          UPDATER_URL="https://github.com/$REPO/releases/download/$VERSION/$ASSET_NAME"
+          RELEASE_URL="https://github.com/$REPO/releases/tag/$VERSION"
+
+          node -e "const fs=require('fs'); const p='$LATEST_PATH'; const j=JSON.parse(fs.readFileSync(p,'utf8')); j.pub_date=new Date().toISOString(); j.releaseUrl='$RELEASE_URL'; j.platforms=j.platforms||{}; j.platforms['android-aarch64']={url:'$UPDATER_URL',signature:'$APK_SHA256'}; fs.writeFileSync(p, JSON.stringify(j,null,2));"
+
+      - name: Upload Android release assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            distribution/release-assets-android/*
+            distribution/latest-android.json
+          draft: false
+          prerelease: false
+          generate_release_notes: true

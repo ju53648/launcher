@@ -1,15 +1,13 @@
 {
-  "version": "0.5.95",
-  "title": "Move Install",
-  "notes": "Move Install\n\n- Games can now be moved to a different library folder, just like in Steam.\n- Game saves and progress are fully preserved during the move — save files inside the install folder are copied along with the game.\n- DropDash highscores are unaffected since they are stored independently of the install path.\n- A new Move Install dialog lets you pick any available library as the target, with a clear note confirming your data is safe.\n- The Move Install button appears on the game detail page for all installed games and is disabled when another job is already running.",
+  "version": "0.7.1",
+  "title": "Android Release Pipeline Hotfix",
+  "notes": "Android Release Pipeline Hotfix\n\n- Fixed release automation so tag pushes trigger both Windows and Android release lanes.\n- Android CI now builds and uploads a launcher APK release asset automatically.\n- Desktop user behavior remains unchanged while mobile delivery is now automated.",
   "notesList": [
-    "Games can now be moved to a different library folder, just like in Steam.",
-    "Game saves and progress are fully preserved during the move — save files inside the install folder are copied along with the game.",
-    "DropDash highscores are unaffected since they are stored independently of the install path.",
-    "A new Move Install dialog lets you pick any available library as the target, with a clear note confirming your data is safe.",
-    "The Move Install button appears on the game detail page for all installed games and is disabled when another job is already running."
+    "Fixed release automation so tag pushes trigger both Windows and Android release lanes.",
+    "Android CI now builds and uploads a launcher APK release asset automatically.",
+    "Desktop user behavior remains unchanged while mobile delivery is now automated."
   ],
-  "pub_date": "2026-05-05T00:00:00Z",
+  "pub_date": "2026-05-06T00:00:00Z",
   "platforms": {
     "windows-x86_64": {
       "url": "__GENERATED_IN_CI__",
