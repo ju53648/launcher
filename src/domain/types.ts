@@ -2,6 +2,12 @@ export type LibraryStatus = "available" | "missing" | "inaccessible";
 
 export type CatalogItemType = "game" | "tool" | "project";
 
+export type ContentPlatform = "desktop" | "android";
+
+export type DistributionChannel = "direct" | "githubRelease" | "playStore";
+
+export type PackageType = "zip" | "apk" | "aab" | "storeListing";
+
 export type TagWeight = 1 | 2 | 3;
 
 export type TagCategoryId = "gameplay" | "world" | "systems";
@@ -96,6 +102,7 @@ export interface LibraryFolder {
 export interface CatalogItemRecord {
   id: string;
   itemType: CatalogItemType;
+  platform: ContentPlatform;
   name: string;
   description: string;
   developer: string;
@@ -121,6 +128,7 @@ export interface CollectionEntry {
 export interface ContentManifest {
   id: string;
   itemType: CatalogItemType;
+  platform: ContentPlatform;
   name: string;
   version: string;
   description: string;
@@ -134,10 +142,16 @@ export interface ContentManifest {
   executable: string;
   installSizeBytes: number;
   defaultInstallFolder: string;
+  distribution?: ManifestDistribution | null;
   supportedActions: ItemAction[];
   installStrategy: InstallStrategy;
   download: DownloadSource;
   changelog: ChangelogEntry[];
+}
+
+export interface ManifestDistribution {
+  channel: DistributionChannel;
+  packageType: PackageType;
 }
 
 export type InstallStrategy =

@@ -89,6 +89,9 @@ const translations = {
     controlLeft: "A / Left",
     controlRight: "D / Right",
     controlPulse: "Space to pulse",
+    touchLeft: "Hold left",
+    touchRight: "Hold right",
+    touchPulse: "Tap pulse",
     startButton: "Start Run",
     gameOverEyebrow: "Run Complete",
     gameOverTitle: "Crash Detected",
@@ -125,6 +128,9 @@ const translations = {
     controlLeft: "A / Links",
     controlRight: "D / Rechts",
     controlPulse: "Leertaste fuer Impuls",
+    touchLeft: "Links halten",
+    touchRight: "Rechts halten",
+    touchPulse: "Impuls tippen",
     startButton: "Run starten",
     gameOverEyebrow: "Durchlauf beendet",
     gameOverTitle: "Crash erkannt",
@@ -161,6 +167,9 @@ const translations = {
     controlLeft: "A / Lewo",
     controlRight: "D / Prawo",
     controlPulse: "Spacja aby pulsowac",
+    touchLeft: "Przytrzymaj lewo",
+    touchRight: "Przytrzymaj prawo",
+    touchPulse: "Stuknij puls",
     startButton: "Start",
     gameOverEyebrow: "Koniec biegu",
     gameOverTitle: "Wykryto crash",
@@ -245,6 +254,13 @@ function applyStaticTranslations() {
   if (diffBtnEasy) diffBtnEasy.textContent = t("diffEasy");
   if (diffBtnNormal) diffBtnNormal.textContent = t("diffNormal");
   if (diffBtnHard) diffBtnHard.textContent = t("diffHard");
+
+  const touchLeft = document.getElementById("touchLeft");
+  const touchPulse = document.getElementById("touchPulse");
+  const touchRight = document.getElementById("touchRight");
+  if (touchLeft) touchLeft.textContent = t("touchLeft");
+  if (touchPulse) touchPulse.textContent = t("touchPulse");
+  if (touchRight) touchRight.textContent = t("touchRight");
 }
 
 function renderStatusText() {
@@ -267,6 +283,7 @@ const WIDTH = canvas.width;
 const HEIGHT = canvas.height;
 const STORAGE_KEY = "lumorix-dropdash-best";
 const keys = new Set();
+const touchKeys = new Set();
 
 // Mode & difficulty selection
 let selectedMode = "classic";
@@ -595,8 +612,8 @@ function update(dt) {
     return ft.age < ft.life;
   });
 
-  const left = keys.has("arrowleft") || keys.has("a");
-  const right = keys.has("arrowright") || keys.has("d");
+  const left = keys.has("arrowleft") || keys.has("a") || touchKeys.has("left");
+  const right = keys.has("arrowright") || keys.has("d") || touchKeys.has("right");
   const target = (right ? 1 : 0) - (left ? 1 : 0);
   state.player.vx += (target * 520 - state.player.vx) * Math.min(1, dt * 10);
   state.player.x += state.player.vx * dt;
@@ -925,6 +942,38 @@ restartButton.addEventListener("click", () => {
   resetGame();
 });
 
+function bindTouchControl(elementId, direction) {
+  const element = document.getElementById(elementId);
+  if (!element) {
+    return;
+  }
+
+  const press = (event) => {
+    event.preventDefault();
+    touchKeys.add(direction);
+  };
+  const release = (event) => {
+    event.preventDefault();
+    touchKeys.delete(direction);
+  };
+
+  element.addEventListener("pointerdown", press);
+  element.addEventListener("pointerup", release);
+  element.addEventListener("pointercancel", release);
+  element.addEventListener("pointerleave", release);
+}
+
+const touchPulseButton = document.getElementById("touchPulse");
+if (touchPulseButton) {
+  touchPulseButton.addEventListener("pointerdown", (event) => {
+    event.preventDefault();
+    pulse();
+  });
+}
+
+bindTouchControl("touchLeft", "left");
+bindTouchControl("touchRight", "right");
+
 window.addEventListener("keydown", (event) => {
   const key = event.key.toLowerCase();
   if (["arrowleft", "arrowright", "a", "d", " ", "p", "enter", "escape"].includes(key)) {
@@ -947,6 +996,11 @@ window.addEventListener("keydown", (event) => {
 
 window.addEventListener("keyup", (event) => {
   keys.delete(event.key.toLowerCase());
+});
+
+window.addEventListener("blur", () => {
+  keys.clear();
+  touchKeys.clear();
 });
 
 window.addEventListener("lumorix-language", (event) => {

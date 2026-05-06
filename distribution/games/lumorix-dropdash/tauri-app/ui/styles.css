@@ -137,6 +137,33 @@ h2 {
   font-weight: 700;
 }
 
+.touch-controls {
+  display: none;
+  width: min(100%, 420px);
+  justify-content: center;
+  gap: 10px;
+}
+
+.touch-btn {
+  flex: 1;
+  min-width: 0;
+  min-height: 48px;
+  padding: 0 14px;
+  border: 1px solid rgba(118, 239, 255, 0.28);
+  border-radius: 12px;
+  color: #dff8ff;
+  background: rgba(7, 18, 28, 0.9);
+  font-size: 13px;
+  font-weight: 800;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+}
+
+.touch-btn--pulse {
+  color: #071318;
+  background: linear-gradient(135deg, #76efff, #f6ff80);
+  border-color: transparent;
+}
+
 button {
   min-width: 146px;
   min-height: 44px;
@@ -252,5 +279,19 @@ footer {
 
   .intro {
     font-size: 15px;
+  }
+
+  .touch-controls {
+    width: 100%;
+  }
+
+  .touch-btn {
+    min-height: 52px;
+  }
+}
+
+@media (pointer: coarse), (hover: none) {
+  .touch-controls {
+    display: flex;
   }
 }

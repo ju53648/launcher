@@ -38,6 +38,7 @@ function normalizeCollectionEntry(entry: CollectionEntry): CollectionEntry {
 function normalizeCatalogItemRecord(record: CatalogItemRecord): CatalogItemRecord {
   return {
     ...record,
+    platform: record.platform ?? "desktop",
     tags: normalizeContentTags(record.tags)
   };
 }
@@ -45,6 +46,7 @@ function normalizeCatalogItemRecord(record: CatalogItemRecord): CatalogItemRecor
 function normalizeContentManifest(manifest: ContentManifest): ContentManifest {
   return {
     ...manifest,
+    platform: manifest.platform ?? "desktop",
     tags: normalizeContentTags(manifest.tags)
   };
 }

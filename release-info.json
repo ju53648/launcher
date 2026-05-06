@@ -1,12 +1,11 @@
 {
-  "version": "0.6.0",
-  "title": "Profiles And Launcher Polish",
+  "version": "0.7.0",
+  "title": "Android Split And Desktop Stability",
   "date": "2026-05-06",
   "notes": [
-    "The launcher now starts in fullscreen and the onboarding intro includes a direct language picker.",
-    "Profiles were reworked into cleaner sidebar popouts with profile-specific pinned games, quick search history, library filters, groups, streaks, and update notices.",
-    "Favorite game selection is now limited to titles that are actually in your library, so profile focus stays relevant.",
-    "The About page hero card and several empty states were redesigned for a more polished Lumorix look.",
-    "DropDash now ships with its own updated native icon instead of falling back to a generic launcher-style symbol."
+    "Desktop launcher behavior and update flow stay unchanged for existing PC users.",
+    "Lumorix now has a separate Android catalog lane and dedicated mobile package identifiers for future phone releases.",
+    "DropDash gained mobile-ready touch controls and a dedicated Android manifest alongside the existing desktop package.",
+    "The launcher and DropDash Tauri runtimes were split into reusable desktop-plus-mobile entry points so Android builds can be added without changing desktop startup behavior."
   ]
 }

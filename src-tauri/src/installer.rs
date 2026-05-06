@@ -1330,6 +1330,7 @@ fn catalog_record_from_manifest(manifest: &crate::models::ContentManifest) -> Ca
     CatalogItemRecord {
         id: manifest.id.clone(),
         item_type: manifest.item_type.clone(),
+        platform: manifest.platform,
         name: manifest.name.clone(),
         description: manifest.description.clone(),
         developer: manifest.developer.clone(),

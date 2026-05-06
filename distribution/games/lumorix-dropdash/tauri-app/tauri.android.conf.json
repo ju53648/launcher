@@ -1,0 +1,21 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Lumorix DropDash Mobile",
+  "identifier": "com.lumorix.dropdash.android",
+  "bundle": {
+    "active": true,
+    "targets": ["apk"],
+    "category": "Game"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Lumorix DropDash Mobile",
+        "width": 420,
+        "height": 920,
+        "fullscreen": false,
+        "resizable": true
+      }
+    ]
+  }
+}

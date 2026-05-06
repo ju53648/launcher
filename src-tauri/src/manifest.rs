@@ -7,7 +7,7 @@ use std::{
 use url::Url;
 
 use crate::{
-    models::{ContentManifest, DownloadSource, InstallStrategy},
+    models::{ContentManifest, ContentPlatform, DistributionChannel, DownloadSource, InstallStrategy, PackageType},
     paths::{folder_name_is_safe, safe_join},
     storage::{CommandError, LauncherRuntime, Result},
 };
@@ -143,6 +143,27 @@ pub fn validate_manifest(manifest: &ContentManifest) -> Result<()> {
         )));
     }
 
+    if let Some(distribution) = &manifest.distribution {
+        match (manifest.platform, distribution.channel, distribution.package_type) {
+            (ContentPlatform::Desktop, DistributionChannel::PlayStore, _)
+            | (ContentPlatform::Desktop, _, PackageType::Apk)
+            | (ContentPlatform::Desktop, _, PackageType::Aab)
+            | (ContentPlatform::Desktop, _, PackageType::StoreListing) => {
+                return Err(CommandError::Manifest(format!(
+                    "Desktop manifest {} cannot use Android distribution settings",
+                    manifest.id
+                )));
+            }
+            (ContentPlatform::Android, _, PackageType::Zip) => {
+                return Err(CommandError::Manifest(format!(
+                    "Android manifest {} cannot use zip package type",
+                    manifest.id
+                )));
+            }
+            _ => {}
+        }
+    }
+
     let mut seen_tags = BTreeSet::new();
     for tag in &manifest.tags {
         if tag.id.trim().is_empty() {
@@ -168,9 +189,11 @@ pub fn validate_manifest(manifest: &ContentManifest) -> Result<()> {
     }
 
     let install_root = std::path::Path::new("C:\\LumorixValidation");
-    safe_join(install_root, &manifest.executable)?;
-    for required_path in &manifest.required_paths {
-        safe_join(install_root, required_path)?;
+    if manifest.platform == ContentPlatform::Desktop {
+        safe_join(install_root, &manifest.executable)?;
+        for required_path in &manifest.required_paths {
+            safe_join(install_root, required_path)?;
+        }
     }
 
     match &manifest.install_strategy {
@@ -190,6 +213,12 @@ pub fn validate_manifest(manifest: &ContentManifest) -> Result<()> {
             }
         }
         InstallStrategy::DirectFolder { source_path } => {
+            if manifest.platform != ContentPlatform::Desktop {
+                return Err(CommandError::Manifest(format!(
+                    "Direct folder install strategy is only supported for desktop manifest {}",
+                    manifest.id
+                )));
+            }
             let source = std::path::Path::new(source_path);
             if source_path.trim().is_empty() {
                 return Err(CommandError::Manifest(format!(
@@ -204,7 +233,14 @@ pub fn validate_manifest(manifest: &ContentManifest) -> Result<()> {
                 )));
             }
         }
-        InstallStrategy::ZipArchive { .. } => {}
+        InstallStrategy::ZipArchive { .. } => {
+            if manifest.platform != ContentPlatform::Desktop {
+                return Err(CommandError::Manifest(format!(
+                    "Zip archive install strategy is only supported for desktop manifest {}",
+                    manifest.id
+                )));
+            }
+        }
     }
 
     match &manifest.download {
@@ -235,6 +271,10 @@ pub fn missing_required_install_paths(
     manifest: &ContentManifest,
     install_root: &Path,
 ) -> Result<Vec<String>> {
+    if manifest.platform != ContentPlatform::Desktop {
+        return Ok(Vec::new());
+    }
+
     let mut missing = Vec::new();
     let mut seen = BTreeSet::new();
 

@@ -87,6 +87,41 @@ pub enum CatalogItemType {
     Project,
 }
 
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Default)]
+#[serde(rename_all = "camelCase")]
+pub enum ContentPlatform {
+    #[default]
+    Desktop,
+    Android,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct ManifestDistribution {
+    pub channel: DistributionChannel,
+    #[serde(default)]
+    pub package_type: PackageType,
+}
+
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Default)]
+#[serde(rename_all = "camelCase")]
+pub enum DistributionChannel {
+    #[default]
+    Direct,
+    GithubRelease,
+    PlayStore,
+}
+
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Default)]
+#[serde(rename_all = "camelCase")]
+pub enum PackageType {
+    #[default]
+    Zip,
+    Apk,
+    Aab,
+    StoreListing,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub struct ContentTag {
@@ -150,6 +185,8 @@ pub struct CatalogItemRecord {
     pub id: String,
     #[serde(default)]
     pub item_type: CatalogItemType,
+    #[serde(default)]
+    pub platform: ContentPlatform,
     pub name: String,
     pub description: String,
     pub developer: String,
@@ -218,6 +255,8 @@ pub struct ContentManifest {
     pub id: String,
     #[serde(default)]
     pub item_type: CatalogItemType,
+    #[serde(default)]
+    pub platform: ContentPlatform,
     pub name: String,
     pub version: String,
     pub description: String,
@@ -235,6 +274,8 @@ pub struct ContentManifest {
     pub required_paths: Vec<String>,
     pub install_size_bytes: u64,
     pub default_install_folder: String,
+    #[serde(default)]
+    pub distribution: Option<ManifestDistribution>,
     pub supported_actions: Vec<ContentAction>,
     pub install_strategy: InstallStrategy,
     pub download: DownloadSource,

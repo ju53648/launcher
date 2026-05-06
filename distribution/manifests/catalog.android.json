@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "timestamp": "2026-05-06T12:00:00Z",
+  "manifests": [
+    {
+      "url": "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/manifests/games/lumorix-dropdash-android.json?v=2.0.0-alpha"
+    }
+  ]
+}

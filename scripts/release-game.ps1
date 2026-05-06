@@ -42,10 +42,15 @@ Push-Location $repoRoot
 try {
     & (Join-Path $PSScriptRoot "update-game-manifest.ps1") -ConfigPath $ConfigPath
 
+    $catalogPath = "distribution/manifests/catalog.json"
+    if (-not [string]::IsNullOrWhiteSpace($config.catalogPath)) {
+        $catalogPath = [string]$config.catalogPath
+    }
+
     $pathsToAdd = @()
     $pathsToAdd += $ConfigPath
     $pathsToAdd += [string]$config.manifestPath
-    $pathsToAdd += "distribution/manifests/catalog.json"
+    $pathsToAdd += $catalogPath
 
     if (-not [string]::IsNullOrWhiteSpace($config.archivePath)) {
         $pathsToAdd += [string]$config.archivePath

@@ -5,6 +5,11 @@ use crate::{
     storage::{CommandError, LauncherRuntime, Result},
 };
 
+#[cfg(target_os = "android")]
+const LAUNCHER_UPDATE_MANIFEST_URL: &str =
+    "https://github.com/ju53648/launcher/releases/latest/download/latest-android.json";
+
+#[cfg(not(target_os = "android"))]
 const LAUNCHER_UPDATE_MANIFEST_URL: &str =
     "https://github.com/ju53648/launcher/releases/latest/download/latest.json";
 

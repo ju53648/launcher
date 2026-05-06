@@ -33,6 +33,12 @@ const RETIRED_ITEM_ID_B: &[u8] = &[
 ];
 const PUBLIC_CATALOG_SOURCE_ID: &str = "lumorix-public-catalog";
 const PUBLIC_CATALOG_SOURCE_NAME: &str = "Lumorix Public Catalog";
+
+#[cfg(target_os = "android")]
+const PUBLIC_CATALOG_URL: &str =
+    "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/manifests/catalog.android.json";
+
+#[cfg(not(target_os = "android"))]
 const PUBLIC_CATALOG_URL: &str =
     "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/manifests/catalog.json";
 
@@ -761,6 +767,7 @@ fn summary_from_manifest(manifest: &ContentManifest) -> CatalogItemRecord {
     CatalogItemRecord {
         id: manifest.id.clone(),
         item_type: manifest.item_type.clone(),
+        platform: manifest.platform,
         name: manifest.name.clone(),
         description: manifest.description.clone(),
         developer: manifest.developer.clone(),
@@ -781,6 +788,7 @@ fn placeholder_catalog_record(item_id: &str) -> CatalogItemRecord {
     CatalogItemRecord {
         id: item_id.into(),
         item_type: CatalogItemType::Game,
+        platform: crate::models::ContentPlatform::Desktop,
         name: fallback_item_name(item_id),
         description: "This item remains in your library, but its catalog page is no longer available.".into(),
         developer: "Lumorix".into(),

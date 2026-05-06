@@ -1,0 +1,13 @@
+{
+  "desktop": {
+    "launcherUpdateManifest": "https://github.com/ju53648/launcher/releases/latest/download/latest.json",
+    "catalog": "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/manifests/catalog.json",
+    "dropdashManifest": "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/manifests/games/lumorix-dropdash.json"
+  },
+  "android": {
+    "launcherUpdateManifest": "https://github.com/ju53648/launcher/releases/latest/download/latest-android.json",
+    "catalog": "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/manifests/catalog.android.json",
+    "dropdashManifest": "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/manifests/games/lumorix-dropdash-android.json",
+    "dropdashApk": "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/games/lumorix-dropdash/release/lumorix-dropdash-android.apk"
+  }
+}

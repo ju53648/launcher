@@ -1,0 +1,17 @@
+{
+  "version": "0.7.0-android-alpha",
+  "title": "Android Split Lane",
+  "notes": "Android split lane bootstrap. Desktop users stay on the existing Windows release channel.",
+  "notesList": [
+    "Introduced a dedicated Android launcher channel.",
+    "Desktop remains on the existing Windows update channel unchanged.",
+    "Catalog loading for Android now defaults to catalog.android.json."
+  ],
+  "pub_date": "2026-05-06T12:00:00Z",
+  "platforms": {
+    "android-aarch64": {
+      "url": "__GENERATED_IN_CI__",
+      "signature": "__GENERATED_IN_CI__"
+    }
+  }
+}

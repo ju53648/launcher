@@ -23,6 +23,7 @@ const catalog: ContentManifest[] = [
   {
     id: "com.lumorix.dropdash",
     itemType: "game",
+    platform: "desktop",
     name: "Lumorix DropDash",
     version: "1.0.0",
     description:
@@ -67,6 +68,7 @@ const catalog: ContentManifest[] = [
   {
     id: "com.lumorix.echo-protocol",
     itemType: "game",
+    platform: "desktop",
     name: "Echo Protocol",
     version: "0.1.0",
     description:
@@ -127,6 +129,7 @@ function loadCollectionEntries(): CollectionEntry[] {
       totalPlaytimeMinutes: entry.totalPlaytimeMinutes ?? 0,
       catalog: {
         ...entry.catalog,
+        platform: entry.catalog.platform ?? "desktop",
         tags: normalizeContentTags(entry.catalog.tags)
       }
     }));
@@ -242,6 +245,7 @@ function buildViews(): ContentView[] {
         : collectionEntry?.catalog ?? {
             id: itemId,
             itemType: "game",
+            platform: "desktop",
             name: itemId,
             description: "This item remains in your library, but its catalog page is no longer available.",
             developer: "Lumorix",
@@ -374,6 +378,7 @@ function catalogRecordFromManifest(manifest: ContentManifest) {
   return {
     id: manifest.id,
     itemType: manifest.itemType,
+    platform: manifest.platform,
     name: manifest.name,
     description: manifest.description,
     developer: manifest.developer,

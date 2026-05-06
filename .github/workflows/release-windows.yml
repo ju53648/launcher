@@ -135,3 +135,131 @@ jobs:
           draft: false
           prerelease: false
           generate_release_notes: true
+
+  build-android:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android,armv7-linux-androideabi,i686-linux-android,x86_64-linux-android
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android components
+        shell: bash
+        run: |
+          yes | sdkmanager --licenses
+          sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0" "ndk;27.1.12297006"
+
+      - name: Export Android environment
+        shell: bash
+        run: |
+          echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> "$GITHUB_ENV"
+          echo "NDK_HOME=$ANDROID_SDK_ROOT/ndk/27.1.12297006" >> "$GITHUB_ENV"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate release-info against tag
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+
+          $releaseInfo = Get-Content -Raw "release-info.json" | ConvertFrom-Json
+          $expectedTag = "v$($releaseInfo.version)"
+          $actualTag = "${{ github.ref_name }}"
+
+          if ($actualTag -ne $expectedTag) {
+            throw "Release tag mismatch. release-info.json expects $expectedTag but workflow is running for $actualTag."
+          }
+
+      - name: Initialize Android target
+        run: npm exec tauri android init -- --ci --skip-targets-install
+
+      - name: Build Android APK
+        run: npm run tauri:android:build
+
+      - name: Prepare latest-android.json for GitHub Releases updater lane
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+
+          $version = "${{ github.ref_name }}"
+          $apkCandidates = Get-ChildItem -Path "src-tauri/gen/android/app/build/outputs/apk" -Recurse -Filter "*.apk" -ErrorAction SilentlyContinue
+          if (-not $apkCandidates -or $apkCandidates.Count -eq 0) {
+            throw "No APK found under src-tauri/gen/android/app/build/outputs/apk"
+          }
+
+          $apk = $apkCandidates |
+            Where-Object { $_.Name -notmatch "unsigned|unaligned" } |
+            Select-Object -First 1
+
+          if (-not $apk) {
+            $apk = $apkCandidates | Select-Object -First 1
+          }
+
+          $releaseAssetDir = Join-Path $PWD "distribution/release-assets-android"
+          New-Item -ItemType Directory -Force -Path $releaseAssetDir | Out-Null
+          Get-ChildItem -Path $releaseAssetDir -File -ErrorAction SilentlyContinue | Remove-Item -Force
+
+          $assetName = "lumorix-launcher-android.apk"
+          $releaseApkPath = Join-Path $releaseAssetDir $assetName
+          Copy-Item -Path $apk.FullName -Destination $releaseApkPath -Force
+
+          $apkSha256 = (Get-FileHash $releaseApkPath -Algorithm SHA256).Hash.ToLowerInvariant()
+          $latestPath = Join-Path $PWD "distribution/latest-android.json"
+          if (-not (Test-Path $latestPath)) {
+            throw "Android updater manifest not found at: $latestPath"
+          }
+
+          $updaterUrl = "https://github.com/${{ github.repository }}/releases/download/$version/$assetName"
+          $releaseUrl = "https://github.com/${{ github.repository }}/releases/tag/$version"
+
+          $existingLatest = Get-Content -Raw $latestPath | ConvertFrom-Json -AsHashtable
+          $json = [ordered]@{
+            version = $existingLatest.version
+            title = $existingLatest.title
+            notes = $existingLatest.notes
+            notesList = $existingLatest.notesList
+            pub_date = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
+            releaseUrl = $releaseUrl
+            platforms = [ordered]@{
+              "android-aarch64" = [ordered]@{
+                url = $updaterUrl
+                signature = $apkSha256
+              }
+            }
+          } | ConvertTo-Json -Depth 8
+
+          Set-Content -Path $latestPath -Value $json -Encoding UTF8
+
+      - name: Upload Android release assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            distribution/release-assets-android/*
+            distribution/latest-android.json
+          draft: false
+          prerelease: false
+          generate_release_notes: true
