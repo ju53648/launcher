@@ -125,7 +125,11 @@ pub fn set_default_library(
     library_id: String,
 ) -> Result<LauncherSnapshot> {
     let mut config = state.load_config()?;
-    if !config.libraries.iter().any(|library| library.id == library_id) {
+    if !config
+        .libraries
+        .iter()
+        .any(|library| library.id == library_id)
+    {
         return Err(CommandError::Validation("Library does not exist".into()));
     }
     config.default_library_id = Some(library_id);
@@ -204,10 +208,7 @@ pub fn start_install_item(
 }
 
 #[tauri::command]
-pub fn start_update_item(
-    state: State<'_, LauncherRuntime>,
-    item_id: String,
-) -> Result<InstallJob> {
+pub fn start_update_item(state: State<'_, LauncherRuntime>, item_id: String) -> Result<InstallJob> {
     let installed_db = state.load_installed_db()?;
     let installed = installed_db
         .items
@@ -285,9 +286,7 @@ pub fn open_install_folder(
 }
 
 #[tauri::command]
-pub async fn check_launcher_updates(
-    state: State<'_, LauncherRuntime>,
-) -> Result<LauncherSnapshot> {
+pub async fn check_launcher_updates(state: State<'_, LauncherRuntime>) -> Result<LauncherSnapshot> {
     let runtime = state.inner().clone();
     let result = run_launcher_update_check(&runtime).await;
     if let Err(err) = &result {
@@ -323,7 +322,10 @@ pub async fn check_item_updates(state: State<'_, LauncherRuntime>) -> Result<Lau
     let changed = verify_installed_game_health(&state)?;
     state.append_log(
         "INFO",
-        &format!("Verified installed game health; {} item(s) changed status", changed),
+        &format!(
+            "Verified installed game health; {} item(s) changed status",
+            changed
+        ),
     );
 
     state.build_snapshot()

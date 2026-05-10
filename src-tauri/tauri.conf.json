@@ -13,12 +13,15 @@
     "windows": [
       {
         "title": "Lumorix Launcher",
-        "width": 1280,
-        "height": 820,
-        "minWidth": 1080,
-        "minHeight": 720,
+        "width": 200,
+        "height": 100,
+        "minWidth": 200,
+        "minHeight": 100,
+        "maxWidth": 1280,
+        "maxHeight": 820,
         "resizable": true,
-        "fullscreen": true,
+        "maximizable": true,
+        "fullscreen": false,
         "decorations": true,
         "center": true,
         "visible": true

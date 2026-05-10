@@ -35,7 +35,7 @@ fn spawn_clean(command: &mut Command, hide_console: bool) -> Result<Child> {
 }
 
 use crate::{
-    manifest::find_manifest,
+    manifest::{find_manifest, is_enabled_item_id},
     models::AppLanguage,
     paths::safe_join,
     storage::{CommandError, LauncherRuntime, Result},
@@ -72,6 +72,12 @@ fn apply_launcher_language(command: &mut Command, runtime: &LauncherRuntime) {
 }
 
 pub fn launch_item(runtime: &LauncherRuntime, item_id: &str) -> Result<()> {
+    if !is_enabled_item_id(item_id) {
+        return Err(CommandError::Process(
+            "This launcher is limited to two playable games".into(),
+        ));
+    }
+
     if runtime.is_item_process_running(item_id)? {
         return Err(CommandError::Process("Item is already running".into()));
     }
@@ -182,7 +188,9 @@ pub fn close_item(runtime: &LauncherRuntime, item_id: &str) -> Result<()> {
             .map_err(|err| CommandError::Process(format!("Could not close item process: {err}")))?;
 
         if !status.success() {
-            return Err(CommandError::Process("Could not close running item process".into()));
+            return Err(CommandError::Process(
+                "Could not close running item process".into(),
+            ));
         }
     }
 
@@ -195,7 +203,9 @@ pub fn close_item(runtime: &LauncherRuntime, item_id: &str) -> Result<()> {
             .map_err(|err| CommandError::Process(format!("Could not close item process: {err}")))?;
 
         if !status.success() {
-            return Err(CommandError::Process("Could not close running item process".into()));
+            return Err(CommandError::Process(
+                "Could not close running item process".into(),
+            ));
         }
     }
 

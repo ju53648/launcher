@@ -17,10 +17,15 @@ pub fn recommended_library_path() -> Result<PathBuf> {
 pub fn validate_library_path(raw: &str) -> Result<PathBuf> {
     let trimmed = raw.trim();
     if trimmed.is_empty() {
-        return Err(CommandError::Validation("Library path cannot be empty".into()));
+        return Err(CommandError::Validation(
+            "Library path cannot be empty".into(),
+        ));
     }
 
-    if trimmed.chars().any(|ch| matches!(ch, '<' | '>' | '"' | '|' | '?' | '*')) {
+    if trimmed
+        .chars()
+        .any(|ch| matches!(ch, '<' | '>' | '"' | '|' | '?' | '*'))
+    {
         return Err(CommandError::Validation(
             "Library path contains characters that are invalid on Windows".into(),
         ));

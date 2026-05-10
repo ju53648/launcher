@@ -128,7 +128,10 @@ async fn fetch_text_uncached(url: &str, label: &str) -> Result<String> {
     let client = reqwest::Client::new();
     let response = client
         .get(&request_url)
-        .header(reqwest::header::CACHE_CONTROL, "no-cache, no-store, max-age=0")
+        .header(
+            reqwest::header::CACHE_CONTROL,
+            "no-cache, no-store, max-age=0",
+        )
         .header(reqwest::header::PRAGMA, "no-cache")
         .send()
         .await
@@ -151,7 +154,10 @@ async fn fetch_text_uncached(url: &str, label: &str) -> Result<String> {
 
 fn with_cache_buster(url: &str) -> String {
     let separator = if url.contains('?') { "&" } else { "?" };
-    format!("{url}{separator}_lumorix_ts={}", Utc::now().timestamp_millis())
+    format!(
+        "{url}{separator}_lumorix_ts={}",
+        Utc::now().timestamp_millis()
+    )
 }
 
 async fn parse_catalog_payload(raw: &str) -> Result<Vec<ContentManifest>> {
@@ -177,12 +183,13 @@ async fn parse_catalog_payload(raw: &str) -> Result<Vec<ContentManifest>> {
                 }
                 RemoteCatalogEntry::Reference { url } => {
                     let payload = fetch_text_uncached(&url, "referenced manifest").await?;
-                    let manifest = serde_json::from_str::<ContentManifest>(&payload).map_err(|err| {
-                        CommandError::Manifest(format!(
-                            "Referenced manifest '{}' is invalid JSON: {err}",
-                            url
-                        ))
-                    })?;
+                    let manifest =
+                        serde_json::from_str::<ContentManifest>(&payload).map_err(|err| {
+                            CommandError::Manifest(format!(
+                                "Referenced manifest '{}' is invalid JSON: {err}",
+                                url
+                            ))
+                        })?;
                     validate_manifest(&manifest)?;
                     manifests.push(manifest);
                 }
@@ -221,11 +228,7 @@ fn write_source_manifests(
     for manifest in manifests {
         validate_manifest(manifest)?;
 
-        let name = format!(
-            "{}{}.json",
-            prefix,
-            sanitize_file_component(&manifest.id)
-        );
+        let name = format!("{}{}.json", prefix, sanitize_file_component(&manifest.id));
 
         if !names.insert(name.clone()) {
             return Err(CommandError::Manifest(format!(
@@ -236,11 +239,17 @@ fn write_source_manifests(
 
         let path = runtime.manifests_dir.join(name);
         let raw = serde_json::to_string_pretty(manifest).map_err(|err| {
-            CommandError::Storage(format!("Could not serialize remote manifest '{}': {err}", manifest.id))
+            CommandError::Storage(format!(
+                "Could not serialize remote manifest '{}': {err}",
+                manifest.id
+            ))
         })?;
 
         fs::write(&path, raw).map_err(|err| {
-            CommandError::Storage(format!("Could not write remote manifest {}: {err}", path.display()))
+            CommandError::Storage(format!(
+                "Could not write remote manifest {}: {err}",
+                path.display()
+            ))
         })?;
     }
 

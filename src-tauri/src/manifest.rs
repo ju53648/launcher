@@ -7,7 +7,10 @@ use std::{
 use url::Url;
 
 use crate::{
-    models::{ContentManifest, ContentPlatform, DistributionChannel, DownloadSource, InstallStrategy, PackageType},
+    models::{
+        ContentManifest, ContentPlatform, DistributionChannel, DownloadSource, InstallStrategy,
+        PackageType,
+    },
     paths::{folder_name_is_safe, safe_join},
     storage::{CommandError, LauncherRuntime, Result},
 };
@@ -25,6 +28,8 @@ const EMBEDDED_MANIFESTS: &[&str] = &[
     include_str!("../manifests/glass-garden.json"),
 ];
 
+const ENABLED_ITEM_IDS: &[&str] = &["com.lumorix.dropdash", "com.lumorix.echo-protocol"];
+
 #[derive(Debug, Clone)]
 pub struct ManifestCatalog {
     pub manifests: Vec<ContentManifest>,
@@ -41,7 +46,9 @@ pub fn load_all_manifests(runtime: &LauncherRuntime) -> ManifestCatalog {
             Ok(manifest)
         }) {
             Ok(manifest) => {
-                manifests.insert(manifest.id.clone(), manifest);
+                if is_enabled_item_id(&manifest.id) {
+                    manifests.insert(manifest.id.clone(), manifest);
+                }
             }
             Err(err) => record_manifest_error(
                 runtime,
@@ -89,7 +96,9 @@ pub fn load_all_manifests(runtime: &LauncherRuntime) -> ManifestCatalog {
                         })
                     }) {
                     Ok(manifest) => {
-                        manifests.insert(manifest.id.clone(), manifest);
+                        if is_enabled_item_id(&manifest.id) {
+                            manifests.insert(manifest.id.clone(), manifest);
+                        }
                     }
                     Err(err) => record_manifest_error(
                         runtime,
@@ -107,6 +116,10 @@ pub fn load_all_manifests(runtime: &LauncherRuntime) -> ManifestCatalog {
         manifests: values,
         errors,
     }
+}
+
+pub fn is_enabled_item_id(item_id: &str) -> bool {
+    ENABLED_ITEM_IDS.contains(&item_id)
 }
 
 pub fn find_manifest(runtime: &LauncherRuntime, item_id: &str) -> Result<ContentManifest> {
@@ -144,7 +157,11 @@ pub fn validate_manifest(manifest: &ContentManifest) -> Result<()> {
     }
 
     if let Some(distribution) = &manifest.distribution {
-        match (manifest.platform, distribution.channel, distribution.package_type) {
+        match (
+            manifest.platform,
+            distribution.channel,
+            distribution.package_type,
+        ) {
             (ContentPlatform::Desktop, DistributionChannel::PlayStore, _)
             | (ContentPlatform::Desktop, _, PackageType::Apk)
             | (ContentPlatform::Desktop, _, PackageType::Aab)

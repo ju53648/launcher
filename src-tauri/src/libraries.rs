@@ -4,7 +4,7 @@ use chrono::Utc;
 use uuid::Uuid;
 
 use crate::{
-    models::{InstalledItemsDb, LibraryFolder, LibraryStatus, LauncherConfig},
+    models::{InstalledItemsDb, LauncherConfig, LibraryFolder, LibraryStatus},
     paths::validate_library_path,
     storage::{CommandError, Result},
 };
@@ -38,7 +38,10 @@ pub fn probe_libraries(config: &mut LauncherConfig) {
 pub fn create_library(name: String, path: String, is_default: bool) -> Result<LibraryFolder> {
     let path = validate_library_path(&path)?;
     fs::create_dir_all(&path).map_err(|err| {
-        CommandError::Validation(format!("Could not create library folder {}: {err}", path.display()))
+        CommandError::Validation(format!(
+            "Could not create library folder {}: {err}",
+            path.display()
+        ))
     })?;
 
     let marker = path.join(".lumorix-library");
@@ -61,7 +64,9 @@ pub fn create_library(name: String, path: String, is_default: bool) -> Result<Li
 }
 
 pub fn ensure_unique_library_path(config: &LauncherConfig, path: &str) -> Result<()> {
-    let normalized = validate_library_path(path)?.to_string_lossy().to_lowercase();
+    let normalized = validate_library_path(path)?
+        .to_string_lossy()
+        .to_lowercase();
     let duplicate = config
         .libraries
         .iter()

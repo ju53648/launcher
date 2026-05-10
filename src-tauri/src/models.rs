@@ -137,7 +137,9 @@ enum ContentTagSeed {
     Legacy(String),
 }
 
-fn deserialize_content_tags<'de, D>(deserializer: D) -> std::result::Result<Vec<ContentTag>, D::Error>
+fn deserialize_content_tags<'de, D>(
+    deserializer: D,
+) -> std::result::Result<Vec<ContentTag>, D::Error>
 where
     D: Deserializer<'de>,
 {

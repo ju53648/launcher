@@ -12,24 +12,24 @@ use thiserror::Error;
 
 use crate::{
     libraries::probe_libraries,
-    manifest::load_all_manifests,
+    manifest::{is_enabled_item_id, load_all_manifests},
     models::{
         CatalogItemRecord, CatalogItemType, CollectionEntry, CollectionStateDb, ContentManifest,
         ContentStateFlags, ContentTag, ContentUpdateInfo, ContentView, InstallBehavior, InstallJob,
-        InstalledItem, InstalledItemsDb, InstalledStatus, ItemCollectionStatus,
-        ItemInstallState, LauncherConfig, LauncherSnapshot, LauncherUpdateState,
-        ManifestSourceConfig, ManifestSourceType, PrivacyConfig,
+        InstalledItem, InstalledItemsDb, InstalledStatus, ItemCollectionStatus, ItemInstallState,
+        LauncherConfig, LauncherSnapshot, LauncherUpdateState, ManifestSourceConfig,
+        ManifestSourceType, PrivacyConfig,
     },
     paths,
 };
 
 const RETIRED_ITEM_ID_A: &[u8] = &[
-    99, 111, 109, 46, 108, 117, 109, 111, 114, 105, 120, 46, 115, 105, 103, 110, 97, 108, 45,
-    108, 97, 98,
+    99, 111, 109, 46, 108, 117, 109, 111, 114, 105, 120, 46, 115, 105, 103, 110, 97, 108, 45, 108,
+    97, 98,
 ];
 const RETIRED_ITEM_ID_B: &[u8] = &[
-    99, 111, 109, 46, 108, 117, 109, 111, 114, 105, 120, 46, 112, 114, 111, 106, 101, 99, 116,
-    45, 97, 116, 108, 97, 115,
+    99, 111, 109, 46, 108, 117, 109, 111, 114, 105, 120, 46, 112, 114, 111, 106, 101, 99, 116, 45,
+    97, 116, 108, 97, 115,
 ];
 const PUBLIC_CATALOG_SOURCE_ID: &str = "lumorix-public-catalog";
 const PUBLIC_CATALOG_SOURCE_NAME: &str = "Lumorix Public Catalog";
@@ -110,13 +110,15 @@ impl LauncherRuntime {
         let logs_dir = data_dir.join("Logs");
         let manifests_dir = data_dir.join("Manifests");
 
-        fs::create_dir_all(&data_dir)
-            .map_err(|err| CommandError::Storage(format!("Could not create data directory: {err}")))?;
+        fs::create_dir_all(&data_dir).map_err(|err| {
+            CommandError::Storage(format!("Could not create data directory: {err}"))
+        })?;
         fs::create_dir_all(&cache_dir).map_err(|err| {
             CommandError::Storage(format!("Could not create cache directory: {err}"))
         })?;
-        fs::create_dir_all(&logs_dir)
-            .map_err(|err| CommandError::Storage(format!("Could not create log directory: {err}")))?;
+        fs::create_dir_all(&logs_dir).map_err(|err| {
+            CommandError::Storage(format!("Could not create log directory: {err}"))
+        })?;
         fs::create_dir_all(&manifests_dir).map_err(|err| {
             CommandError::Storage(format!("Could not create manifest directory: {err}"))
         })?;
@@ -246,7 +248,11 @@ impl LauncherRuntime {
         self.upsert_collection_entry_from_manifest(manifest, true)?;
 
         let mut db = self.load_installed_db()?;
-        if let Some(existing) = db.items.iter_mut().find(|entry| entry.item_id == item.item_id) {
+        if let Some(existing) = db
+            .items
+            .iter_mut()
+            .find(|entry| entry.item_id == item.item_id)
+        {
             *existing = item;
         } else {
             db.items.push(item);
@@ -271,7 +277,10 @@ impl LauncherRuntime {
             .map_err(|_| CommandError::Storage("Install job state is locked".into()))?;
         if jobs.iter().any(|job| {
             job.item_id == item_id
-                && matches!(job.status, crate::models::JobStatus::Queued | crate::models::JobStatus::Running)
+                && matches!(
+                    job.status,
+                    crate::models::JobStatus::Queued | crate::models::JobStatus::Running
+                )
         }) {
             return Err(CommandError::Validation(
                 "Wait for the active transfer to finish before removing this item".into(),
@@ -280,7 +289,11 @@ impl LauncherRuntime {
         drop(jobs);
 
         let installed_db = self.load_installed_db()?;
-        if installed_db.items.iter().any(|item| item.item_id == item_id) {
+        if installed_db
+            .items
+            .iter()
+            .any(|item| item.item_id == item_id)
+        {
             return Err(CommandError::Validation(
                 "Installed items must be uninstalled before removal".into(),
             ));
@@ -290,7 +303,9 @@ impl LauncherRuntime {
         let before = db.entries.len();
         db.entries.retain(|entry| entry.item_id != item_id);
         if before == db.entries.len() {
-            return Err(CommandError::Validation("Item is not in the library".into()));
+            return Err(CommandError::Validation(
+                "Item is not in the library".into(),
+            ));
         }
 
         self.save_collection_db(&db)
@@ -318,7 +333,9 @@ impl LauncherRuntime {
                 total_playtime_minutes: 0,
                 last_error: Some(error.into()),
                 last_error_at: Some(Utc::now()),
-                catalog: catalog.cloned().unwrap_or_else(|| placeholder_catalog_record(item_id)),
+                catalog: catalog
+                    .cloned()
+                    .unwrap_or_else(|| placeholder_catalog_record(item_id)),
             });
         }
         self.save_collection_db(&db)
@@ -337,7 +354,11 @@ impl LauncherRuntime {
     pub fn mark_item_used(&self, item_id: &str) -> Result<()> {
         let mut collection_changed = false;
         let mut collection_db = self.load_collection_db()?;
-        if let Some(entry) = collection_db.entries.iter_mut().find(|entry| entry.item_id == item_id) {
+        if let Some(entry) = collection_db
+            .entries
+            .iter_mut()
+            .find(|entry| entry.item_id == item_id)
+        {
             entry.last_used_at = Some(Utc::now());
             collection_changed = true;
         }
@@ -347,7 +368,11 @@ impl LauncherRuntime {
 
         let mut installed_changed = false;
         let mut installed_db = self.load_installed_db()?;
-        if let Some(item) = installed_db.items.iter_mut().find(|entry| entry.item_id == item_id) {
+        if let Some(item) = installed_db
+            .items
+            .iter_mut()
+            .find(|entry| entry.item_id == item_id)
+        {
             item.last_launched_at = Some(Utc::now());
             item.last_error = None;
             installed_changed = true;
@@ -454,15 +479,12 @@ impl LauncherRuntime {
                 last_used_at: installed.last_launched_at,
                 total_playtime_minutes: 0,
                 last_error: installed.last_error.clone(),
-                last_error_at: installed
-                    .last_error
-                    .as_ref()
-                    .and(
-                        installed
-                            .last_verified_at
-                            .clone()
-                            .or(Some(installed.installed_at)),
-                    ),
+                last_error_at: installed.last_error.as_ref().and(
+                    installed
+                        .last_verified_at
+                        .clone()
+                        .or(Some(installed.installed_at)),
+                ),
                 catalog: manifest
                     .map(summary_from_manifest)
                     .unwrap_or_else(|| placeholder_catalog_record(&installed.item_id)),
@@ -511,6 +533,7 @@ impl LauncherRuntime {
                 item_ids.push(item_id.clone());
             }
         }
+        item_ids.retain(|item_id| is_enabled_item_id(item_id));
 
         let mut items = item_ids
             .into_iter()
@@ -524,7 +547,8 @@ impl LauncherRuntime {
                         job.item_id == item_id
                             && matches!(
                                 job.status,
-                                crate::models::JobStatus::Queued | crate::models::JobStatus::Running
+                                crate::models::JobStatus::Queued
+                                    | crate::models::JobStatus::Running
                             )
                     })
                     .cloned();
@@ -587,7 +611,11 @@ impl LauncherRuntime {
                 let last_error = installed
                     .as_ref()
                     .and_then(|item| item.last_error.clone())
-                    .or_else(|| collection_entry.as_ref().and_then(|entry| entry.last_error.clone()));
+                    .or_else(|| {
+                        collection_entry
+                            .as_ref()
+                            .and_then(|entry| entry.last_error.clone())
+                    });
 
                 ContentView {
                     catalog,
@@ -635,7 +663,11 @@ impl LauncherRuntime {
     ) -> Result<()> {
         let mut db = self.load_collection_db()?;
         let next_catalog = summary_from_manifest(manifest);
-        if let Some(entry) = db.entries.iter_mut().find(|entry| entry.item_id == manifest.id) {
+        if let Some(entry) = db
+            .entries
+            .iter_mut()
+            .find(|entry| entry.item_id == manifest.id)
+        {
             entry.discoverable = true;
             entry.catalog = next_catalog;
             if clear_error {
@@ -758,7 +790,10 @@ impl LauncherRuntime {
         self.save_installed_db(&InstalledItemsDb {
             items: installed_items,
         })?;
-        self.append_log("INFO", "Migrated legacy installed-games.json into split state files");
+        self.append_log(
+            "INFO",
+            "Migrated legacy installed-games.json into split state files",
+        );
         Ok(())
     }
 }
@@ -790,7 +825,8 @@ fn placeholder_catalog_record(item_id: &str) -> CatalogItemRecord {
         item_type: CatalogItemType::Game,
         platform: crate::models::ContentPlatform::Desktop,
         name: fallback_item_name(item_id),
-        description: "This item remains in your library, but its catalog page is no longer available.".into(),
+        description:
+            "This item remains in your library, but its catalog page is no longer available.".into(),
         developer: "Lumorix".into(),
         release_date: String::new(),
         categories: vec![default_category_for_type(&CatalogItemType::Game)],
@@ -865,7 +901,8 @@ fn sync_collection_with_manifests(
 
 fn purge_retired_collection_entries(db: &mut CollectionStateDb) -> bool {
     let before = db.entries.len();
-    db.entries.retain(|entry| !is_retired_item_id(&entry.item_id));
+    db.entries
+        .retain(|entry| !is_retired_item_id(&entry.item_id));
     before != db.entries.len()
 }
 
@@ -977,8 +1014,9 @@ fn ensure_default_manifest_sources(config: &mut LauncherConfig) -> bool {
 }
 
 pub fn read_json<T: DeserializeOwned>(path: &Path) -> Result<T> {
-    let raw = fs::read_to_string(path)
-        .map_err(|err| CommandError::Storage(format!("Could not read {}: {err}", path.display())))?;
+    let raw = fs::read_to_string(path).map_err(|err| {
+        CommandError::Storage(format!("Could not read {}: {err}", path.display()))
+    })?;
     serde_json::from_str(&raw)
         .map_err(|err| CommandError::Storage(format!("Could not parse {}: {err}", path.display())))
 }

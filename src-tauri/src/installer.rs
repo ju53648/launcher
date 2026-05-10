@@ -92,9 +92,14 @@ pub fn start_install_job(
     let runtime_clone = runtime.clone();
     let job_id = job.id.clone();
     tauri::async_runtime::spawn(async move {
-        if let Err(err) =
-            run_install_pipeline(runtime_clone.clone(), job_id.clone(), item_id, library_id, mode)
-                .await
+        if let Err(err) = run_install_pipeline(
+            runtime_clone.clone(),
+            job_id.clone(),
+            item_id,
+            library_id,
+            mode,
+        )
+        .await
         {
             runtime_clone.append_log("ERROR", &format!("Install pipeline failed: {err}"));
             fail_job(&runtime_clone, &job_id, err.to_string());
@@ -194,7 +199,9 @@ pub fn uninstall_item(runtime: &LauncherRuntime, item_id: &str) -> Result<()> {
         .libraries
         .iter()
         .find(|library| library.id == installed.library_id)
-        .ok_or_else(|| CommandError::Install("Installed item references a missing library".into()))?;
+        .ok_or_else(|| {
+            CommandError::Install("Installed item references a missing library".into())
+        })?;
 
     let library_root = PathBuf::from(&library.path);
     let install_path = PathBuf::from(&installed.install_path);
@@ -202,7 +209,10 @@ pub fn uninstall_item(runtime: &LauncherRuntime, item_id: &str) -> Result<()> {
 
     if install_path.exists() {
         fs::remove_dir_all(&install_path).map_err(|err| {
-            CommandError::Install(format!("Could not remove {}: {err}", install_path.display()))
+            CommandError::Install(format!(
+                "Could not remove {}: {err}",
+                install_path.display()
+            ))
         })?;
     }
 
@@ -269,7 +279,10 @@ async fn run_install_pipeline(
 
     let library_root = PathBuf::from(&library.path);
     fs::create_dir_all(&library_root).map_err(|err| {
-        CommandError::Install(format!("Could not create library {}: {err}", library_root.display()))
+        CommandError::Install(format!(
+            "Could not create library {}: {err}",
+            library_root.display()
+        ))
     })?;
 
     let install_path = library_root.join(&manifest.default_install_folder);
@@ -278,7 +291,9 @@ async fn run_install_pipeline(
     if matches!(mode, InstallMode::Install) && install_path.exists() {
         let existing_db = runtime.load_installed_db()?;
         let already_installed = existing_db.items.iter().any(|item| item.item_id == item_id);
-        if !already_installed && fs::read_dir(&install_path).is_ok_and(|mut entries| entries.next().is_some()) {
+        if !already_installed
+            && fs::read_dir(&install_path).is_ok_and(|mut entries| entries.next().is_some())
+        {
             return Err(CommandError::Install(format!(
                 "Install folder {} is not empty",
                 install_path.display()
@@ -305,7 +320,9 @@ async fn run_install_pipeline(
             sha256,
             size_bytes,
         } => {
-            let archive = runtime.cache_dir.join(format!("{}-{}.zip", manifest.id, manifest.version));
+            let archive = runtime
+                .cache_dir
+                .join(format!("{}-{}.zip", manifest.id, manifest.version));
             let partial = partial_archive_path(&archive);
             let resumed = fs::metadata(&partial).map(|meta| meta.len()).unwrap_or(0);
             let remaining = size_bytes.saturating_sub(resumed);
@@ -331,7 +348,10 @@ async fn run_install_pipeline(
     )?;
 
     fs::create_dir_all(&install_path).map_err(|err| {
-        CommandError::Install(format!("Could not create install path {}: {err}", install_path.display()))
+        CommandError::Install(format!(
+            "Could not create install path {}: {err}",
+            install_path.display()
+        ))
     })?;
 
     match (&manifest.install_strategy, archive_path.as_ref()) {
@@ -357,7 +377,13 @@ async fn run_install_pipeline(
             install_direct_folder_item(&runtime, &job_id, source_path, &install_path).await?;
         }
         (InstallStrategy::ZipArchive { root_folder }, Some(archive)) => {
-            extract_zip_archive(&runtime, &job_id, archive, &install_path, root_folder.as_deref())?;
+            extract_zip_archive(
+                &runtime,
+                &job_id,
+                archive,
+                &install_path,
+                root_folder.as_deref(),
+            )?;
         }
         (InstallStrategy::ZipArchive { .. }, None) => {
             return Err(CommandError::Install(
@@ -483,7 +509,9 @@ async fn run_move_pipeline(
         .libraries
         .iter()
         .find(|library| library.id == installed.library_id)
-        .ok_or_else(|| CommandError::Install("Installed item references a missing library".into()))?;
+        .ok_or_else(|| {
+            CommandError::Install("Installed item references a missing library".into())
+        })?;
 
     let source_library_root = PathBuf::from(&source_library.path);
     let target_library_root = PathBuf::from(&target_library.path);
@@ -515,19 +543,11 @@ async fn run_move_pipeline(
         "target library",
     )?;
 
-    let temp_target = target_library_root.join(format!(
-        ".lumorix-move-{}-{}",
-        manifest.id,
-        Uuid::new_v4()
-    ));
+    let temp_target =
+        target_library_root.join(format!(".lumorix-move-{}-{}", manifest.id, Uuid::new_v4()));
 
-    let copy_result = copy_directory_with_progress(
-        &runtime,
-        &job_id,
-        &source_path,
-        &temp_target,
-        source_size,
-    );
+    let copy_result =
+        copy_directory_with_progress(&runtime, &job_id, &source_path, &temp_target, source_size);
     if let Err(err) = copy_result {
         if temp_target.exists() {
             let _ = fs::remove_dir_all(&temp_target);
@@ -673,7 +693,10 @@ async fn download_archive(
 
     if let Some(parent) = target.parent() {
         fs::create_dir_all(parent).map_err(|err| {
-            CommandError::Install(format!("Could not create cache folder {}: {err}", parent.display()))
+            CommandError::Install(format!(
+                "Could not create cache folder {}: {err}",
+                parent.display()
+            ))
         })?;
     }
 
@@ -690,7 +713,8 @@ async fn download_archive(
         .send()
         .await
         .map_err(|err| CommandError::Network(format!("Download request failed: {err}")))?;
-    if !(response.status().is_success() || response.status() == reqwest::StatusCode::PARTIAL_CONTENT)
+    if !(response.status().is_success()
+        || response.status() == reqwest::StatusCode::PARTIAL_CONTENT)
     {
         return Err(CommandError::Network(format!(
             "Download failed with HTTP {}",
@@ -769,9 +793,13 @@ async fn download_archive(
 
     while let Some(chunk) = stream.next().await {
         check_cancelled(runtime, job_id)?;
-        let chunk = chunk.map_err(|err| CommandError::Network(format!("Download failed: {err}")))?;
+        let chunk =
+            chunk.map_err(|err| CommandError::Network(format!("Download failed: {err}")))?;
         file.write_all(&chunk).await.map_err(|err| {
-            CommandError::Install(format!("Could not write cache file {}: {err}", partial.display()))
+            CommandError::Install(format!(
+                "Could not write cache file {}: {err}",
+                partial.display()
+            ))
         })?;
         downloaded = downloaded.saturating_add(chunk.len() as u64);
         let ratio = if total == 0 {
@@ -791,7 +819,10 @@ async fn download_archive(
     }
 
     file.flush().await.map_err(|err| {
-        CommandError::Install(format!("Could not flush cache file {}: {err}", partial.display()))
+        CommandError::Install(format!(
+            "Could not flush cache file {}: {err}",
+            partial.display()
+        ))
     })?;
 
     update_job(
@@ -834,15 +865,16 @@ fn partial_archive_path(target: &Path) -> PathBuf {
 }
 
 fn hash_file_sha256(path: &Path) -> Result<String> {
-    let mut file = fs::File::open(path)
-        .map_err(|err| CommandError::Install(format!("Could not open {}: {err}", path.display())))?;
+    let mut file = fs::File::open(path).map_err(|err| {
+        CommandError::Install(format!("Could not open {}: {err}", path.display()))
+    })?;
     let mut hasher = Sha256::new();
     let mut buffer = [0_u8; 1024 * 128];
 
     loop {
-        let read = file
-            .read(&mut buffer)
-            .map_err(|err| CommandError::Install(format!("Could not read {}: {err}", path.display())))?;
+        let read = file.read(&mut buffer).map_err(|err| {
+            CommandError::Install(format!("Could not read {}: {err}", path.display()))
+        })?;
         if read == 0 {
             break;
         }
@@ -935,8 +967,9 @@ fn list_relative_files(base: &Path) -> Result<Vec<PathBuf>> {
             CommandError::Install(format!("Could not read {}: {err}", current.display()))
         })?;
         for entry in entries {
-            let entry = entry
-                .map_err(|err| CommandError::Install(format!("Could not read directory entry: {err}")))?;
+            let entry = entry.map_err(|err| {
+                CommandError::Install(format!("Could not read directory entry: {err}"))
+            })?;
             let path = entry.path();
             if path.is_dir() {
                 stack.push(path);
@@ -1079,7 +1112,8 @@ async fn install_direct_folder_item(
         })?;
     }
 
-    let copy_result = copy_directory_with_progress(runtime, job_id, &source, &temp_install, source_size);
+    let copy_result =
+        copy_directory_with_progress(runtime, job_id, &source, &temp_install, source_size);
     if let Err(err) = copy_result {
         if temp_install.exists() {
             let _ = fs::remove_dir_all(&temp_install);
@@ -1126,7 +1160,10 @@ fn extract_zip_archive(
     root_folder: Option<&str>,
 ) -> Result<()> {
     let file = fs::File::open(archive_path).map_err(|err| {
-        CommandError::Install(format!("Could not open archive {}: {err}", archive_path.display()))
+        CommandError::Install(format!(
+            "Could not open archive {}: {err}",
+            archive_path.display()
+        ))
     })?;
     let mut archive = zip::ZipArchive::new(file)
         .map_err(|err| CommandError::Install(format!("Invalid zip archive: {err}")))?;
@@ -1198,7 +1235,9 @@ fn ensure_install_path_is_inside_library(library_root: &Path, install_path: &Pat
         ));
     }
 
-    let canonical_library = library_root.canonicalize().unwrap_or_else(|_| library_root.to_path_buf());
+    let canonical_library = library_root
+        .canonicalize()
+        .unwrap_or_else(|_| library_root.to_path_buf());
     let canonical_parent = install_path
         .parent()
         .and_then(|parent| parent.canonicalize().ok())
@@ -1351,6 +1390,9 @@ fn missing_install_paths_message(missing_paths: &[String]) -> String {
     if missing_paths.is_empty() {
         "Executable or install folder is missing".into()
     } else {
-        format!("Installed item is missing required files: {}", missing_paths.join(", "))
+        format!(
+            "Installed item is missing required files: {}",
+            missing_paths.join(", ")
+        )
     }
 }
