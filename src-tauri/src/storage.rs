@@ -896,7 +896,7 @@ fn default_config() -> LauncherConfig {
         check_launcher_updates_on_start: false,
         check_game_updates_on_start: true,
         install_behavior: InstallBehavior {
-            ask_for_library_each_install: true,
+            ask_for_library_each_install: false,
             create_desktop_shortcuts: false,
             keep_download_cache: true,
         },

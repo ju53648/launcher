@@ -226,6 +226,12 @@
         "many": "{{count}} aktywnych zadan",
         "other": "{{count}} aktywnych zadan"
       },
+      "downloadsQueued": {
+        "one": "{{count}} zadanie w kolejce",
+        "few": "{{count}} zadania w kolejce",
+        "many": "{{count}} zadan w kolejce",
+        "other": "{{count}} zadan w kolejce"
+      },
       "homePersonalized": "Gotowe na kolejna sesje, {{name}}",
       "downloadsClear": "Kolejka jest pusta",
       "socials": "2 oficjalne platformy",
@@ -286,7 +292,9 @@
     },
     "activeTransfers": {
       "eyebrow": "Pobrania",
-      "title": "Aktywne transfery"
+      "title": "Aktywne transfery",
+      "queuedEyebrow": "Kolejka",
+      "queuedTitle": "Oczekuje w kolejce"
     },
     "recentActivity": {
       "eyebrow": "Ostatnia aktywnosc",
@@ -295,6 +303,8 @@
       "added": "Dodano do biblioteki",
       "installed": "Zainstalowano lokalnie",
       "updated": "Zaktualizowano lokalnie",
+      "repaired": "Naprawiono lokalne pliki",
+      "moved": "Przeniesiono lokalizacje biblioteki",
       "launched": "Otwierano niedawno",
       "error": "Wymaga uwagi"
     },
@@ -501,7 +511,9 @@
       "queued": "W kolejce",
       "queuedDescription": "Czeka na swoja kolej",
       "history": "Historia",
-      "historyDescription": "Zakonczone, anulowane lub nieudane"
+      "historyDescription": "Zakonczone, anulowane lub nieudane",
+      "pendingPayload": "Oczekujace dane",
+      "pendingPayloadDescription": "Pozostale dane we wszystkich aktywnych i oczekujacych transferach"
     },
     "toolbar": {
       "eyebrow": "Transfery i instalacje",
@@ -516,7 +528,10 @@
       "historyTitle": "Zakonczone zadania"
     },
     "row": {
-      "progress": "{{operation}} / {{phase}}"
+      "progress": "{{operation}} / {{phase}}",
+      "queuePosition": "Pozycja {{position}} w kolejce",
+      "startedAt": "Rozpoczeto {{date}}",
+      "updatedAt": "Ostatnia aktualizacja {{date}}"
     }
   },
   "socials": {
@@ -562,6 +577,12 @@
     "eyebrow": "Pierwsza konfiguracja",
     "title": "Twoje tresci Lumorix pozostaja na twoim komputerze.",
     "body": "Wybierz miejsce instalacji tresci Lumorix. Bez konta, bez uzaleznienia od chmury, bez ukrytej analityki. Dostep do sieci jest zarezerwowany dla manifestow, pobran i jawnie uruchamianych sprawdzen aktualizacji.",
+    "webPathDialog": {
+      "title": "Ustaw sciezke biblioteki",
+      "body": "Podglad w przegladarce nie ma natywnego wyboru folderu. Wpisz sciezke instalacji recznie, aby zachowac realistyczny przebieg onboardingu.",
+      "hint": "Wskazowka: w podgladzie przegladarkowym ta sciezka jest symulowana, aby mozna bylo sprawdzic caly flow.",
+      "confirm": "Uzyj tej sciezki"
+    },
     "privacyPoints": {
       "config": "Lokalna konfiguracja i metadane instalacji",
       "libraries": "Pozniej mozna dodac wiele bibliotek",
@@ -661,7 +682,14 @@
       "defaultChip": "Domyslna",
       "saveLibrary": "Zapisz",
       "lastSeen": "Ostatnio widziana: {{date}}",
-      "removeAria": "Usun biblioteke"
+      "removeAria": "Usun biblioteke",
+      "previewHint": "W podgladzie przegladarkowym sciezki bibliotek sa symulowane, aby caly flow magazynu byl testowalny.",
+      "webPathDialog": {
+        "title": "Wpisz sciezke biblioteki",
+        "body": "Podglad w przegladarce nie moze otworzyc natywnego wyboru folderu. Wpisz sciezke biblioteki recznie, aby zachowac realistyczny przebieg flow.",
+        "hint": "Ta sciezka jest lokalnie symulowana w podgladzie i zostanie zastapiona prawdziwym wyborem folderu w buildzie Tauri.",
+        "confirm": "Uzyj sciezki biblioteki"
+      }
     },
     "maintenance": {
       "eyebrow": "Konserwacja",
@@ -723,7 +751,10 @@
     "installedPanel": {
       "notAdded": "Dodaj ten element do biblioteki przed instalacja.",
       "notInstalled": "Dodano do biblioteki, ale jeszcze nie zainstalowano.",
-      "unavailable": "Ten element jest obecnie niedostepny w Sklepie i teraz nie mozna go ponownie zainstalowac."
+      "unavailable": "Ten element jest obecnie niedostepny w Sklepie i teraz nie mozna go ponownie zainstalowac.",
+      "previewCopyAction": "Kopiuj sciezke instalacji",
+      "previewCopied": "Sciezka instalacji skopiowana",
+      "previewHint": "Podglad w przegladarce nie moze otworzyc prawdziwego folderu, dlatego Lumorix kopiuje sciezke instalacji."
     },
     "changelogEmpty": "Dla tego elementu nie ma obecnie dostepnego dziennika zmian.",
     "addFavorite": "Oznacz jako ulubiony",
@@ -761,6 +792,11 @@
       "none": "Brak dostepnej aktualizacji. Lumorix jest aktualny.",
       "desktopOnly": "Aktualizacje w aplikacji sa dostepne tylko w wersji desktopowej.",
       "error": "Aktualizator zakonczyl sie bledem: {{message}}"
+    },
+    "details": {
+      "desktopOnly": "W podgladzie przegladarkowym mozna sprawdzic sam flow aktualizacji, ale pobieranie i instalacja dzialaja dopiero w aplikacji desktopowej.",
+      "none": "Nie trzeba wykonywac dalszych dzialan. Ta wersja launchera odpowiada najnowszemu dostepnemu wydaniu.",
+      "restartRequired": "Pliki aktualizacji sa juz zainstalowane, ale Lumorix nie mogl uruchomic sie ponownie samodzielnie. Reczny restart dokonczy aktualizacje."
     }
   },
   "profiles": {
@@ -810,7 +846,7 @@
     "historyTitle": "Ostatnie wyszukiwania",
     "historyEmpty": "Brak ostatnich wyszukiwan",
     "clearHistory": "Wyczysc",
-    "hintNav": "Przełącz sekcję",
+    "hintNav": "Nawiguj wynikami",
     "hintToggle": "Otwórz/zamknij wyszukiwanie"
   },
   "updateNotice": {

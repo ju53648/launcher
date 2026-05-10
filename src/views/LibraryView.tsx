@@ -84,6 +84,20 @@ export function LibraryView({ setRoute }: { setRoute: (route: AppRoute) => void 
     setGroups(loadLibraryGroups(activeProfileId));
   }, [activeProfileId]);
 
+  const handleInstall = async (item: ContentView) => {
+    if (!snapshot) return;
+
+    const { askForLibraryEachInstall } = snapshot.config.installBehavior;
+    const defaultLibraryId = snapshot.config.defaultLibraryId;
+
+    if (askForLibraryEachInstall || !defaultLibraryId) {
+      setInstallTarget(item);
+      return;
+    }
+
+    await installItem(item.catalog.id, defaultLibraryId);
+  };
+
   const collator = useMemo(
     () => new Intl.Collator(intlLocale, { sensitivity: "base" }),
     [intlLocale]
@@ -411,8 +425,14 @@ export function LibraryView({ setRoute }: { setRoute: (route: AppRoute) => void 
             <GameCard
               key={item.catalog.id}
               item={item}
+              canMoveInstall={snapshot.config.libraries.some(
+                (library) =>
+                  library.status === "available" && library.id !== item.installed?.libraryId
+              )}
               onOpen={() => setRoute(`item:${item.catalog.id}`)}
-              onInstall={() => setInstallTarget(item)}
+              onInstall={() => {
+                void handleInstall(item);
+              }}
               onLaunch={() => launchItem(item.catalog.id)}
               onClose={() => closeItem(item.catalog.id)}
               onUpdate={() => updateItem(item.catalog.id)}
@@ -532,7 +552,7 @@ export function LibraryView({ setRoute }: { setRoute: (route: AppRoute) => void 
                           ));
                         }}
                         aria-label="Remove"
-                      >×</button>
+                      >x</button>
                     </span>
                   ))}
                   {availableToAdd.length > 0 && (

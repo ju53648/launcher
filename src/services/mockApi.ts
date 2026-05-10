@@ -13,11 +13,71 @@ import type {
   LauncherSnapshot,
   LibraryFolder
 } from "../domain/types";
+import { setEmbeddedGameId } from "../domain/embeddedGameSession";
 import { normalizeContentTags } from "../domain/tags";
 import { releaseInfo } from "../releaseInfo";
 
 const now = () => new Date().toISOString();
 const RETIRED_ITEM_IDS = new Set([buildRetiredItemIdA(), buildRetiredItemIdB()]);
+
+function buildMockManifest({
+  id,
+  slug,
+  name,
+  version,
+  description,
+  releaseDate,
+  categories,
+  tags,
+  executable,
+  installSizeBytes,
+  defaultInstallFolder,
+  changelog
+}: {
+  id: string;
+  slug: string;
+  name: string;
+  version: string;
+  description: string;
+  releaseDate: string;
+  categories: string[];
+  tags: ContentManifest["tags"];
+  executable: string;
+  installSizeBytes: number;
+  defaultInstallFolder: string;
+  changelog: ContentManifest["changelog"];
+}): ContentManifest {
+  return {
+    id,
+    itemType: "game",
+    platform: "desktop",
+    name,
+    version,
+    description,
+    developer: "Lumorix",
+    releaseDate,
+    categories,
+    tags,
+    coverImage: `/assets/games/${slug}-cover.svg`,
+    bannerImage: `/assets/games/${slug}-banner.svg`,
+    iconImage: `/assets/games/${slug}-icon.svg`,
+    executable,
+    installSizeBytes,
+    defaultInstallFolder,
+    supportedActions: ["install", "launch", "repair", "uninstall", "openFolder"],
+    installStrategy: {
+      kind: "synthetic",
+      executableTemplate:
+        "@echo off\nsetlocal\nset \"GAME_ROOT=%~dp0..\"\nstart \"\" \"%GAME_ROOT%\\index.html\"\n",
+      contentFiles: []
+    },
+    download: {
+      kind: "localSynthetic",
+      integrity: `embedded-${slug}-${version}`
+    },
+    changelog
+  };
+}
 
 const catalog: ContentManifest[] = [
   {
@@ -110,13 +170,246 @@ const catalog: ContentManifest[] = [
         ]
       }
     ]
-  }
+  },
+  buildMockManifest({
+    id: "com.lumorix.frostline-courier",
+    slug: "frostline-courier",
+    name: "Frostline Courier",
+    version: "1.3.2",
+    description:
+      "Route fragile cargo through whiteout corridors, ration heat, and keep the convoy alive one risky delivery at a time.",
+    releaseDate: "2026-05-02",
+    categories: ["Survival", "Logistics", "Snow"],
+    tags: [
+      { id: "survival", weight: 3 },
+      { id: "exploration", weight: 2 },
+      { id: "offline", weight: 3 },
+      { id: "open_world", weight: 1 }
+    ],
+    executable: "runtime\\FrostlineCourier.exe",
+    installSizeBytes: 842_137_600,
+    defaultInstallFolder: "Frostline Courier",
+    changelog: [
+      {
+        version: "1.3.2",
+        date: "2026-05-02",
+        items: [
+          "Adds storm-routing modifiers and a cleaner cargo risk readout.",
+          "Improves recovery pacing after failed deliveries."
+        ]
+      }
+    ]
+  }),
+  buildMockManifest({
+    id: "com.lumorix.glass-garden",
+    slug: "glass-garden",
+    name: "Glass Garden",
+    version: "1.1.0",
+    description:
+      "Grow a crystalline sanctuary, balance light and soil chemistry, and sculpt a slow-burn world that reacts to every planting choice.",
+    releaseDate: "2026-05-05",
+    categories: ["Sandbox", "Builder", "Calm"],
+    tags: [
+      { id: "sandbox", weight: 3 },
+      { id: "building", weight: 3 },
+      { id: "crafting", weight: 2 },
+      { id: "offline", weight: 3 }
+    ],
+    executable: "runtime\\GlassGarden.exe",
+    installSizeBytes: 695_205_888,
+    defaultInstallFolder: "Glass Garden",
+    changelog: [
+      {
+        version: "1.1.0",
+        date: "2026-05-05",
+        items: [
+          "Introduces bloom chains that reward careful biome planning.",
+          "Polishes ambient growth feedback and greenhouse readability."
+        ]
+      }
+    ]
+  }),
+  buildMockManifest({
+    id: "com.lumorix.graveyard-shift",
+    slug: "graveyard-shift",
+    name: "Graveyard Shift",
+    version: "0.9.6",
+    description:
+      "Work the cemetery after midnight, survive what should stay buried, and decide which rituals are worth the cost of seeing dawn.",
+    releaseDate: "2026-04-30",
+    categories: ["Horror", "Survival", "Night Shift"],
+    tags: [
+      { id: "horror", weight: 3 },
+      { id: "survival", weight: 3 },
+      { id: "offline", weight: 3 },
+      { id: "exploration", weight: 2 }
+    ],
+    executable: "runtime\\GraveyardShift.exe",
+    installSizeBytes: 918_552_576,
+    defaultInstallFolder: "Graveyard Shift",
+    changelog: [
+      {
+        version: "0.9.6",
+        date: "2026-04-30",
+        items: [
+          "Rebalances panic spikes so the late-game dread feels earned, not random.",
+          "Sharpens creature silhouettes during low-light encounters."
+        ]
+      }
+    ]
+  }),
+  buildMockManifest({
+    id: "com.lumorix.neon-circuit",
+    slug: "neon-circuit",
+    name: "Neon Circuit",
+    version: "1.4.1",
+    description:
+      "A velocity-first shooter set above a sleepless megacity, built around lane swaps, precision bursts, and clean arcade flow.",
+    releaseDate: "2026-05-07",
+    categories: ["Shooter", "Arcade", "Cyberpunk"],
+    tags: [
+      { id: "shooter", weight: 3 },
+      { id: "arcade", weight: 3 },
+      { id: "city", weight: 2 },
+      { id: "offline", weight: 3 }
+    ],
+    executable: "runtime\\NeonCircuit.exe",
+    installSizeBytes: 603_979_776,
+    defaultInstallFolder: "Neon Circuit",
+    changelog: [
+      {
+        version: "1.4.1",
+        date: "2026-05-07",
+        items: [
+          "Tightens hit feedback and score chaining during high-speed sections.",
+          "Adds a cleaner route preview before boss transitions."
+        ]
+      }
+    ]
+  }),
+  buildMockManifest({
+    id: "com.lumorix.pocket-heist",
+    slug: "pocket-heist",
+    name: "Pocket Heist",
+    version: "1.0.4",
+    description:
+      "Scout tiny urban sandboxes, improvise silent entries, and turn near-disasters into stylish getaways before the block wakes up.",
+    releaseDate: "2026-05-01",
+    categories: ["Stealth", "Sandbox", "City"],
+    tags: [
+      { id: "sandbox", weight: 3 },
+      { id: "city", weight: 2 },
+      { id: "exploration", weight: 2 },
+      { id: "offline", weight: 3 }
+    ],
+    executable: "runtime\\PocketHeist.exe",
+    installSizeBytes: 512_753_664,
+    defaultInstallFolder: "Pocket Heist",
+    changelog: [
+      {
+        version: "1.0.4",
+        date: "2026-05-01",
+        items: [
+          "Improves patrol readability and getaway timing in dense districts.",
+          "Speeds up restarts so stealth iteration feels immediate."
+        ]
+      }
+    ]
+  }),
+  buildMockManifest({
+    id: "com.lumorix.tempo-trashfire",
+    slug: "tempo-trashfire",
+    name: "Tempo Trashfire",
+    version: "0.8.9",
+    description:
+      "Keep a collapsing gig alive with rhythm-driven repairs, panic management, and just enough style to survive another chorus.",
+    releaseDate: "2026-04-27",
+    categories: ["Rhythm", "Arcade", "Comedy"],
+    tags: [
+      { id: "arcade", weight: 3 },
+      { id: "narrative", weight: 2 },
+      { id: "offline", weight: 3 },
+      { id: "city", weight: 1 }
+    ],
+    executable: "runtime\\TempoTrashfire.exe",
+    installSizeBytes: 438_304_768,
+    defaultInstallFolder: "Tempo Trashfire",
+    changelog: [
+      {
+        version: "0.8.9",
+        date: "2026-04-27",
+        items: [
+          "Pushes beat windows toward a snappier arcade feel.",
+          "Adds stronger crowd-state feedback when a run starts to implode."
+        ]
+      }
+    ]
+  }),
+  buildMockManifest({
+    id: "com.lumorix.velvet-rook",
+    slug: "velvet-rook",
+    name: "Velvet Rook",
+    version: "1.2.0",
+    description:
+      "Unpack a velvet-draped conspiracy through social duels, curated clues, and elegant city spaces that hide more than they show.",
+    releaseDate: "2026-05-03",
+    categories: ["Narrative", "Mystery", "City"],
+    tags: [
+      { id: "narrative", weight: 3 },
+      { id: "city", weight: 2 },
+      { id: "exploration", weight: 2 },
+      { id: "offline", weight: 3 }
+    ],
+    executable: "runtime\\VelvetRook.exe",
+    installSizeBytes: 774_111_232,
+    defaultInstallFolder: "Velvet Rook",
+    changelog: [
+      {
+        version: "1.2.0",
+        date: "2026-05-03",
+        items: [
+          "Expands clue-linking clarity during high-suspicion conversations.",
+          "Refines chapter transitions to hold tension between investigations."
+        ]
+      }
+    ]
+  }),
+  buildMockManifest({
+    id: "com.lumorix.word-reactor",
+    slug: "word-reactor",
+    name: "Word Reactor",
+    version: "1.0.7",
+    description:
+      "Chain unstable words under lab pressure, juggle heat and timing, and turn a language puzzle into an escalating score attack.",
+    releaseDate: "2026-05-06",
+    categories: ["Puzzle", "Arcade", "Lab"],
+    tags: [
+      { id: "arcade", weight: 3 },
+      { id: "utility", weight: 2 },
+      { id: "offline", weight: 3 },
+      { id: "lab", weight: 2 }
+    ],
+    executable: "runtime\\WordReactor.exe",
+    installSizeBytes: 286_261_248,
+    defaultInstallFolder: "Word Reactor",
+    changelog: [
+      {
+        version: "1.0.7",
+        date: "2026-05-06",
+        items: [
+          "Improves combo legibility during fast chain reactions.",
+          "Retunes reactor overheat pacing to create better comeback windows."
+        ]
+      }
+    ]
+  })
 ];
 
 let collectionEntries = loadCollectionEntries();
 let installedItems = loadInstalledItems();
 let state = loadState();
 const runningItemIds = new Set<string>();
+let activeMockJobTimer: number | null = null;
 
 function loadCollectionEntries(): CollectionEntry[] {
   const saved = localStorage.getItem("lumorix.mock.collectionEntries");
@@ -176,7 +469,7 @@ function loadState(): Omit<LauncherSnapshot, "items"> {
       checkLauncherUpdatesOnStart: false,
       checkGameUpdatesOnStart: true,
       installBehavior: {
-        askForLibraryEachInstall: true,
+        askForLibraryEachInstall: false,
         createDesktopShortcuts: false,
         keepDownloadCache: true
       },
@@ -374,6 +667,30 @@ function buildRetiredItemIdB() {
   );
 }
 
+async function copyTextToClipboard(text: string) {
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(text);
+    return;
+  }
+
+  const textarea = document.createElement("textarea");
+  textarea.value = text;
+  textarea.setAttribute("readonly", "true");
+  textarea.style.position = "fixed";
+  textarea.style.opacity = "0";
+  textarea.style.pointerEvents = "none";
+  document.body.appendChild(textarea);
+  textarea.select();
+  textarea.setSelectionRange(0, text.length);
+
+  const copied = document.execCommand("copy");
+  textarea.remove();
+
+  if (!copied) {
+    throw { message: "Unable to copy install path in browser preview" };
+  }
+}
+
 function catalogRecordFromManifest(manifest: ContentManifest) {
   return {
     id: manifest.id,
@@ -397,30 +714,224 @@ function hasActiveJob(itemId: string) {
   );
 }
 
+function sortJobsByStartTime(left: InstallJob, right: InstallJob) {
+  return new Date(left.startedAt).getTime() - new Date(right.startedAt).getTime();
+}
+
+function queuedJobMessage() {
+  return "Waiting for the current transfer to finish";
+}
+
+function startJobMessage(operation: InstallJob["operation"]) {
+  switch (operation) {
+    case "update":
+      return "Preparing update package";
+    case "repair":
+      return "Inspecting local files";
+    case "move":
+      return "Preparing files for move";
+    default:
+      return "Preparing local package";
+  }
+}
+
+function progressJobMessage(operation: InstallJob["operation"], progress: number) {
+  const latePhase = progress > 70;
+
+  switch (operation) {
+    case "update":
+      return latePhase ? "Applying update files" : "Staging update package";
+    case "repair":
+      return latePhase ? "Rewriting affected files" : "Verifying local files";
+    case "move":
+      return latePhase ? "Relocating installed files" : "Preparing move payload";
+    default:
+      return latePhase ? "Writing local files" : "Staging package";
+  }
+}
+
+function completedJobMessage(operation: InstallJob["operation"]) {
+  switch (operation) {
+    case "update":
+      return "Update completed";
+    case "repair":
+      return "Repair completed";
+    case "move":
+      return "Move completed";
+    default:
+      return "Ready to use";
+  }
+}
+
+function failJob(job: InstallJob, message: string) {
+  job.status = "failed";
+  job.phase = "failed";
+  job.error = message;
+  job.message = message;
+  job.updatedAt = now();
+  save();
+  resumeMockJobs();
+}
+
+function getRunningMockJob() {
+  const runningJobs = [...state.jobs]
+    .filter((job) => job.status === "running")
+    .sort(sortJobsByStartTime);
+
+  for (const job of runningJobs.slice(1)) {
+    job.status = "queued";
+    job.phase = "queued";
+    job.progress = 0;
+    job.bytesDownloaded = 0;
+    job.message = queuedJobMessage();
+    job.updatedAt = now();
+  }
+
+  return (
+    runningJobs[0] ?? null
+  );
+}
+
+function startJobExecution(jobId: string) {
+  const job = state.jobs.find((entry) => entry.id === jobId);
+  if (!job) {
+    return;
+  }
+
+  job.status = "running";
+  job.phase = job.progress > 70 ? "installing" : "downloading";
+  job.progress = Math.max(job.progress, 3);
+  job.bytesDownloaded = Math.round((job.progress / 100) * job.bytesTotal);
+  job.message = startJobMessage(job.operation);
+  job.updatedAt = now();
+  save();
+
+  if (activeMockJobTimer) {
+    window.clearInterval(activeMockJobTimer);
+  }
+
+  activeMockJobTimer = window.setInterval(() => {
+    const current = state.jobs.find((entry) => entry.id === job.id);
+    if (!current || current.status !== "running") {
+      if (activeMockJobTimer) {
+        window.clearInterval(activeMockJobTimer);
+        activeMockJobTimer = null;
+      }
+      resumeMockJobs();
+      return;
+    }
+
+    current.progress = Math.min(100, current.progress + 12);
+    current.bytesDownloaded = Math.round((current.progress / 100) * current.bytesTotal);
+    current.phase = current.progress > 70 ? "installing" : "downloading";
+    current.message = progressJobMessage(current.operation, current.progress);
+    current.updatedAt = now();
+
+    if (current.progress >= 100) {
+      if (activeMockJobTimer) {
+        window.clearInterval(activeMockJobTimer);
+        activeMockJobTimer = null;
+      }
+      completeJob(current.id);
+      return;
+    }
+
+    save();
+  }, 350);
+}
+
+function resumeMockJobs() {
+  if (activeMockJobTimer) {
+    return;
+  }
+
+  const runningJob = getRunningMockJob();
+  if (runningJob) {
+    startJobExecution(runningJob.id);
+    return;
+  }
+
+  const nextQueuedJob =
+    [...state.jobs]
+      .filter((job) => job.status === "queued")
+      .sort(sortJobsByStartTime)[0] ?? null;
+
+  if (!nextQueuedJob) {
+    return;
+  }
+
+  startJobExecution(nextQueuedJob.id);
+}
+
 function completeJob(jobId: string) {
   const job = state.jobs.find((entry) => entry.id === jobId);
   if (!job || job.status === "cancelled") return;
 
   const manifest = catalog.find((entry) => entry.id === job.itemId);
   const library = state.config.libraries.find((entry) => entry.id === job.libraryId);
-  if (!manifest || !library) return;
+  if (!library) {
+    failJob(job, "Target library is no longer available");
+    return;
+  }
 
   job.status = "completed";
   job.phase = "completed";
   job.progress = 100;
-  job.message = "Ready to use";
+  job.message = completedJobMessage(job.operation);
   job.updatedAt = now();
 
+  if (job.operation === "move") {
+    const installed = installedItems.find((item) => item.itemId === job.itemId);
+    if (!installed) {
+      failJob(job, "Installed files are no longer available for this move");
+      return;
+    }
+
+    const folderName = installed.installPath.split("\\").pop() ?? job.itemId;
+    installed.libraryId = library.id;
+    installed.installPath = `${library.path}\\${folderName}`;
+    installed.lastVerifiedAt = now();
+    installed.lastError = null;
+    installed.status = "installed";
+
+    const collectionEntry = ensureCollectionEntry(job.itemId);
+    collectionEntry.lastError = null;
+    collectionEntry.lastErrorAt = null;
+    save();
+    resumeMockJobs();
+    return;
+  }
+
+  if (!manifest) {
+    failJob(job, "Item manifest is no longer available");
+    return;
+  }
+
   const existing = installedItems.find((item) => item.itemId === manifest.id);
+  if (job.operation !== "install" && !existing) {
+    failJob(job, "Installed files are no longer available for this queued transfer");
+    return;
+  }
+  const nextInstalledVersion =
+    job.operation === "repair"
+      ? existing?.installedVersion ?? manifest.version
+      : manifest.version;
+  const nextLibraryId = existing?.libraryId ?? library.id;
+  const nextInstallPath =
+    existing?.installPath ?? `${library.path}\\${manifest.defaultInstallFolder}`;
+  const nextSizeOnDiskBytes =
+    job.operation === "repair"
+      ? existing?.sizeOnDiskBytes ?? manifest.installSizeBytes
+      : manifest.installSizeBytes;
   const nextInstall: InstalledItem = {
     itemId: manifest.id,
-    installedVersion: manifest.version,
-    libraryId: library.id,
-    installPath: `${library.path}\\${manifest.defaultInstallFolder}`,
-    installedAt: now(),
+    installedVersion: nextInstalledVersion,
+    libraryId: nextLibraryId,
+    installPath: nextInstallPath,
+    installedAt: existing?.installedAt ?? now(),
     lastVerifiedAt: now(),
     lastLaunchedAt: existing?.lastLaunchedAt ?? null,
-    sizeOnDiskBytes: manifest.installSizeBytes,
+    sizeOnDiskBytes: nextSizeOnDiskBytes,
     status: "installed",
     lastError: null
   };
@@ -434,6 +945,7 @@ function completeJob(jobId: string) {
   collectionEntry.lastError = null;
   collectionEntry.lastErrorAt = null;
   save();
+  resumeMockJobs();
 }
 
 function startMockJob(itemId: string, libraryId: string, operation: InstallJob["operation"]) {
@@ -442,18 +954,23 @@ function startMockJob(itemId: string, libraryId: string, operation: InstallJob["
     throw { message: "Item manifest is not available" };
   }
 
+  const shouldQueue = state.jobs.some((entry) => entry.status === "running" || entry.status === "queued");
+  const bytesTotal =
+    operation === "move"
+      ? installedItems.find((entry) => entry.itemId === itemId)?.sizeOnDiskBytes ?? manifest.installSizeBytes
+      : manifest.installSizeBytes;
   const job: InstallJob = {
     id: crypto.randomUUID(),
     itemId,
     itemName: manifest.name,
     libraryId,
     operation,
-    phase: "downloading",
-    status: "running",
-    progress: 3,
-    message: "Preparing local package",
+    phase: shouldQueue ? "queued" : "downloading",
+    status: shouldQueue ? "queued" : "running",
+    progress: shouldQueue ? 0 : 3,
+    message: shouldQueue ? queuedJobMessage() : startJobMessage(operation),
     bytesDownloaded: 0,
-    bytesTotal: manifest.installSizeBytes,
+    bytesTotal,
     startedAt: now(),
     updatedAt: now(),
     error: null
@@ -461,41 +978,18 @@ function startMockJob(itemId: string, libraryId: string, operation: InstallJob["
 
   state.jobs.push(job);
   save();
-
-  const timer = window.setInterval(() => {
-    const current = state.jobs.find((entry) => entry.id === job.id);
-    if (!current || current.status !== "running") {
-      window.clearInterval(timer);
-      return;
-    }
-
-    current.progress = Math.min(100, current.progress + 12);
-    current.bytesDownloaded = Math.round((current.progress / 100) * current.bytesTotal);
-    current.phase = current.progress > 70 ? "installing" : "downloading";
-    current.message =
-      current.progress > 70
-        ? operation === "update"
-          ? "Applying update files"
-          : "Writing local files"
-        : "Staging package";
-    current.updatedAt = now();
-
-    if (current.progress >= 100) {
-      window.clearInterval(timer);
-      completeJob(current.id);
-    }
-    save();
-  }, 350);
-
+  resumeMockJobs();
   return job;
 }
 
 export const mockApi = {
   async bootstrap() {
+    resumeMockJobs();
     save();
     return buildSnapshot();
   },
   async getSnapshot() {
+    resumeMockJobs();
     save();
     return buildSnapshot();
   },
@@ -613,30 +1107,8 @@ export const mockApi = {
     if (!installed) {
       throw { message: "Item is not installed" };
     }
-    installed.libraryId = targetLibraryId;
-    const targetLibrary = state.config.libraries.find((library) => library.id === targetLibraryId);
-    if (targetLibrary) {
-      const folderName = installed.installPath.split("\\").pop() ?? itemId;
-      installed.installPath = `${targetLibrary.path}\\${folderName}`;
-    }
-    installed.lastVerifiedAt = now();
-    save();
-    return {
-      id: crypto.randomUUID(),
-      itemId,
-      itemName: catalog.find((entry) => entry.id === itemId)?.name ?? itemId,
-      libraryId: targetLibraryId,
-      operation: "move",
-      phase: "completed",
-      status: "completed",
-      progress: 100,
-      message: "Move completed",
-      bytesDownloaded: installed.sizeOnDiskBytes,
-      bytesTotal: installed.sizeOnDiskBytes,
-      startedAt: now(),
-      updatedAt: now(),
-      error: null
-    } satisfies InstallJob;
+
+    return startMockJob(itemId, targetLibraryId, "move");
   },
   async uninstallItem(itemId: string) {
     if (runningItemIds.has(itemId)) {
@@ -669,20 +1141,35 @@ export const mockApi = {
       installed.lastError = null;
     }
     runningItemIds.add(itemId);
+    if (itemId === "com.lumorix.echo-protocol") {
+      setEmbeddedGameId(itemId);
+    }
     save();
     return { message: "Item launched" };
   },
   async closeItem(itemId: string): Promise<CommandOk> {
     if (!runningItemIds.has(itemId)) {
+      if (itemId === "com.lumorix.echo-protocol") {
+        setEmbeddedGameId(null);
+      }
       save();
       return { message: "Item already closed" };
     }
     runningItemIds.delete(itemId);
+    if (itemId === "com.lumorix.echo-protocol") {
+      setEmbeddedGameId(null);
+    }
     save();
     return { message: "Item closed" };
   },
-  async openInstallFolder(_itemId: string): Promise<CommandOk> {
-    return { message: "Install folder opened" };
+  async openInstallFolder(itemId: string): Promise<CommandOk> {
+    const installed = installedItems.find((entry) => entry.itemId === itemId);
+    if (!installed) {
+      throw { message: "Item is not installed" };
+    }
+
+    await copyTextToClipboard(installed.installPath);
+    return { message: "Install path copied" };
   },
   async checkLauncherUpdates() {
     state.appVersion = releaseInfo.version;
@@ -725,12 +1212,20 @@ export const mockApi = {
   async cancelJob(jobId: string) {
     const job = state.jobs.find((entry) => entry.id === jobId);
     if (job) {
+      if (job.status === "running" && activeMockJobTimer) {
+        window.clearInterval(activeMockJobTimer);
+        activeMockJobTimer = null;
+      }
       job.status = "cancelled";
       job.phase = "cancelled";
-      job.message = "Cancelled";
+      job.message =
+        job.bytesDownloaded > 0
+          ? `Cancelled at ${Math.round(job.progress)}%`
+          : "Cancelled before transfer started";
       job.updatedAt = now();
     }
     save();
+    resumeMockJobs();
     return buildSnapshot();
   },
   async clearCompletedJobs() {

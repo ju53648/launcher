@@ -1,9 +1,15 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { AppShell, type AppRoute } from "./components/AppShell";
 import { EmptyState } from "./components/EmptyState";
 import { ErrorToast } from "./components/ErrorToast";
 import { PersonalizationDialog } from "./components/PersonalizationDialog";
+import {
+  embeddedGameEventName,
+  getEmbeddedGameId,
+  setEmbeddedGameId as persistEmbeddedGameId
+} from "./domain/embeddedGameSession";
+import { EchoProtocolGameShell } from "./echo-protocol/EchoProtocolApp";
 import { useI18n } from "./i18n";
 import { AboutView } from "./views/AboutView";
 import { DownloadsView } from "./views/DownloadsView";
@@ -17,11 +23,25 @@ import { ShopView } from "./views/ShopView";
 import { useLauncher } from "./store/LauncherStore";
 import type { LauncherSnapshot } from "./domain/types";
 
+const ECHO_PROTOCOL_ITEM_ID = "com.lumorix.echo-protocol";
+const ECHO_PROTOCOL_ROUTE: AppRoute = `item:${ECHO_PROTOCOL_ITEM_ID}`;
+
 export function App() {
   const { t } = useI18n();
-  const { snapshot, loading, error, clearError, personalization, activeProfileId } = useLauncher();
+  const {
+    snapshot,
+    loading,
+    error,
+    clearError,
+    personalization,
+    activeProfileId,
+    closeItem
+  } = useLauncher();
   const [route, setRoute] = useState<AppRoute>("home");
+  const [lastLauncherRoute, setLastLauncherRoute] = useState<AppRoute>(ECHO_PROTOCOL_ROUTE);
   const [manifestWarningDismissed, setManifestWarningDismissed] = useState(false);
+  const [embeddedGameId, setEmbeddedGameId] = useState<string | null>(() => getEmbeddedGameId());
+  const previousEmbeddedGameIdRef = useRef<string | null>(embeddedGameId);
   const manifestWarning =
     !manifestWarningDismissed && snapshot?.manifestErrors.length
       ? {
@@ -35,6 +55,56 @@ export function App() {
                 })
         }
       : null;
+
+  useEffect(() => {
+    const syncEmbeddedGame = () => setEmbeddedGameId(getEmbeddedGameId());
+    syncEmbeddedGame();
+
+    const onStorage = (event: StorageEvent) => {
+      if (event.key === "lumorix.embeddedGame.active") {
+        syncEmbeddedGame();
+      }
+    };
+    const onCustom = () => syncEmbeddedGame();
+
+    window.addEventListener("storage", onStorage);
+    window.addEventListener(embeddedGameEventName(), onCustom);
+
+    return () => {
+      window.removeEventListener("storage", onStorage);
+      window.removeEventListener(embeddedGameEventName(), onCustom);
+    };
+  }, []);
+
+  useEffect(() => {
+    const previousEmbeddedGameId = previousEmbeddedGameIdRef.current;
+
+    if (embeddedGameId && previousEmbeddedGameId !== embeddedGameId) {
+      setLastLauncherRoute(route);
+    }
+
+    if (!embeddedGameId && previousEmbeddedGameId) {
+      setRoute(lastLauncherRoute);
+    }
+
+    previousEmbeddedGameIdRef.current = embeddedGameId;
+  }, [embeddedGameId, lastLauncherRoute, route]);
+
+  useEffect(() => {
+    if (embeddedGameId !== ECHO_PROTOCOL_ITEM_ID) {
+      return;
+    }
+    if (!snapshot) {
+      return;
+    }
+
+    const embeddedItem = snapshot.items.find((entry) => entry.catalog.id === embeddedGameId);
+    if (embeddedItem?.isRunning) {
+      return;
+    }
+
+    persistEmbeddedGameId(null);
+  }, [embeddedGameId, snapshot]);
 
   if (loading) {
     return (
@@ -71,6 +141,19 @@ export function App() {
         {!error && manifestWarning && (
           <ErrorToast error={manifestWarning} onClose={() => setManifestWarningDismissed(true)} />
         )}
+      </>
+    );
+  }
+
+  if (embeddedGameId === ECHO_PROTOCOL_ITEM_ID) {
+    return (
+      <>
+        <EchoProtocolGameShell
+          onExit={() => {
+            void closeItem(ECHO_PROTOCOL_ITEM_ID);
+          }}
+        />
+        {error && <ErrorToast error={error} onClose={clearError} />}
       </>
     );
   }

@@ -40,22 +40,30 @@
                              "launch",
                              "repair",
                              "uninstall",
-                             "openFolder"
+                             "openFolder",
+                             "update",
+                             "moveInstall"
                          ],
+    "distribution":  {
+                         "channel":  "direct",
+                         "packageType":  "zip"
+                     },
     "installStrategy":  {
-                            "kind":  "directFolder",
-                            "sourcePath":  "C:\\Users\\julia\\Desktop\\Lumorix Launcher\\distribution\\games\\neon-circuit\\runtime"
+                            "kind":  "zipArchive",
+                            "rootFolder":  "."
                         },
     "download":  {
-                     "kind":  "localSynthetic",
-                     "integrity":  "embedded-neon-circuit-0.1.0"
+                     "kind":  "httpArchive",
+                     "url":  "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/games/neon-circuit/release/neon-circuit-win64.zip",
+                     "sha256":  "58cdc8f38ebb2fe50aea1f4c0567757fc55ba5b7dc5f6b78b395a0b0ede566c5",
+                     "sizeBytes":  11816179
                  },
     "changelog":  [
                       {
                           "version":  "0.1.0",
                           "date":  "2026-04-29",
                           "items":  [
-                                        "Expanded a new fast arcade prototype built for direct local launcher installs.",
+                                        "Expanded a new fast arcade prototype built for archive-based public launcher installs.",
                                         "Now presented as a native Windows desktop executable with a branded Lumorix Arcade release shell.",
                                         "Positioned as a replayable standalone release from its own studio identity inside the launcher catalog."
                                     ]

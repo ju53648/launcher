@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
+import { PathInputDialog } from "../components/PathInputDialog";
 import { LauncherAvatar } from "../components/LauncherAvatar";
 import { StatusBadge } from "../components/StatusBadge";
 import { LauncherUpdatePanel } from "../components/LauncherUpdatePanel";
@@ -27,7 +28,7 @@ import { loadColorMode, saveColorMode, type ColorMode } from "../domain/colorMod
 import type { LauncherSnapshot } from "../domain/types";
 import { SUPPORTED_LOCALES, useI18n } from "../i18n";
 import { exportBackup, getBackupMeta } from "../services/backup";
-import { chooseDirectory } from "../services/tauri";
+import { chooseDirectory, isTauriRuntime } from "../services/tauri";
 import { useLauncher } from "../store/LauncherStore";
 
 export function SettingsView() {
@@ -60,6 +61,7 @@ export function SettingsView() {
   } = useLauncher();
   const [newLibraryName, setNewLibraryName] = useState("");
   const [newLibraryPath, setNewLibraryPath] = useState("");
+  const [isLibraryPathDialogOpen, setIsLibraryPathDialogOpen] = useState(false);
   const [libraryNames, setLibraryNames] = useState<Record<string, string>>({});
   const [displayNameDraft, setDisplayNameDraft] = useState(personalization.displayName);
   const [newProfileName, setNewProfileName] = useState("");
@@ -88,6 +90,8 @@ export function SettingsView() {
 
   if (!snapshot || !preferences) return null;
 
+  const runningInTauri = isTauriRuntime();
+  const recommendedLibraryPath = snapshot.recommendedLibraryPath;
   const prefs = draftPreferences ?? preferences;
   const favoriteOptions = getLibraryItems(snapshot)
     .filter((item) => item.catalog.itemType === "game")
@@ -103,9 +107,38 @@ export function SettingsView() {
     isNovelty: value === "shakespeare"
   }));
 
+  function applySuggestedLibraryPath(path: string) {
+    const trimmedPath = path.trim();
+    if (!trimmedPath) {
+      return;
+    }
+
+    setNewLibraryPath(trimmedPath);
+    if (!newLibraryName.trim()) {
+      setNewLibraryName(suggestLibraryNameFromPath(trimmedPath, t("settings.storage.defaultNamePlaceholder")));
+    }
+  }
+
+  async function handleChooseLibraryPath() {
+    if (!runningInTauri) {
+      setIsLibraryPathDialogOpen(true);
+      return;
+    }
+
+    const path = await chooseDirectory({
+      title: t("common.actions.chooseFolder"),
+      prompt: t("common.labels.path"),
+      defaultPath: recommendedLibraryPath
+    });
+    if (path) {
+      applySuggestedLibraryPath(path);
+    }
+  }
+
   return (
-    <div className="settings-layout">
-      <section className="settings-section">
+    <>
+      <div className="settings-layout">
+        <section className="settings-section">
         <div className="section-toolbar">
           <div>
             <p className="eyebrow">{t("settings.personalization.eyebrow")}</p>
@@ -323,7 +356,7 @@ export function SettingsView() {
         </div>
       </section>
 
-      <section className="settings-section">
+        <section className="settings-section">
         <div className="section-toolbar">
           <div>
             <p className="eyebrow">{t("settings.profiles.eyebrow")}</p>
@@ -464,7 +497,7 @@ export function SettingsView() {
                 </div>
                 <small>
                   {active ? t("settings.language.active") : t("settings.language.switchNow")}
-                  {option.isNovelty ? ` • ${t("settings.language.novelty")}` : ""}
+                  {option.isNovelty ? ` / ${t("settings.language.novelty")}` : ""}
                 </small>
               </button>
             );
@@ -474,113 +507,113 @@ export function SettingsView() {
         <p className="muted">{t("settings.language.helper")}</p>
       </section>
 
-      <section className="settings-section">
-        <div className="section-toolbar">
-          <div>
-            <p className="eyebrow">{t("settings.storage.eyebrow")}</p>
-            <h2>{t("settings.storage.title")}</h2>
+        <section className="settings-section">
+          <div className="section-toolbar">
+            <div>
+              <p className="eyebrow">{t("settings.storage.eyebrow")}</p>
+              <h2>{t("settings.storage.title")}</h2>
+              {!runningInTauri ? <p className="muted">{t("settings.storage.previewHint")}</p> : null}
+            </div>
+            <button
+              className="button button--secondary"
+              onClick={() => {
+                void handleChooseLibraryPath();
+              }}
+              type="button"
+            >
+              <FolderPlus size={16} />
+              {t("common.actions.chooseFolder")}
+            </button>
           </div>
-          <button
-            className="button button--secondary"
-            onClick={async () => {
-              const path = await chooseDirectory({
-                title: t("common.actions.chooseFolder"),
-                prompt: t("common.labels.path"),
-                defaultPath: snapshot.recommendedLibraryPath
-              });
-              if (path) setNewLibraryPath(path);
-            }}
-            type="button"
-          >
-            <FolderPlus size={16} />
-            {t("common.actions.chooseFolder")}
-          </button>
-        </div>
 
-        <div className="add-library">
-          <label>
-            <span>{t("common.labels.name")}</span>
-            <input
-              value={newLibraryName}
-              onChange={(event) => setNewLibraryName(event.target.value)}
-              placeholder={t("settings.storage.defaultNamePlaceholder")}
-            />
-          </label>
-          <label>
-            <span>{t("common.labels.path")}</span>
-            <input
-              value={newLibraryPath}
-              onChange={(event) => setNewLibraryPath(event.target.value)}
-              placeholder={snapshot.recommendedLibraryPath}
-            />
-          </label>
-          <button
-            className="button button--primary"
-            disabled={!newLibraryPath.trim()}
-            onClick={async () => {
-              await addLibrary(
-                newLibraryName.trim() || t("settings.storage.defaultNamePlaceholder"),
-                newLibraryPath
-              );
-              setNewLibraryName("");
-              setNewLibraryPath("");
-            }}
-            type="button"
-          >
-            {t("common.actions.addLibrary")}
-          </button>
-        </div>
+          <div className="add-library">
+            <label>
+              <span>{t("common.labels.name")}</span>
+              <input
+                value={newLibraryName}
+                onChange={(event) => setNewLibraryName(event.target.value)}
+                placeholder={t("settings.storage.defaultNamePlaceholder")}
+              />
+            </label>
+            <label>
+              <span>{t("common.labels.path")}</span>
+              <input
+                value={newLibraryPath}
+                onChange={(event) => setNewLibraryPath(event.target.value)}
+                placeholder={snapshot.recommendedLibraryPath}
+              />
+            </label>
+            <button
+              className="button button--primary"
+              disabled={!newLibraryPath.trim()}
+              onClick={async () => {
+                await addLibrary(
+                  newLibraryName.trim() || t("settings.storage.defaultNamePlaceholder"),
+                  newLibraryPath.trim()
+                );
+                setNewLibraryName("");
+                setNewLibraryPath("");
+              }}
+              type="button"
+            >
+              {t("common.actions.addLibrary")}
+            </button>
+          </div>
 
-        <div className="library-list">
-          {snapshot.config.libraries.map((library) => (
-            <article key={library.id} className="library-row">
-              <div className="library-row__main">
-                <div className="library-row__name">
-                  <input
-                    value={libraryNames[library.id] ?? library.name}
-                    onChange={(event) =>
-                      setLibraryNames((current) => ({
-                        ...current,
-                        [library.id]: event.target.value
-                      }))
-                    }
-                  />
-                  {library.isDefault && <span className="default-chip">{t("settings.storage.defaultChip")}</span>}
-                  <StatusBadge status={library.status} type="library" />
+          <div className="library-list">
+            {snapshot.config.libraries.map((library) => (
+              <article key={library.id} className="library-row">
+                <div className="library-row__main">
+                  <div className="library-row__name">
+                    <input
+                      value={libraryNames[library.id] ?? library.name}
+                      onChange={(event) =>
+                        setLibraryNames((current) => ({
+                          ...current,
+                          [library.id]: event.target.value
+                        }))
+                      }
+                    />
+                    {library.isDefault && <span className="default-chip">{t("settings.storage.defaultChip")}</span>}
+                    <StatusBadge status={library.status} type="library" />
+                  </div>
+                  <small>{library.path}</small>
+                  <small>
+                    {t("settings.storage.lastSeen", {
+                      date: formatDate(library.lastSeenAt, locale, t)
+                    })}
+                  </small>
                 </div>
-                <small>{library.path}</small>
-                <small>
-                  {t("settings.storage.lastSeen", {
-                    date: formatDate(library.lastSeenAt, locale, t)
-                  })}
-                </small>
-              </div>
-              <div className="library-row__actions">
-                <button
-                  className="button button--ghost"
-                  onClick={() => renameLibrary(library.id, libraryNames[library.id] ?? library.name)}
-                  type="button"
-                >
-                  {t("settings.storage.saveLibrary")}
-                </button>
-                {!library.isDefault && (
-                  <button className="button button--ghost" onClick={() => setDefaultLibrary(library.id)} type="button">
-                    {t("common.actions.makeDefault")}
+                <div className="library-row__actions">
+                  <button
+                    className="button button--ghost"
+                    onClick={() => renameLibrary(library.id, libraryNames[library.id] ?? library.name)}
+                    type="button"
+                  >
+                    {t("settings.storage.saveLibrary")}
                   </button>
-                )}
-                <button
-                  className="icon-button"
-                  onClick={() => removeLibrary(library.id)}
-                  type="button"
-                  aria-label={t("settings.storage.removeAria")}
-                >
-                  <Trash2 size={16} />
-                </button>
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
+                  {!library.isDefault && (
+                    <button
+                      className="button button--ghost"
+                      onClick={() => setDefaultLibrary(library.id)}
+                      type="button"
+                    >
+                      {t("common.actions.makeDefault")}
+                    </button>
+                  )}
+                  <button
+                    className="icon-button"
+                    onClick={() => removeLibrary(library.id)}
+                    type="button"
+                    aria-label={t("settings.storage.removeAria")}
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
 
       <section className="settings-section">
         <div className="section-toolbar">
@@ -698,8 +731,32 @@ export function SettingsView() {
       </section>
 
       <BackupSection snapshot={snapshot} t={t} />
-    </div>
+      </div>
+      {isLibraryPathDialogOpen ? (
+        <PathInputDialog
+          body={t("settings.storage.webPathDialog.body")}
+          confirmLabel={t("settings.storage.webPathDialog.confirm")}
+          hint={t("settings.storage.webPathDialog.hint")}
+          initialValue={newLibraryPath || snapshot.recommendedLibraryPath}
+          onClose={() => setIsLibraryPathDialogOpen(false)}
+          onConfirm={(path) => {
+            applySuggestedLibraryPath(path);
+            setIsLibraryPathDialogOpen(false);
+          }}
+          title={t("settings.storage.webPathDialog.title")}
+        />
+      ) : null}
+    </>
   );
+}
+
+function suggestLibraryNameFromPath(path: string, fallbackName: string) {
+  const segments = path
+    .split(/[\\/]+/)
+    .map((segment) => segment.trim())
+    .filter(Boolean);
+  const lastSegment = segments.at(-1);
+  return lastSegment || fallbackName;
 }
 
 function BackupSection({

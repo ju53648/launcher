@@ -11,6 +11,7 @@ import { StatusBadge } from "./StatusBadge";
 
 export function GameCard({
   item,
+  canMoveInstall,
   onOpen,
   onInstall,
   onLaunch,
@@ -21,6 +22,7 @@ export function GameCard({
   onRemove
 }: {
   item: ContentView;
+  canMoveInstall: boolean;
   onOpen: () => void;
   onInstall: () => void;
   onLaunch: () => void;
@@ -124,6 +126,8 @@ export function GameCard({
         {item.lastError && <p className="field-error">{item.lastError}</p>}
         {hasActiveJob ? (
           <p className="game-card__hint">{t("library.card.transferHint")}</p>
+        ) : isInstalled && !canMoveInstall ? (
+          <p className="game-card__hint">{t("moveDialog.noLibrariesBody")}</p>
         ) : isInstalled ? (
           <p className="game-card__hint">{t("library.card.removeHint")}</p>
         ) : null}

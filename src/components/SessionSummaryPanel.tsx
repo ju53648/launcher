@@ -12,6 +12,7 @@ interface SessionRecord {
   iconSrc: string | null;
   durationMinutes: number;
   totalMinutes: number;
+  closedAt: string;
 }
 
 const STREAK_KEY = "lumorix.play.streak";
@@ -78,25 +79,33 @@ export function SessionSummaryPanel() {
         // Game just stopped
         wasRunningRef.current.delete(item.catalog.id);
         const durationMs = Date.now() - prev.startedAt;
-        const durationMinutes = Math.round(durationMs / 60000);
-        if (durationMinutes >= 1) {
-          const newStreak = updateStreak(activeProfileId);
-          setStreak(newStreak);
-          const iconSrc = resolveCatalogImageSrc(
-            item.catalog.iconImage,
-            item.manifest?.version ?? item.catalog.releaseDate
-          );
-          setSession({
-            itemId: item.catalog.id,
-            itemName: item.catalog.name,
-            iconSrc,
-            durationMinutes,
-            totalMinutes: item.collectionEntry?.totalPlaytimeMinutes ?? 0
-          });
-        }
+        const durationMinutes = Math.max(1, Math.round(durationMs / 60000));
+        const newStreak = updateStreak(activeProfileId);
+        setStreak(newStreak);
+        const iconSrc = resolveCatalogImageSrc(
+          item.catalog.iconImage,
+          item.manifest?.version ?? item.catalog.releaseDate
+        );
+        setSession({
+          itemId: item.catalog.id,
+          itemName: item.catalog.name,
+          iconSrc,
+          durationMinutes,
+          totalMinutes: Math.max(
+            item.collectionEntry?.totalPlaytimeMinutes ?? 0,
+            prev.totalMinutes + durationMinutes
+          ),
+          closedAt: new Date().toISOString()
+        });
       }
     }
   }, [activeProfileId, snapshot]);
+
+  useEffect(() => {
+    if (!session) return;
+    const timer = window.setTimeout(() => setSession(null), 10000);
+    return () => window.clearTimeout(timer);
+  }, [session]);
 
   if (!session) return null;
 
@@ -121,6 +130,12 @@ export function SessionSummaryPanel() {
         <div>
           <p className="eyebrow">{t("home.sessionSummary.eyebrow")}</p>
           <strong>{session.itemName}</strong>
+          <small>
+            {new Date(session.closedAt).toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit"
+            })}
+          </small>
         </div>
       </div>
       <div className="session-summary__stats">

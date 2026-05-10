@@ -1,13 +1,13 @@
 {
-  "version": "0.7.1",
-  "title": "Android Release Pipeline Hotfix",
-  "notes": "Android Release Pipeline Hotfix\n\n- Fixed release automation so tag pushes trigger both Windows and Android release lanes.\n- Android CI now builds and uploads a launcher APK release asset automatically.\n- Desktop user behavior remains unchanged while mobile delivery is now automated.",
+  "version": "0.7.2",
+  "title": "Update 4 - Install Flow and Stability",
+  "notes": "Update 4 - Install Flow and Stability\n\n- First installs now use the default library directly instead of forcing a location selection.\n- Install behavior preference is now consistently honored in Library and Detail install actions.\n- Stability and release metadata sync improvements for cleaner updater rollout.",
   "notesList": [
-    "Fixed release automation so tag pushes trigger both Windows and Android release lanes.",
-    "Android CI now builds and uploads a launcher APK release asset automatically.",
-    "Desktop user behavior remains unchanged while mobile delivery is now automated."
+    "First installs now use the default library directly instead of forcing a location selection.",
+    "Install behavior preference is now consistently honored in Library and Detail install actions.",
+    "Stability and release metadata sync improvements for cleaner updater rollout."
   ],
-  "pub_date": "2026-05-06T00:00:00Z",
+  "pub_date": "2026-05-10T00:00:00Z",
   "platforms": {
     "windows-x86_64": {
       "url": "__GENERATED_IN_CI__",

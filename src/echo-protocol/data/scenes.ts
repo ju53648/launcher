@@ -385,6 +385,9 @@ export const SCENES: EchoScene[] = [
   }
 ];
 
+export const TOTAL_SCENE_COUNT = SCENES.length;
+export const TOTAL_ENDING_COUNT = SCENES.filter((scene) => scene.isEnding).length;
+
 export function getSceneById(sceneId: string): EchoScene {
   const scene = SCENES.find((entry) => entry.id === sceneId);
   if (!scene) {

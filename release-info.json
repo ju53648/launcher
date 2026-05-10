@@ -1,10 +1,10 @@
 {
-  "version": "0.7.1",
-  "title": "Android Release Pipeline Hotfix",
-  "date": "2026-05-06",
+  "version": "0.7.2",
+  "title": "Update 4 - Install Flow and Stability",
+  "date": "2026-05-10",
   "notes": [
-    "Fixed release automation so tag pushes trigger both Windows and Android release lanes.",
-    "Android CI now builds and uploads a launcher APK release asset automatically.",
-    "Desktop user behavior remains unchanged while mobile delivery is now automated."
+    "First installs now use the default library directly instead of forcing a location selection.",
+    "Install behavior preference is now consistently honored in Library and Detail install actions.",
+    "Stability and release metadata sync improvements for cleaner updater rollout."
   ]
 }

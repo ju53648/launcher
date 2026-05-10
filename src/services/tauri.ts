@@ -28,7 +28,11 @@ export async function chooseDirectory({
   defaultPath: string;
 }): Promise<string | null> {
   if (!isTauriRuntime()) {
-    return window.prompt(prompt, defaultPath);
+    try {
+      return typeof window.prompt === "function" ? window.prompt(prompt, defaultPath) : null;
+    } catch {
+      return null;
+    }
   }
 
   const selected = await open({

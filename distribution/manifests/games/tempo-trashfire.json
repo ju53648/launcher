@@ -43,7 +43,18 @@
                              "openFolder",
                              "update",
                              "moveInstall"
-                         ],/release/tempo-trashfire-win64.zip",
+                         ],
+    "distribution":  {
+                         "channel":  "direct",
+                         "packageType":  "zip"
+                     },
+    "installStrategy":  {
+                            "kind":  "zipArchive",
+                            "rootFolder":  "."
+                        },
+    "download":  {
+                     "kind":  "httpArchive",
+                     "url":  "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/games/tempo-trashfire/release/tempo-trashfire-win64.zip",
                      "sha256":  "e2e13b199001671113fb04926c0b50a1809ee0bcab4c0d2fee874e44da2247c9",
                      "sizeBytes":  11816654
                  },

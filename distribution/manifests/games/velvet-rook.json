@@ -43,7 +43,18 @@
                              "openFolder",
                              "update",
                              "moveInstall"
-                         ],/release/velvet-rook-win64.zip",
+                         ],
+    "distribution":  {
+                         "channel":  "direct",
+                         "packageType":  "zip"
+                     },
+    "installStrategy":  {
+                            "kind":  "zipArchive",
+                            "rootFolder":  "."
+                        },
+    "download":  {
+                     "kind":  "httpArchive",
+                     "url":  "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/games/velvet-rook/release/velvet-rook-win64.zip",
                      "sha256":  "4b6fe606b21a3b2f62802adae78d30706e097de8a62d54fa759811bdd149957b",
                      "sizeBytes":  11815801
                  },

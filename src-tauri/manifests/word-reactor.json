@@ -40,15 +40,23 @@
                              "launch",
                              "repair",
                              "uninstall",
-                             "openFolder"
+                             "openFolder",
+                             "update",
+                             "moveInstall"
                          ],
+    "distribution":  {
+                         "channel":  "direct",
+                         "packageType":  "zip"
+                     },
     "installStrategy":  {
-                            "kind":  "directFolder",
-                            "sourcePath":  "C:\\Users\\julia\\Desktop\\Lumorix Launcher\\distribution\\games\\word-reactor\\runtime"
+                            "kind":  "zipArchive",
+                            "rootFolder":  "."
                         },
     "download":  {
-                     "kind":  "localSynthetic",
-                     "integrity":  "embedded-word-reactor-0.1.0"
+                     "kind":  "httpArchive",
+                     "url":  "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/games/word-reactor/release/word-reactor-win64.zip",
+                     "sha256":  "dba64d2447c2f2040fb9b3fc2d2f89d4e808c8ff26a9cc25e9b6b78084d06d44",
+                     "sizeBytes":  11815930
                  },
     "changelog":  [
                       {

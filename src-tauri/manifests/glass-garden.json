@@ -40,15 +40,23 @@
                              "launch",
                              "repair",
                              "uninstall",
-                             "openFolder"
+                             "openFolder",
+                             "update",
+                             "moveInstall"
                          ],
+    "distribution":  {
+                         "channel":  "direct",
+                         "packageType":  "zip"
+                     },
     "installStrategy":  {
-                            "kind":  "directFolder",
-                            "sourcePath":  "C:\\Users\\julia\\Desktop\\Lumorix Launcher\\distribution\\games\\glass-garden\\runtime"
+                            "kind":  "zipArchive",
+                            "rootFolder":  "."
                         },
     "download":  {
-                     "kind":  "localSynthetic",
-                     "integrity":  "embedded-glass-garden-0.1.0"
+                     "kind":  "httpArchive",
+                     "url":  "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/games/glass-garden/release/glass-garden-win64.zip",
+                     "sha256":  "62973aa076d43b552ff20f4662c9ba197656ed03523733498d6f24d10d4f346d",
+                     "sizeBytes":  11815417
                  },
     "changelog":  [
                       {

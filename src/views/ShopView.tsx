@@ -4,11 +4,15 @@ import { useDeferredValue, useMemo, useState } from "react";
 import type { AppRoute } from "../components/AppShell";
 import { LauncherAvatar } from "../components/LauncherAvatar";
 import { EmptyState } from "../components/EmptyState";
+import { InstallDialog } from "../components/InstallDialog";
+import { RecommendationSection } from "../components/RecommendationSection";
 import { StatusBadge } from "../components/StatusBadge";
 import { formatBytes, itemTypeLabel, resolveIntlLocale } from "../domain/format";
 import { resolveCatalogImageSrc } from "../domain/media";
 import {
+  getBecauseYouPlayedRecommendations,
   getDiscoverableItems,
+  getForYouRecommendations,
   getGameStatus,
   getShopCategories
 } from "../domain/selectors";
@@ -31,11 +35,14 @@ export function ShopView({ setRoute }: { setRoute: (route: AppRoute) => void }) 
   const [tagFilter, setTagFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState<ShopStatusFilter>("all");
   const [sortBy, setSortBy] = useState<ShopSortKey>("relevance");
+  const [installTarget, setInstallTarget] = useState<ContentView | null>(null);
   const deferredSearch = useDeferredValue(search.trim().toLowerCase());
 
   if (!snapshot) return null;
 
   const discoverableItems = getDiscoverableItems(snapshot);
+  const forYouRecommendations = getForYouRecommendations(snapshot, 4);
+  const becauseYouPlayed = getBecauseYouPlayedRecommendations(snapshot, 3);
   const featuredItem = selectFeaturedItem(discoverableItems);
   const favoriteItem = personalization.favoriteItemId
     ? discoverableItems.find((item) => item.catalog.id === personalization.favoriteItemId) ??
@@ -91,6 +98,18 @@ export function ShopView({ setRoute }: { setRoute: (route: AppRoute) => void }) 
     categoryFilter !== "all" ||
     tagFilter !== "all";
 
+  const handleInstall = async (item: ContentView) => {
+    const { askForLibraryEachInstall } = snapshot.config.installBehavior;
+    const defaultLibraryId = snapshot.config.defaultLibraryId;
+
+    if (askForLibraryEachInstall || !defaultLibraryId) {
+      setInstallTarget(item);
+      return;
+    }
+
+    await installItem(item.catalog.id, defaultLibraryId);
+  };
+
   return (
     <div className="view-stack">
       <section className="shop-intro">
@@ -124,6 +143,26 @@ export function ShopView({ setRoute }: { setRoute: (route: AppRoute) => void }) 
         </div>
       </section>
 
+      <RecommendationSection
+        eyebrow={t("shop.recommendations.forYouEyebrow")}
+        title={t("shop.recommendations.forYouTitle")}
+        description={t("shop.recommendations.forYouBody")}
+        entries={forYouRecommendations}
+        onOpen={(itemId) => setRoute(`item:${itemId}`)}
+      />
+
+      {becauseYouPlayed.sourceItem && becauseYouPlayed.recommendations.length > 0 && (
+        <RecommendationSection
+          eyebrow={t("shop.recommendations.becausePlayedEyebrow")}
+          title={t("shop.recommendations.becausePlayedTitle", {
+            name: becauseYouPlayed.sourceItem.catalog.name
+          })}
+          description={t("shop.recommendations.becausePlayedBody")}
+          entries={becauseYouPlayed.recommendations}
+          onOpen={(itemId) => setRoute(`item:${itemId}`)}
+        />
+      )}
+
       {!hasActiveFilters && featuredItem && (
         <FeaturedShopCard
           item={featuredItem}
@@ -133,14 +172,7 @@ export function ShopView({ setRoute }: { setRoute: (route: AppRoute) => void }) 
             if (!featuredItem.state.added) {
               await addItemToLibrary(featuredItem.catalog.id);
             }
-
-            const defaultLibraryId = snapshot.config.defaultLibraryId;
-            if (!defaultLibraryId) {
-              setRoute(`item:${featuredItem.catalog.id}`);
-              return;
-            }
-
-            await installItem(featuredItem.catalog.id, defaultLibraryId);
+            await handleInstall(featuredItem);
           }}
           onPlay={async () => {
             if (featuredItem.isRunning) {
@@ -283,8 +315,9 @@ export function ShopView({ setRoute }: { setRoute: (route: AppRoute) => void }) 
               <ShopCard
                 key={item.catalog.id}
                 item={item}
-                busy={busyAction === "add-item-to-library"}
+                busy={Boolean(busyAction)}
                 onAdd={() => addItemToLibrary(item.catalog.id)}
+                onInstall={() => handleInstall(item)}
                 onOpen={() => setRoute(`item:${item.catalog.id}`)}
                 onLibrary={() => setRoute("library")}
                 onDownloads={() => setRoute("downloads")}
@@ -311,6 +344,18 @@ export function ShopView({ setRoute }: { setRoute: (route: AppRoute) => void }) 
             </section>
           )}
         </>
+      )}
+
+      {installTarget && (
+        <InstallDialog
+          item={installTarget}
+          libraries={snapshot.config.libraries}
+          defaultLibraryId={snapshot.config.defaultLibraryId}
+          onClose={() => setInstallTarget(null)}
+          onInstall={async (libraryId) => {
+            await installItem(installTarget.catalog.id, libraryId);
+          }}
+        />
       )}
     </div>
   );
@@ -470,6 +515,7 @@ function ShopCard({
   item,
   busy,
   onAdd,
+  onInstall,
   onOpen,
   onLibrary,
   onDownloads,
@@ -478,6 +524,7 @@ function ShopCard({
   item: ContentView;
   busy: boolean;
   onAdd: () => void;
+  onInstall: () => void | Promise<void>;
   onOpen: () => void;
   onLibrary: () => void;
   onDownloads: () => void;
@@ -546,6 +593,11 @@ function ShopCard({
             <button className="button button--secondary" onClick={onDownloads} type="button">
               <Download size={16} />
               {t("common.actions.viewDownload")}
+            </button>
+          ) : gameStatus === "notInstalled" && manifest ? (
+            <button className="button button--primary" disabled={busy} onClick={() => void onInstall()} type="button">
+              <Download size={16} />
+              {t("common.actions.install")}
             </button>
           ) : (
             <button className="button button--secondary" onClick={onLibrary} type="button">

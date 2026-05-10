@@ -220,6 +220,10 @@
         "one": "{{count}} aktiver Job",
         "other": "{{count}} aktive Jobs"
       },
+      "downloadsQueued": {
+        "one": "{{count}} wartender Job",
+        "other": "{{count}} wartende Jobs"
+      },
       "homePersonalized": "Bereit fur deinen naechsten Start, {{name}}",
       "downloadsClear": "Warteschlange ist leer",
       "socials": "2 offizielle Plattformen",
@@ -270,7 +274,9 @@
     },
     "activeTransfers": {
       "eyebrow": "Downloads",
-      "title": "Aktive Transfers"
+      "title": "Aktive Transfers",
+      "queuedEyebrow": "Warteschlange",
+      "queuedTitle": "Wartet in der Queue"
     },
     "recentActivity": {
       "eyebrow": "Letzte Aktivitat",
@@ -279,6 +285,8 @@
       "added": "Zur Bibliothek hinzugefugt",
       "installed": "Lokal installiert",
       "updated": "Lokal aktualisiert",
+      "repaired": "Lokale Dateien repariert",
+      "moved": "Bibliotheksort verschoben",
       "launched": "Kuerzlich geoffnet",
       "error": "Benotigt Aufmerksamkeit"
     },
@@ -481,7 +489,9 @@
       "queued": "Wartend",
       "queuedDescription": "Wartet auf den Start",
       "history": "Verlauf",
-      "historyDescription": "Abgeschlossen, abgebrochen oder fehlgeschlagen"
+      "historyDescription": "Abgeschlossen, abgebrochen oder fehlgeschlagen",
+      "pendingPayload": "Offenes Datenvolumen",
+      "pendingPayloadDescription": "Verbleibende Daten ueber aktive und wartende Transfers hinweg"
     },
     "toolbar": {
       "eyebrow": "Transfers und Installationen",
@@ -496,7 +506,10 @@
       "historyTitle": "Abgeschlossene Jobs"
     },
     "row": {
-      "progress": "{{operation}} / {{phase}}"
+      "progress": "{{operation}} / {{phase}}",
+      "queuePosition": "Position {{position}} in der Warteschlange",
+      "startedAt": "Gestartet {{date}}",
+      "updatedAt": "Letzte Aktualisierung {{date}}"
     }
   },
   "socials": {
@@ -542,6 +555,12 @@
     "eyebrow": "Ersteinrichtung",
     "title": "Deine Lumorix-Inhalte bleiben auf deinem Rechner.",
     "body": "Wahle aus, wo Lumorix Inhalte installiert. Kein Konto, kein Cloud-Lock-in, keine versteckte Analyse. Netzwerkzugriff wird nur fur Manifeste, Downloads und explizite Update-Prufungen genutzt.",
+    "webPathDialog": {
+      "title": "Bibliothekspfad festlegen",
+      "body": "Im Browser-Preview gibt es keinen nativen Ordnerdialog. Trage den gewunschten Installationspfad direkt ein.",
+      "hint": "Tipp: Im Browser-Preview wird der Pfad nur simuliert, damit du den Flow realistisch testen kannst.",
+      "confirm": "Pfad ubernehmen"
+    },
     "privacyPoints": {
       "config": "Lokale Konfiguration und Installationsmetadaten",
       "libraries": "Weitere Bibliotheken konnen spater hinzugefugt werden",
@@ -641,7 +660,14 @@
       "defaultChip": "Standard",
       "saveLibrary": "Speichern",
       "lastSeen": "Zuletzt gesehen: {{date}}",
-      "removeAria": "Bibliothek entfernen"
+      "removeAria": "Bibliothek entfernen",
+      "previewHint": "Im Browser-Preview werden Bibliothekspfade simuliert, damit der gesamte Storage-Flow testbar bleibt.",
+      "webPathDialog": {
+        "title": "Bibliothekspfad eingeben",
+        "body": "Der Browser-Preview kann keinen nativen Ordnerdialog oeffnen. Trage den gewuenschten Bibliothekspfad direkt ein.",
+        "hint": "Der Pfad wird im Preview lokal simuliert und spaeter im Tauri-Build durch echte Ordnerwahl ersetzt.",
+        "confirm": "Bibliothekspfad verwenden"
+      }
     },
     "maintenance": {
       "eyebrow": "Wartung",
@@ -703,7 +729,10 @@
     "installedPanel": {
       "notAdded": "Fuge diesen Eintrag zuerst deiner Bibliothek hinzu, bevor du ihn installierst.",
       "notInstalled": "Zur Bibliothek hinzugefugt, aber noch nicht installiert.",
-      "unavailable": "Dieser Eintrag ist derzeit im Shop nicht verfugbar und kann aktuell nicht neu installiert werden."
+      "unavailable": "Dieser Eintrag ist derzeit im Shop nicht verfugbar und kann aktuell nicht neu installiert werden.",
+      "previewCopyAction": "Installationspfad kopieren",
+      "previewCopied": "Installationspfad kopiert",
+      "previewHint": "Im Browser-Preview wird kein echter Ordner geoeffnet. Stattdessen kopiert Lumorix den Installationspfad."
     },
     "changelogEmpty": "Fur diesen Eintrag ist aktuell kein Anderungsprotokoll verfugbar.",
     "addFavorite": "Als Favorit markieren",
@@ -741,6 +770,11 @@
       "none": "Kein Update verfugbar. Lumorix ist auf dem neuesten Stand.",
       "desktopOnly": "In-App-Updates sind nur in der Desktop-App verfugbar.",
       "error": "Updater fehlgeschlagen: {{message}}"
+    },
+    "details": {
+      "desktopOnly": "Im Browser-Preview kannst du den Update-Flow pruefen, aber Download und Installation funktionieren erst in der Desktop-App.",
+      "none": "Es ist keine weitere Aktion noetig. Dieser Launcher-Stand entspricht bereits der aktuell verfuegbaren Version.",
+      "restartRequired": "Die Dateien sind installiert, aber Lumorix konnte sich nicht selbst neu starten. Ein manueller Neustart schliesst das Update ab."
     }
   },
   "profiles": {
@@ -790,7 +824,7 @@
     "historyTitle": "Letzte Suchen",
     "historyEmpty": "Noch keine letzten Suchen",
     "clearHistory": "Leeren",
-    "hintNav": "Bereich wechseln",
+    "hintNav": "Ergebnisse steuern",
     "hintToggle": "Suche öffnen/schließen"
   },
   "updateNotice": {

@@ -40,15 +40,23 @@
                              "launch",
                              "repair",
                              "uninstall",
-                             "openFolder"
+                             "openFolder",
+                             "update",
+                             "moveInstall"
                          ],
+    "distribution":  {
+                         "channel":  "direct",
+                         "packageType":  "zip"
+                     },
     "installStrategy":  {
-                            "kind":  "directFolder",
-                            "sourcePath":  "C:\\Users\\julia\\Desktop\\Lumorix Launcher\\distribution\\games\\frostline-courier\\runtime"
+                            "kind":  "zipArchive",
+                            "rootFolder":  "."
                         },
     "download":  {
-                     "kind":  "localSynthetic",
-                     "integrity":  "embedded-frostline-courier-0.1.0"
+                     "kind":  "httpArchive",
+                     "url":  "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/games/frostline-courier/release/frostline-courier-win64.zip",
+                     "sha256":  "7311be8c2b7e829790f8b45e808e640384d0a10d5e26e95b0696cc29ae6520bd",
+                     "sizeBytes":  11815022
                  },
     "changelog":  [
                       {

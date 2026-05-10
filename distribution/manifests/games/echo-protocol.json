@@ -57,6 +57,16 @@
                              "update",
                              "moveInstall"
                          ],
+    "distribution":  {
+                         "channel":  "direct",
+                         "packageType":  "zip"
+                     },
+    "installStrategy":  {
+                            "kind":  "zipArchive",
+                            "rootFolder":  "."
+                        },
+    "download":  {
+                     "kind":  "httpArchive",
                      "url":  "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/games/echo-protocol/release/echo-protocol-win64.zip",
                      "sha256":  "c82e905b3fd9adfaaa27ca095a04174a6d8d515d9e6a44e0a8bc9c5d02a34117",
                      "sizeBytes":  58725

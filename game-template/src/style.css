@@ -46,6 +46,7 @@ canvas {
   position: absolute;
   inset: 14px 14px auto 14px;
   display: flex;
+  flex-wrap: wrap;
   gap: 10px;
   pointer-events: none;
 }
@@ -158,6 +159,7 @@ button:active {
 
 footer {
   display: flex;
+  flex-wrap: wrap;
   gap: 2rem;
   justify-content: center;
   margin-top: 18px;
@@ -168,4 +170,24 @@ footer {
   font-size: 0.875rem;
   color: #91a6b3;
   text-align: center;
+}
+
+@media (max-width: 720px) {
+  .game-shell {
+    padding: 12px;
+  }
+
+  .overlay {
+    padding: 20px;
+  }
+
+  .control-grid {
+    grid-template-columns: 1fr;
+    max-width: 100%;
+  }
+
+  footer {
+    gap: 0.75rem;
+    font-size: 0.8rem;
+  }
 }

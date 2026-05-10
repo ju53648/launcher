@@ -3,7 +3,7 @@ import { Ban, Clock3, Download, RefreshCw, Trash2 } from "lucide-react";
 import { EmptyState } from "../components/EmptyState";
 import { ProgressBar } from "../components/ProgressBar";
 import { StatusBadge } from "../components/StatusBadge";
-import { formatBytes, jobProgressLabel } from "../domain/format";
+import { formatBytes, formatDateTime, jobProgressLabel } from "../domain/format";
 import { getActiveJobs, getFinishedJobs, getQueuedJobs } from "../domain/selectors";
 import { useI18n } from "../i18n";
 import { useLauncher } from "../store/LauncherStore";
@@ -14,9 +14,15 @@ export function DownloadsView({ setRoute }: { setRoute: (route: AppRoute) => voi
   const { snapshot, cancelJob, clearCompletedJobs } = useLauncher();
   if (!snapshot) return null;
 
-  const activeJobs = getActiveJobs(snapshot);
+  const activeJobs = getActiveJobs(snapshot).filter((job) => job.status === "running");
   const queuedJobs = getQueuedJobs(snapshot);
   const finishedJobs = getFinishedJobs(snapshot);
+  const totalQueuedBytes = queuedJobs.reduce((total, job) => total + job.bytesTotal, 0);
+  const totalActiveBytesRemaining = activeJobs.reduce(
+    (total, job) => total + Math.max(0, job.bytesTotal - job.bytesDownloaded),
+    0
+  );
+  const totalPendingBytes = totalQueuedBytes + totalActiveBytesRemaining;
 
   if (snapshot.jobs.length === 0) {
     return (
@@ -58,6 +64,12 @@ export function DownloadsView({ setRoute }: { setRoute: (route: AppRoute) => voi
           <strong>{finishedJobs.length}</strong>
           <p>{t("downloads.summary.historyDescription")}</p>
         </article>
+        <article className="metric-panel">
+          <Clock3 size={22} />
+          <span>{t("downloads.summary.pendingPayload")}</span>
+          <strong>{formatBytes(totalPendingBytes, locale)}</strong>
+          <p>{t("downloads.summary.pendingPayloadDescription")}</p>
+        </article>
       </section>
 
       <div className="section-toolbar">
@@ -65,7 +77,12 @@ export function DownloadsView({ setRoute }: { setRoute: (route: AppRoute) => voi
           <p className="eyebrow">{t("downloads.toolbar.eyebrow")}</p>
           <h2>{t("downloads.toolbar.title", { count: snapshot.jobs.length })}</h2>
         </div>
-        <button className="button button--ghost" onClick={clearCompletedJobs} type="button">
+        <button
+          className="button button--ghost"
+          disabled={finishedJobs.length === 0}
+          onClick={clearCompletedJobs}
+          type="button"
+        >
           <Trash2 size={16} />
           {t("common.actions.clearFinished")}
         </button>
@@ -83,6 +100,7 @@ export function DownloadsView({ setRoute }: { setRoute: (route: AppRoute) => voi
                 key={job.id}
                 job={job}
                 locale={locale}
+                queuePosition={null}
                 onCancel={() => cancelJob(job.id)}
               />
             ))}
@@ -97,11 +115,12 @@ export function DownloadsView({ setRoute }: { setRoute: (route: AppRoute) => voi
             <h2>{t("downloads.sections.queuedTitle")}</h2>
           </div>
           <div className="downloads-list">
-            {queuedJobs.map((job) => (
+            {queuedJobs.map((job, index) => (
               <DownloadRow
                 key={job.id}
                 job={job}
                 locale={locale}
+                queuePosition={index + 1}
                 onCancel={() => cancelJob(job.id)}
               />
             ))}
@@ -117,7 +136,7 @@ export function DownloadsView({ setRoute }: { setRoute: (route: AppRoute) => voi
           </div>
           <div className="downloads-list">
             {finishedJobs.map((job) => (
-              <DownloadRow key={job.id} job={job} locale={locale} />
+              <DownloadRow key={job.id} job={job} locale={locale} queuePosition={null} />
             ))}
           </div>
         </section>
@@ -129,13 +148,25 @@ export function DownloadsView({ setRoute }: { setRoute: (route: AppRoute) => voi
 function DownloadRow({
   job,
   locale,
+  queuePosition,
   onCancel
 }: {
   job: ReturnType<typeof getActiveJobs>[number];
   locale: string;
+  queuePosition: number | null;
   onCancel?: () => void;
 }) {
   const { t } = useI18n();
+  const statusMeta =
+    queuePosition && job.status === "queued"
+      ? t("downloads.row.queuePosition", { position: queuePosition })
+      : job.status === "running"
+        ? t("downloads.row.startedAt", {
+            date: formatDateTime(job.startedAt, locale, t)
+          })
+        : t("downloads.row.updatedAt", {
+            date: formatDateTime(job.updatedAt, locale, t)
+          });
 
   return (
     <article className="download-row">
@@ -145,10 +176,17 @@ function DownloadRow({
           <StatusBadge status={job.status} type="job" />
         </div>
         <span>{jobProgressLabel(job, t)}</span>
-        <ProgressBar value={job.progress} />
+        <p className="download-row__message">{job.message}</p>
+        {(job.status === "running" || job.status === "completed") && <ProgressBar value={job.progress} />}
+        {job.status === "queued" ? (
+          <div className="progress-bar progress-bar--compact" aria-hidden="true">
+            <div className="progress-bar__value" style={{ width: "12%" }} />
+          </div>
+        ) : null}
         <small>
           {formatBytes(job.bytesDownloaded, locale)} / {formatBytes(job.bytesTotal, locale)}
         </small>
+        <small>{statusMeta}</small>
         {job.error && <p className="field-error">{job.error}</p>}
       </div>
       {onCancel && (job.status === "running" || job.status === "queued") && (

@@ -12,7 +12,7 @@ export type GameStatus = "notInstalled" | "installed" | "updateAvailable" | "bro
 export interface ActivityEvent {
   id: string;
   item: ContentView;
-  kind: "added" | "installed" | "updated" | "launched" | "error";
+  kind: "added" | "installed" | "updated" | "repaired" | "moved" | "launched" | "error";
   at: string;
 }
 
@@ -50,6 +50,10 @@ export function getActiveJobs(snapshot: LauncherSnapshot) {
   return snapshot.jobs.filter((job) => job.status === "queued" || job.status === "running");
 }
 
+export function getRunningJobs(snapshot: LauncherSnapshot) {
+  return snapshot.jobs.filter((job) => job.status === "running");
+}
+
 export function getQueuedJobs(snapshot: LauncherSnapshot) {
   return snapshot.jobs.filter((job) => job.status === "queued");
 }
@@ -79,7 +83,51 @@ export function getRecentlyUsedItems(snapshot: LauncherSnapshot, limit = 4) {
 }
 
 export function buildRecentActivity(snapshot: LauncherSnapshot, limit = 8): ActivityEvent[] {
-  const events = getLibraryItems(snapshot).flatMap((item) => {
+  const libraryItems = getLibraryItems(snapshot);
+  const itemById = new Map(libraryItems.map((item) => [item.catalog.id, item]));
+  const completedTransferJobsByItem = new Map<string, Set<InstallJob["operation"]>>();
+  const transferEvents: ActivityEvent[] = [];
+
+  for (const job of snapshot.jobs) {
+    const item = itemById.get(job.itemId);
+    if (!item) {
+      continue;
+    }
+
+    if (job.status === "completed") {
+      const operations = completedTransferJobsByItem.get(job.itemId) ?? new Set<InstallJob["operation"]>();
+      operations.add(job.operation);
+      completedTransferJobsByItem.set(job.itemId, operations);
+
+      const kind =
+        job.operation === "install"
+          ? "installed"
+          : job.operation === "update"
+            ? "updated"
+            : job.operation === "repair"
+            ? "repaired"
+            : "moved";
+
+      transferEvents.push({
+        id: `${job.id}:${kind}:${job.updatedAt}`,
+        item,
+        kind,
+        at: job.updatedAt
+      });
+      continue;
+    }
+
+    if (job.status === "failed" || job.status === "cancelled") {
+      transferEvents.push({
+        id: `${job.id}:error:${job.updatedAt}`,
+        item,
+        kind: "error",
+        at: job.updatedAt
+      });
+    }
+  }
+
+  const stateEvents = libraryItems.flatMap((item) => {
     const activity: ActivityEvent[] = [];
     if (item.collectionEntry?.addedAt) {
       activity.push({
@@ -89,15 +137,14 @@ export function buildRecentActivity(snapshot: LauncherSnapshot, limit = 8): Acti
         at: item.collectionEntry.addedAt
       });
     }
-    if (item.installed?.installedAt) {
+    if (
+      item.installed?.installedAt &&
+      !(completedTransferJobsByItem.get(item.catalog.id)?.has("install") ?? false)
+    ) {
       activity.push({
         id: `${item.catalog.id}:installed:${item.installed.installedAt}`,
         item,
-        kind:
-          item.availableUpdate?.currentVersion &&
-          item.availableUpdate.currentVersion !== item.installed.installedVersion
-            ? "updated"
-            : "installed",
+        kind: "installed",
         at: item.installed.installedAt
       });
     }
@@ -121,7 +168,9 @@ export function buildRecentActivity(snapshot: LauncherSnapshot, limit = 8): Acti
     return activity;
   });
 
-  return events.sort((left, right) => toTime(right.at) - toTime(left.at)).slice(0, limit);
+  return [...transferEvents, ...stateEvents]
+    .sort((left, right) => toTime(right.at) - toTime(left.at))
+    .slice(0, limit);
 }
 
 export function getShopCategories(snapshot: LauncherSnapshot) {

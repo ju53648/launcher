@@ -78,6 +78,8 @@ interface I18nContextValue {
 }
 
 const I18nContext = createContext<I18nContextValue | undefined>(undefined);
+const FALLBACK_LOCALE: SupportedLocale =
+  typeof navigator === "undefined" ? "en" : detectPreferredLocale(navigator.languages);
 
 export function I18nProvider({ children }: { children: ReactNode }) {
   const [locale, setLocaleState] = useState<SupportedLocale>(
@@ -119,10 +121,18 @@ export function I18nProvider({ children }: { children: ReactNode }) {
 
 export function useI18n() {
   const context = useContext(I18nContext);
-  if (!context) {
-    throw new Error("useI18n must be used inside I18nProvider");
+  if (context) {
+    return context;
   }
-  return context;
+
+  return {
+    locale: FALLBACK_LOCALE,
+    setLocale: () => {
+      // During HMR or provider churn, keep the UI alive instead of hard-crashing.
+    },
+    t: (key: string, params?: TranslationParams) =>
+      translate(FALLBACK_LOCALE, key, params)
+  };
 }
 
 export function detectPreferredLocale(languages = navigator.languages): SupportedLocale {

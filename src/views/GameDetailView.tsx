@@ -1,4 +1,4 @@
-import { ArrowLeft, Download, FolderInput, FolderOpen, Play, Plus, RefreshCw, Star, Trash2, Wrench, X } from "lucide-react";
+import { ArrowLeft, Check, Download, FolderInput, FolderOpen, Play, Plus, RefreshCw, Star, Trash2, Wrench, X } from "lucide-react";
 import { useState } from "react";
 
 import { ConfirmDialog } from "../components/ConfirmDialog";
@@ -13,6 +13,7 @@ import { getGameStatus, getPrimaryGameAction, getSimilarItems } from "../domain/
 import { getTagLabel, sortTagsByWeight } from "../domain/tags";
 import type { ContentView } from "../domain/types";
 import { useI18n } from "../i18n";
+import { isTauriRuntime } from "../services/tauri";
 import { useLauncher } from "../store/LauncherStore";
 import type { AppRoute } from "../components/AppShell";
 
@@ -44,9 +45,11 @@ export function GameDetailView({
   const [moveOpen, setMoveOpen] = useState(false);
   const [removeOpen, setRemoveOpen] = useState(false);
   const [uninstallOpen, setUninstallOpen] = useState(false);
+  const [pathCopied, setPathCopied] = useState(false);
 
   if (!snapshot) return null;
 
+  const runningInTauri = isTauriRuntime();
   const manifest = item.manifest;
   const similarItems = getSimilarItems(snapshot, item.catalog.id, 3);
   const hasActiveJob = Boolean(item.activeJob);
@@ -63,6 +66,34 @@ export function GameDetailView({
   );
   const preferredReturnRoute: AppRoute =
     item.collectionStatus === "notAdded" ? "shop" : "library";
+  const canMoveInstall = snapshot.config.libraries.some(
+    (library) => library.status === "available" && library.id !== item.installed?.libraryId
+  );
+  const showFilesLabel = runningInTauri
+    ? t("common.actions.showFiles")
+    : pathCopied
+      ? t("detail.installedPanel.previewCopied")
+      : t("detail.installedPanel.previewCopyAction");
+
+  const handleInstall = async () => {
+    const { askForLibraryEachInstall } = snapshot.config.installBehavior;
+    const defaultLibraryId = snapshot.config.defaultLibraryId;
+
+    if (askForLibraryEachInstall || !defaultLibraryId) {
+      setInstallOpen(true);
+      return;
+    }
+
+    await installItem(item.catalog.id, defaultLibraryId);
+  };
+
+  const handleOpenInstallFolder = async () => {
+    await openInstallFolder(item.catalog.id);
+    if (!runningInTauri) {
+      setPathCopied(true);
+      window.setTimeout(() => setPathCopied(false), 1800);
+    }
+  };
 
   return (
     <div className="view-stack">
@@ -130,7 +161,13 @@ export function GameDetailView({
             </button>
           )}
           {item.collectionStatus !== "notAdded" && primaryAction === "install" && manifest && (
-            <button className="button button--primary" onClick={() => setInstallOpen(true)} type="button">
+            <button
+              className="button button--primary"
+              onClick={() => {
+                void handleInstall();
+              }}
+              type="button"
+            >
               <Download size={16} />
               {t("common.actions.install")}
             </button>
@@ -166,13 +203,20 @@ export function GameDetailView({
               <Wrench size={16} />
               {t("common.actions.verifyRepair")}
             </button>
-            <button className="button button--secondary" disabled={hasActiveJob || item.isRunning} onClick={() => openInstallFolder(item.catalog.id)} type="button">
-              <FolderOpen size={16} />
-              {t("common.actions.showFiles")}
+            <button
+              className="button button--secondary"
+              disabled={hasActiveJob || item.isRunning}
+              onClick={() => {
+                void handleOpenInstallFolder();
+              }}
+              type="button"
+            >
+              {runningInTauri ? <FolderOpen size={16} /> : pathCopied ? <Check size={16} /> : <FolderOpen size={16} />}
+              {showFilesLabel}
             </button>
             <button
               className="button button--secondary"
-              disabled={hasActiveJob || item.isRunning || snapshot.config.libraries.filter(l => l.status === "available" && l.id !== item.installed?.libraryId).length === 0}
+              disabled={hasActiveJob || item.isRunning || !canMoveInstall}
               onClick={() => setMoveOpen(true)}
               type="button"
             >
@@ -225,6 +269,9 @@ export function GameDetailView({
           </button>
         </div>
         {hasActiveJob && <p className="detail-actions__hint">{t("library.card.transferHint")}</p>}
+        {!hasActiveJob && isInstalled && !item.isRunning && !canMoveInstall && (
+          <p className="detail-actions__hint">{t("moveDialog.noLibrariesBody")}</p>
+        )}
       </section>
 
       {item.activeJob && (
@@ -306,6 +353,13 @@ export function GameDetailView({
                   : t("detail.installedPanel.unavailable")}
             </p>
           )}
+          {item.installed && !runningInTauri ? (
+            <p className={`detail-installed-note ${pathCopied ? "is-success" : ""}`}>
+              {pathCopied
+                ? t("detail.installedPanel.previewCopied")
+                : t("detail.installedPanel.previewHint")}
+            </p>
+          ) : null}
         </article>
       </section>
 

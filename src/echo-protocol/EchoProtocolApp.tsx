@@ -1,10 +1,11 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { INITIAL_SCENE_ID, getSceneById } from "./data/scenes";
 import { CaseFile } from "./components/CaseFile";
 import { GameScreen } from "./components/GameScreen";
 import { StartScreen } from "./components/StartScreen";
 import type { EchoGameState, SceneChoice, SceneEffect } from "./types/game";
+import { echoAudio } from "./utils/audio";
 import { clearEchoSave, hasEchoSave, loadEchoSave, saveEchoState } from "./utils/storage";
 import "./styles.css";
 
@@ -71,11 +72,48 @@ function seedSceneEntries(state: EchoGameState): EchoGameState {
 }
 
 export function EchoProtocolApp() {
+  return <EchoProtocolGameShell />;
+}
+
+export function EchoProtocolGameShell({
+  onExit
+}: {
+  onExit?: () => void;
+}) {
   const [phase, setPhase] = useState<"start" | "game">("start");
   const [state, setState] = useState<EchoGameState>(() => seedSceneEntries(makeInitialState()));
   const [warningPulse, setWarningPulse] = useState<string | null>(null);
   const [transitioning, setTransitioning] = useState(false);
+  const previousSceneId = useRef<string | null>(null);
+  const savePreview = useMemo(() => loadEchoSave(), [phase, state.updatedAt]);
   const canContinue = useMemo(() => hasEchoSave(), [phase, state.updatedAt]);
+
+  useEffect(() => {
+    if (phase !== "game") {
+      previousSceneId.current = null;
+      return;
+    }
+
+    if (previousSceneId.current === state.currentSceneId) {
+      return;
+    }
+
+    const scene = getSceneById(state.currentSceneId);
+    if (scene.isEnding) {
+      echoAudio.play("ending");
+    } else if (previousSceneId.current) {
+      echoAudio.play(state.realityShiftLevel >= 4 ? "choice-danger" : "choice-stable");
+    }
+
+    previousSceneId.current = state.currentSceneId;
+  }, [phase, state.currentSceneId, state.realityShiftLevel]);
+
+  useEffect(() => {
+    if (!warningPulse) {
+      return;
+    }
+    echoAudio.play("warning");
+  }, [warningPulse]);
 
   function persist(nextState: EchoGameState) {
     saveEchoState(nextState);
@@ -83,12 +121,14 @@ export function EchoProtocolApp() {
   }
 
   function startNewGame() {
+    echoAudio.play("menu");
     const fresh = seedSceneEntries(makeInitialState());
     persist(fresh);
     setPhase("game");
   }
 
   function continueGame() {
+    echoAudio.play("menu");
     const loaded = loadEchoSave();
     if (!loaded) return;
     const hydrated = seedSceneEntries(loaded);
@@ -97,6 +137,7 @@ export function EchoProtocolApp() {
   }
 
   function resetGame() {
+    echoAudio.play("warning");
     clearEchoSave();
     setState(seedSceneEntries(makeInitialState()));
     setPhase("start");
@@ -104,6 +145,7 @@ export function EchoProtocolApp() {
 
   function handlePick(choice: SceneChoice) {
     setTransitioning(true);
+    echoAudio.play(choiceTone(choice));
 
     const currentScene = getSceneById(state.currentSceneId);
     let next = applyEffects(state, currentScene.id, choice.effects);
@@ -129,6 +171,17 @@ export function EchoProtocolApp() {
       {phase === "start" ? (
         <StartScreen
           hasSave={canContinue}
+          onExit={onExit}
+          saveSummary={
+            savePreview
+              ? {
+                  sceneTitle: getSceneById(savePreview.currentSceneId).title,
+                  updatedAt: savePreview.updatedAt,
+                  decisions: savePreview.decisions.length,
+                  realityShiftLevel: savePreview.realityShiftLevel
+                }
+              : null
+          }
           onContinue={continueGame}
           onNewGame={startNewGame}
           onReset={resetGame}
@@ -136,6 +189,7 @@ export function EchoProtocolApp() {
       ) : (
         <div className="echo-app">
           <GameScreen
+            onExit={onExit}
             onBackToMenu={() => setPhase("start")}
             onPick={handlePick}
             state={state}
@@ -147,4 +201,18 @@ export function EchoProtocolApp() {
       )}
     </div>
   );
+}
+
+function choiceTone(choice: SceneChoice) {
+  const shiftAmount = choice.effects
+    .filter((effect): effect is Extract<SceneEffect, { type: "shift" }> => effect.type === "shift")
+    .reduce((total, effect) => total + effect.amount, 0);
+
+  if (shiftAmount >= 2) {
+    return "choice-danger" as const;
+  }
+  if (shiftAmount === 1) {
+    return "choice-tense" as const;
+  }
+  return "choice-stable" as const;
 }

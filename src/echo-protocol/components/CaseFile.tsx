@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react";
+
 import type { CaseEntry, EchoGameState } from "../types/game";
 
 function mutateDiary(entry: CaseEntry, state: EchoGameState): string {
@@ -17,6 +19,23 @@ export function CaseFile({ state }: { state: EchoGameState }) {
   const clues = byType(state.caseLog, "clue");
   const diary = byType(state.caseLog, "diary");
   const photos = byType(state.caseLog, "photo");
+  const latestEntry = state.caseLog[state.caseLog.length - 1] ?? null;
+  const [highlightLatest, setHighlightLatest] = useState(false);
+  const latestText = latestEntry
+    ? latestEntry.type === "diary"
+      ? mutateDiary(latestEntry, state)
+      : latestEntry.text
+    : null;
+
+  useEffect(() => {
+    if (!latestEntry) {
+      return;
+    }
+
+    setHighlightLatest(true);
+    const timer = window.setTimeout(() => setHighlightLatest(false), 1200);
+    return () => window.clearTimeout(timer);
+  }, [latestEntry?.id]);
 
   return (
     <aside className="echo-case-file">
@@ -26,8 +45,30 @@ export function CaseFile({ state }: { state: EchoGameState }) {
         <small>Reality Shift Level: {state.realityShiftLevel}</small>
       </header>
 
+      <div className="echo-case-file__stats">
+        <div className="echo-mini-stat">
+          <span>Hinweise</span>
+          <strong>{clues.length}</strong>
+        </div>
+        <div className="echo-mini-stat">
+          <span>Tagebuch</span>
+          <strong>{diary.length}</strong>
+        </div>
+        <div className="echo-mini-stat">
+          <span>Fotos</span>
+          <strong>{photos.length}</strong>
+        </div>
+      </div>
+
+      {latestEntry && latestText ? (
+        <section className={`echo-latest-entry ${highlightLatest ? "echo-latest-entry--fresh" : ""}`}>
+          <small>Letzte Bewegung / {latestEntry.sceneId}</small>
+          <p>{latestText}</p>
+        </section>
+      ) : null}
+
       <section>
-        <h4>Hinweise</h4>
+        <h4>Hinweise ({clues.length})</h4>
         {clues.length === 0 ? <p className="echo-empty">Noch keine Hinweise.</p> : null}
         <div className="echo-card-stack">
           {clues.map((entry) => (
@@ -40,7 +81,7 @@ export function CaseFile({ state }: { state: EchoGameState }) {
       </section>
 
       <section>
-        <h4>Tagebuch</h4>
+        <h4>Tagebuch ({diary.length})</h4>
         {diary.length === 0 ? <p className="echo-empty">Noch keine Eintraege.</p> : null}
         <div className="echo-card-stack">
           {diary.map((entry) => (
@@ -53,7 +94,7 @@ export function CaseFile({ state }: { state: EchoGameState }) {
       </section>
 
       <section>
-        <h4>Fotos</h4>
+        <h4>Fotos ({photos.length})</h4>
         {photos.length === 0 ? <p className="echo-empty">Noch keine Fotokarten.</p> : null}
         <div className="echo-card-stack">
           {photos.map((entry) => (

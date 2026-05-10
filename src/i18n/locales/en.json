@@ -220,6 +220,10 @@
         "one": "{{count}} active job",
         "other": "{{count}} active jobs"
       },
+      "downloadsQueued": {
+        "one": "{{count}} queued job",
+        "other": "{{count}} queued jobs"
+      },
       "homePersonalized": "Ready for your next session, {{name}}",
       "downloadsClear": "Queue is clear",
       "socials": "2 official platforms",
@@ -270,7 +274,9 @@
     },
     "activeTransfers": {
       "eyebrow": "Downloads",
-      "title": "Active transfers"
+      "title": "Active transfers",
+      "queuedEyebrow": "Queue",
+      "queuedTitle": "Waiting in queue"
     },
     "recentActivity": {
       "eyebrow": "Recent activity",
@@ -279,6 +285,8 @@
       "added": "Added to Library",
       "installed": "Installed locally",
       "updated": "Updated locally",
+      "repaired": "Repaired local files",
+      "moved": "Moved library location",
       "launched": "Opened recently",
       "error": "Needs attention"
     },
@@ -481,7 +489,9 @@
       "queued": "Queued",
       "queuedDescription": "Waiting for a turn",
       "history": "History",
-      "historyDescription": "Completed, cancelled, or failed"
+      "historyDescription": "Completed, cancelled, or failed",
+      "pendingPayload": "Pending payload",
+      "pendingPayloadDescription": "Remaining data across active and queued transfers"
     },
     "toolbar": {
       "eyebrow": "Transfers and installs",
@@ -496,7 +506,10 @@
       "historyTitle": "Finished jobs"
     },
     "row": {
-      "progress": "{{operation}} / {{phase}}"
+      "progress": "{{operation}} / {{phase}}",
+      "queuePosition": "Queue position {{position}}",
+      "startedAt": "Started {{date}}",
+      "updatedAt": "Last update {{date}}"
     }
   },
   "socials": {
@@ -542,6 +555,12 @@
     "eyebrow": "First setup",
     "title": "Your Lumorix content stays on your machine.",
     "body": "Choose where Lumorix installs content. No account, no cloud lock-in, no hidden analytics. Network access is reserved for manifests, downloads, and explicit update checks.",
+    "webPathDialog": {
+      "title": "Set library path",
+      "body": "The browser preview has no native folder picker. Enter the install path directly so the onboarding flow still behaves realistically.",
+      "hint": "Tip: In browser preview this path is simulated so you can test the full flow without leaving the page.",
+      "confirm": "Use this path"
+    },
     "privacyPoints": {
       "config": "Local config and install metadata",
       "libraries": "Multiple libraries can be added later",
@@ -641,7 +660,14 @@
       "defaultChip": "Default",
       "saveLibrary": "Save",
       "lastSeen": "Last seen: {{date}}",
-      "removeAria": "Remove library"
+      "removeAria": "Remove library",
+      "previewHint": "In browser preview, library paths are simulated so the full storage flow stays testable.",
+      "webPathDialog": {
+        "title": "Enter library path",
+        "body": "The browser preview cannot open a native folder picker. Enter the library path directly to keep the storage flow realistic.",
+        "hint": "This path is simulated locally in preview and will map to real folder selection in the Tauri build.",
+        "confirm": "Use library path"
+      }
     },
     "maintenance": {
       "eyebrow": "Maintenance",
@@ -703,7 +729,10 @@
     "installedPanel": {
       "notAdded": "Add this item to your Library before installing it.",
       "notInstalled": "Added to your Library, but not installed yet.",
-      "unavailable": "This item is currently unavailable in the Shop and cannot be reinstalled right now."
+      "unavailable": "This item is currently unavailable in the Shop and cannot be reinstalled right now.",
+      "previewCopyAction": "Copy install path",
+      "previewCopied": "Install path copied",
+      "previewHint": "Browser preview cannot open a real folder, so Lumorix copies the install path instead."
     },
     "changelogEmpty": "No changelog is available for this item right now.",
     "addFavorite": "Mark as favorite",
@@ -741,6 +770,11 @@
       "none": "No update available. Lumorix is up to date.",
       "desktopOnly": "In-app updates are only available in the desktop app.",
       "error": "Updater failed: {{message}}"
+    },
+    "details": {
+      "desktopOnly": "In browser preview you can verify the update flow, but download and install only work in the desktop app.",
+      "none": "No further action is needed. This launcher build already matches the latest available release.",
+      "restartRequired": "The update files are installed, but Lumorix could not relaunch itself. A manual restart will finish the update."
     }
   },
   "taxonomy": {
@@ -790,7 +824,7 @@
     "historyTitle": "Recent searches",
     "historyEmpty": "No recent searches yet",
     "clearHistory": "Clear",
-    "hintNav": "Switch section",
+    "hintNav": "Navigate results",
     "hintToggle": "Open/close search"
   },
   "updateNotice": {
@@ -799,7 +833,7 @@
     "collapseChangelog": "Hide changelog"
   },
   "offline": {
-    "banner": "No internet connection — manifests and updates unavailable"
+    "banner": "No internet connection - manifests and updates unavailable"
   },
   "backup": {
     "eyebrow": "Backup",

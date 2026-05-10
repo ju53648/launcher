@@ -20,7 +20,13 @@ import { SessionSummaryPanel } from "./SessionSummaryPanel";
 import { UpdateNoticeToast } from "./UpdateNoticeToast";
 import { useI18n } from "../i18n";
 import { useLauncher } from "../store/LauncherStore";
-import { getActiveJobs, getDiscoverableItems, getLibraryItems } from "../domain/selectors";
+import {
+  getActiveJobs,
+  getDiscoverableItems,
+  getLibraryItems,
+  getQueuedJobs,
+  getRunningJobs
+} from "../domain/selectors";
 import type { LauncherSnapshot } from "../domain/types";
 import { applyColorMode, colorModeEventName, loadColorMode } from "../domain/colorMode";
 
@@ -236,7 +242,8 @@ function metaForRoute(
 ): string {
   const discoverableCount = getDiscoverableItems(snapshot).length;
   const libraryCount = getLibraryItems(snapshot).length;
-  const activeJobs = getActiveJobs(snapshot).length;
+  const runningJobs = getRunningJobs(snapshot).length;
+  const queuedJobs = getQueuedJobs(snapshot).length;
 
   if (route === "home" && displayName) {
     return t("shell.meta.homePersonalized", { name: displayName });
@@ -249,7 +256,13 @@ function metaForRoute(
     return t("shell.meta.library", { count: libraryCount });
   }
   if (route === "downloads") {
-    return activeJobs > 0 ? t("shell.meta.downloadsActive", { count: activeJobs }) : t("shell.meta.downloadsClear");
+    if (runningJobs > 0) {
+      return t("shell.meta.downloadsActive", { count: runningJobs });
+    }
+    if (queuedJobs > 0) {
+      return t("shell.meta.downloadsQueued", { count: queuedJobs });
+    }
+    return t("shell.meta.downloadsClear");
   }
   if (route === "socials") {
     return t("shell.meta.socials");

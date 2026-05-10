@@ -5,6 +5,7 @@ import type { AppRoute } from "../components/AppShell";
 import { LauncherAvatar } from "../components/LauncherAvatar";
 import { LauncherUpdatePanel } from "../components/LauncherUpdatePanel";
 import { ProgressBar } from "../components/ProgressBar";
+import { RecommendationSection } from "../components/RecommendationSection";
 import {
   formatBytes,
   formatDate,
@@ -13,9 +14,12 @@ import {
 import { resolveCatalogImageSrc } from "../domain/media";
 import {
   buildRecentActivity,
+  getBecauseYouPlayedRecommendations,
+  getForYouRecommendations,
   getActiveJobs,
   getInstalledItems,
   getLibraryItems,
+  getRunningJobs,
   getRecentlyInstalledItems,
   getRecentlyUsedItems
 } from "../domain/selectors";
@@ -64,14 +68,17 @@ export function HomeView({ setRoute }: { setRoute: (route: AppRoute) => void }) 
 
   const libraryItems = getLibraryItems(snapshot);
   const installedItems = getInstalledItems(snapshot);
-  const activeJobs = getActiveJobs(snapshot);
+  const pendingJobs = getActiveJobs(snapshot);
+  const runningJobs = getRunningJobs(snapshot);
+  const hasRunningJobs = runningJobs.length > 0;
   const recentActivity = buildRecentActivity(snapshot, 6);
   const recentInstalls = getRecentlyInstalledItems(snapshot, 4);
   const recentlyUsed = getRecentlyUsedItems(snapshot, 4);
-  // The most recently played/used installed game for the "continue" hero card
   const lastPlayedItem = getRecentlyUsedItems(snapshot, 1).find(
     (item) => item.state.installed && item.catalog.itemType === "game"
   ) ?? null;
+  const forYouRecommendations = getForYouRecommendations(snapshot, 4);
+  const becauseYouPlayed = getBecauseYouPlayedRecommendations(snapshot, 3);
   const favoriteItem = personalization.favoriteItemId
     ? snapshot.items.find((item) => item.catalog.id === personalization.favoriteItemId) ?? null
     : null;
@@ -86,6 +93,12 @@ export function HomeView({ setRoute }: { setRoute: (route: AppRoute) => void }) 
       total + (item.installed?.sizeOnDiskBytes ?? item.manifest?.installSizeBytes ?? 0),
     0
   );
+  const transfersEyebrow = hasRunningJobs
+    ? t("home.activeTransfers.eyebrow")
+    : t("home.activeTransfers.queuedEyebrow");
+  const transfersTitle = hasRunningJobs
+    ? t("home.activeTransfers.title")
+    : t("home.activeTransfers.queuedTitle");
 
   const updateMessage =
     updateProgress.status !== "idle"
@@ -274,8 +287,8 @@ export function HomeView({ setRoute }: { setRoute: (route: AppRoute) => void }) 
         <article className="metric-panel">
           <Download size={22} />
           <span>{t("home.metrics.downloads")}</span>
-          <strong>{activeJobs.length}</strong>
-          <p>{t("home.metrics.downloadsDescription", { count: activeJobs.length })}</p>
+          <strong>{runningJobs.length}</strong>
+          <p>{t("home.metrics.downloadsDescription", { count: runningJobs.length })}</p>
         </article>
         <article className="metric-panel">
           <HardDrive size={22} />
@@ -293,14 +306,14 @@ export function HomeView({ setRoute }: { setRoute: (route: AppRoute) => void }) 
 
       <LauncherUpdatePanel progress={updateProgress} />
 
-      {activeJobs.length > 0 && (
+      {pendingJobs.length > 0 && (
         <section className="queue-strip">
           <div>
-            <p className="eyebrow">{t("home.activeTransfers.eyebrow")}</p>
-            <h2>{t("home.activeTransfers.title")}</h2>
+            <p className="eyebrow">{transfersEyebrow}</p>
+            <h2>{transfersTitle}</h2>
           </div>
           <div className="queue-strip__stack">
-            {activeJobs.slice(0, 3).map((job) => (
+            {pendingJobs.slice(0, 3).map((job) => (
               <button
                 className="queue-strip__job"
                 key={job.id}
@@ -314,6 +327,26 @@ export function HomeView({ setRoute }: { setRoute: (route: AppRoute) => void }) 
             ))}
           </div>
         </section>
+      )}
+
+      <RecommendationSection
+        eyebrow={t("shop.recommendations.forYouEyebrow")}
+        title={t("shop.recommendations.forYouTitle")}
+        description={t("shop.recommendations.forYouBody")}
+        entries={forYouRecommendations}
+        onOpen={(itemId) => setRoute(`item:${itemId}`)}
+      />
+
+      {becauseYouPlayed.sourceItem && becauseYouPlayed.recommendations.length > 0 && (
+        <RecommendationSection
+          eyebrow={t("shop.recommendations.becausePlayedEyebrow")}
+          title={t("shop.recommendations.becausePlayedTitle", {
+            name: becauseYouPlayed.sourceItem.catalog.name
+          })}
+          description={t("shop.recommendations.becausePlayedBody")}
+          entries={becauseYouPlayed.recommendations}
+          onOpen={(itemId) => setRoute(`item:${itemId}`)}
+        />
       )}
 
       <section className="home-columns">
@@ -522,6 +555,12 @@ function ContinuePlayingCard({
   const lastUsed =
     item.collectionEntry?.lastUsedAt ?? item.installed?.lastLaunchedAt ?? null;
   const minutes = item.collectionEntry?.totalPlaytimeMinutes ?? 0;
+  const playtimeLabel =
+    minutes > 0
+      ? t("home.continuePlaying.playtime", {
+          hours: Math.round((minutes / 60) * 10) / 10
+        })
+      : null;
 
   return (
     <section className="continue-card">
@@ -546,8 +585,7 @@ function ContinuePlayingCard({
               {t("home.continuePlaying.lastPlayed", {
                 date: formatDate(lastUsed, locale, t)
               })}
-              {minutes > 0 &&
-                ` · ${t("home.continuePlaying.playtime", { hours: Math.round(minutes / 60 * 10) / 10 })}`}
+              {playtimeLabel ? ` / ${playtimeLabel}` : ""}
             </p>
           )}
         </div>
@@ -591,4 +629,3 @@ function savePinnedGameIds(activeProfileId: string, ids: string[]) {
   }
   window.localStorage.setItem(getProfileScopedStorageKey(PINNED_GAMES_STORAGE_KEY, activeProfileId), JSON.stringify(ids));
 }
-

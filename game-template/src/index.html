@@ -3,11 +3,11 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>My Lumorix Game</title>
+    <title>Lumorix Arcade Template</title>
     <link rel="stylesheet" href="./style.css" />
   </head>
   <body>
-    <main class="game-shell" aria-label="My Lumorix Game">
+    <main class="game-shell" aria-label="Lumorix Arcade Template">
       <section class="stage-wrap">
         <canvas id="gameCanvas" width="960" height="540" aria-label="Game playfield"></canvas>
 
@@ -27,19 +27,19 @@
         </div>
 
         <section id="titleScreen" class="overlay">
-          <p class="eyebrow">Lumorix Game</p>
-          <h1>My Game</h1>
-          <p class="intro">Your game description goes here.</p>
+          <p class="eyebrow">Lumorix Arcade Template</p>
+          <h1>Pulse Runner</h1>
+          <p class="intro">Slide between red shards, collect bright cores, and trigger a pulse when the lane gets tight.</p>
           <div class="control-grid">
             <span>A / Left Arrow</span>
             <span>D / Right Arrow</span>
-            <span>Space to Action</span>
+            <span>Space to Pulse</span>
           </div>
-          <button id="startButton" type="button">Start Game</button>
+          <button id="startButton" type="button">Start Run</button>
         </section>
 
         <section id="gameOverScreen" class="overlay hidden">
-          <p class="eyebrow">Game Over</p>
+          <p class="eyebrow">Run Complete</p>
           <h2>Run Complete</h2>
           <p id="finalScore" class="intro">Score: 0</p>
           <button id="restartButton" type="button">Play Again</button>
@@ -48,6 +48,7 @@
 
       <footer>
         <span>Press P to pause.</span>
+        <span>Press Esc to return to title.</span>
         <span>Edit src/main.ts to customize your game.</span>
       </footer>
     </main>

@@ -40,15 +40,23 @@
                              "launch",
                              "repair",
                              "uninstall",
-                             "openFolder"
+                             "openFolder",
+                             "update",
+                             "moveInstall"
                          ],
+    "distribution":  {
+                         "channel":  "direct",
+                         "packageType":  "zip"
+                     },
     "installStrategy":  {
-                            "kind":  "directFolder",
-                            "sourcePath":  "C:\\Users\\julia\\Desktop\\Lumorix Launcher\\distribution\\games\\velvet-rook\\runtime"
+                            "kind":  "zipArchive",
+                            "rootFolder":  "."
                         },
     "download":  {
-                     "kind":  "localSynthetic",
-                     "integrity":  "embedded-velvet-rook-0.1.0"
+                     "kind":  "httpArchive",
+                     "url":  "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/games/velvet-rook/release/velvet-rook-win64.zip",
+                     "sha256":  "4b6fe606b21a3b2f62802adae78d30706e097de8a62d54fa759811bdd149957b",
+                     "sizeBytes":  11815801
                  },
     "changelog":  [
                       {

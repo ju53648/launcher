@@ -1,5 +1,5 @@
 import { ArrowRight, Search, X } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import type { AppRoute } from "./AppShell";
 import { resolveCatalogImageSrc } from "../domain/media";
@@ -16,6 +16,7 @@ export function QuickSearch({ setRoute }: { setRoute: (route: AppRoute) => void 
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [history, setHistory] = useState<string[]>(() => loadQuickSearchHistory(activeProfileId));
+  const [activeIndex, setActiveIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -59,14 +60,30 @@ export function QuickSearch({ setRoute }: { setRoute: (route: AppRoute) => void 
 
   const items = snapshot?.items ?? [];
   const normalized = query.trim().toLowerCase();
-  const results = normalized.length < 1
-    ? []
-    : items
-        .filter((item) =>
-          item.catalog.name.toLowerCase().includes(normalized) ||
-          item.catalog.developer.toLowerCase().includes(normalized)
-        )
-        .slice(0, 8);
+  const results = useMemo(() => {
+    if (normalized.length < 1) {
+      return [];
+    }
+
+    return [...items]
+      .filter((item) => {
+        const haystack = [
+          item.catalog.name,
+          item.catalog.developer,
+          item.catalog.description,
+          ...item.catalog.categories
+        ]
+          .join(" ")
+          .toLowerCase();
+        return haystack.includes(normalized);
+      })
+      .sort((left, right) => searchRank(right, normalized) - searchRank(left, normalized))
+      .slice(0, 8);
+  }, [items, normalized]);
+
+  useEffect(() => {
+    setActiveIndex(0);
+  }, [normalized, open]);
 
   function navigate(itemId: string) {
     if (normalized) {
@@ -96,10 +113,26 @@ export function QuickSearch({ setRoute }: { setRoute: (route: AppRoute) => void 
             className="quicksearch__input"
             placeholder={t("quicksearch.placeholder")}
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              setActiveIndex(0);
+            }}
             onKeyDown={(e) => {
+              if (e.key === "ArrowDown" && results.length > 0) {
+                e.preventDefault();
+                setActiveIndex((current) => Math.min(results.length - 1, current + 1));
+                return;
+              }
+
+              if (e.key === "ArrowUp" && results.length > 0) {
+                e.preventDefault();
+                setActiveIndex((current) => Math.max(0, current - 1));
+                return;
+              }
+
               if (e.key === "Enter" && results.length > 0) {
-                navigate(results[0].catalog.id);
+                e.preventDefault();
+                navigate(results[Math.min(activeIndex, results.length - 1)].catalog.id);
               }
             }}
             type="search"
@@ -113,18 +146,21 @@ export function QuickSearch({ setRoute }: { setRoute: (route: AppRoute) => void 
 
         {results.length > 0 && (
           <div className="quicksearch__results" role="listbox">
-            {results.map((item) => {
+            {results.map((item, index) => {
               const iconSrc = resolveCatalogImageSrc(
                 item.catalog.iconImage,
                 item.manifest?.version ?? item.catalog.releaseDate
               );
+              const isActive = index === activeIndex;
               return (
                 <button
                   key={item.catalog.id}
-                  className="quicksearch__item"
+                  className={`quicksearch__item ${isActive ? "is-active" : ""}`}
                   onClick={() => navigate(item.catalog.id)}
+                  onMouseEnter={() => setActiveIndex(index)}
                   type="button"
                   role="option"
+                  aria-selected={isActive}
                 >
                   {iconSrc ? (
                     <img src={iconSrc} alt="" className="quicksearch__icon" />
@@ -184,7 +220,7 @@ export function QuickSearch({ setRoute }: { setRoute: (route: AppRoute) => void 
               )}
             </div>
             <div>
-              <span><kbd>1</kbd><kbd>–</kbd><kbd>7</kbd></span>
+              <span><kbd>↑</kbd><kbd>↓</kbd><kbd>↵</kbd></span>
               <span>{t("quicksearch.hintNav")}</span>
             </div>
             <div>
@@ -236,4 +272,27 @@ function pushQueryHistory(current: string[], value: string): string[] {
   }
   const withoutDupes = current.filter((entry) => entry.toLowerCase() !== normalized.toLowerCase());
   return [normalized, ...withoutDupes].slice(0, QUICKSEARCH_HISTORY_LIMIT);
+}
+
+function searchRank(
+  item: NonNullable<ReturnType<typeof useLauncher>["snapshot"]>["items"][number],
+  query: string
+) {
+  const name = item.catalog.name.toLowerCase();
+  const developer = item.catalog.developer.toLowerCase();
+  const description = item.catalog.description.toLowerCase();
+
+  let score = 0;
+  if (name === query) score += 120;
+  else if (name.startsWith(query)) score += 80;
+  else if (name.includes(query)) score += 50;
+
+  if (developer.startsWith(query)) score += 20;
+  else if (developer.includes(query)) score += 12;
+
+  if (description.includes(query)) score += 8;
+  if (item.state.added) score += 4;
+  if (item.state.installed) score += 3;
+
+  return score;
 }

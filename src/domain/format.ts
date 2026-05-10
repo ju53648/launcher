@@ -45,6 +45,21 @@ export function formatDate(value: string | null, locale: string, t: Translate): 
   }).format(date);
 }
 
+export function formatDateTime(value: string | null, locale: string, t: Translate): string {
+  if (!value) return t("common.never");
+  const normalizedValue = /^\d{4}-\d{2}-\d{2}$/.test(value) ? `${value}T12:00:00Z` : value;
+  const date = new Date(normalizedValue);
+  if (Number.isNaN(date.getTime())) return value;
+  const safeLocale = resolveIntlLocale(locale);
+  return new Intl.DateTimeFormat(safeLocale, {
+    year: "numeric",
+    month: "short",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit"
+  }).format(date);
+}
+
 export function formatPlaytime(minutes: number | null | undefined, locale: string, t: Translate): string {
   if (!minutes || minutes <= 0) return t("common.never");
 

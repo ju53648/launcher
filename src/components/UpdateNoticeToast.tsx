@@ -10,6 +10,7 @@ interface UpdateNotice {
   id: string;
   itemName: string;
   version: string;
+  releaseDate: string | null;
   changelog: Array<{ version: string; date: string; items: string[] }>;
 }
 
@@ -66,6 +67,7 @@ export function UpdateNoticeToast() {
         id: noticeId,
         itemName: job.itemName,
         version: item?.manifest?.version ?? "",
+        releaseDate: item?.manifest?.releaseDate ?? null,
         changelog: changelog.slice(0, 2)
       });
       markShown(activeProfileId, noticeId);
@@ -104,6 +106,7 @@ export function UpdateNoticeToast() {
                 {notice.version && (
                   <span>{t("updateNotice.version", { version: notice.version })}</span>
                 )}
+                {notice.releaseDate && <small>{notice.releaseDate}</small>}
               </div>
               {notice.changelog.length > 0 && (
                 <button
@@ -128,7 +131,7 @@ export function UpdateNoticeToast() {
               <div className="update-toast__changelog">
                 {notice.changelog.map((entry) => (
                   <div key={`${entry.version}-${entry.date}`}>
-                    <small>v{entry.version} · {entry.date}</small>
+                    <small>v{entry.version} / {entry.date}</small>
                     <ul>
                       {entry.items.map((item) => (
                         <li key={item}>{item}</li>

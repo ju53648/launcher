@@ -291,6 +291,12 @@ textarea:hover {
   overflow-wrap: anywhere;
 }
 
+.setup-path__hint {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 13px;
+}
+
 .setup-path__actions,
 .hero-actions,
 .action-row,
@@ -638,7 +644,7 @@ textarea:hover {
 }
 
 .downloads-summary {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
 .metric-panel,
@@ -1922,6 +1928,16 @@ textarea:hover {
   margin: 0;
 }
 
+.detail-installed-note {
+  margin: 0;
+  color: var(--color-subtle);
+  font-size: 12px;
+}
+
+.detail-installed-note.is-success {
+  color: var(--color-accent);
+}
+
 .spec-list {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1977,6 +1993,11 @@ textarea:hover {
 .install-panel__header {
   display: grid;
   gap: var(--space-2);
+}
+
+.install-panel__detail {
+  margin: 0;
+  color: var(--color-muted);
 }
 
 .game-refresh-status {
@@ -2154,6 +2175,12 @@ textarea:hover {
 .download-row__main {
   display: grid;
   gap: var(--space-2);
+}
+
+.download-row__message {
+  margin: 0;
+  color: var(--color-text);
+  font-size: 14px;
 }
 
 .download-row__title,
@@ -2753,6 +2780,31 @@ textarea:hover {
 
 .confirm-dialog {
   width: min(560px, 100%);
+}
+
+.path-input-dialog {
+  width: min(600px, 100%);
+}
+
+.path-input-dialog__copy {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.path-input-dialog__field {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.path-input-dialog__field span {
+  color: var(--color-muted);
+  font-size: 13px;
+}
+
+.path-input-dialog__hint {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 13px;
 }
 
 .personalization-dialog {
@@ -3376,6 +3428,12 @@ textarea:hover {
   transform: translateX(2px);
 }
 
+.quicksearch__item.is-active {
+  background: var(--color-surface-3);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-accent) 30%, transparent);
+  transform: translateX(2px);
+}
+
 .quicksearch__icon {
   width: 36px;
   height: 36px;
@@ -3572,6 +3630,17 @@ textarea:hover {
   margin-bottom: var(--space-3);
 }
 
+.session-summary__header > div {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.session-summary__header small {
+  color: var(--color-muted);
+  font-size: var(--text-xs);
+}
+
 .session-summary__icon {
   width: 40px;
   height: 40px;
@@ -3616,6 +3685,10 @@ textarea:hover {
 
 .session-summary__streak {
   margin-top: var(--space-3);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
   text-align: center;
   font-size: var(--text-sm);
   color: var(--color-accent);
@@ -3658,8 +3731,23 @@ textarea:hover {
 
 .update-toast__title {
   flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 2px;
   font-size: var(--text-sm);
   font-weight: 700;
+}
+
+.update-toast__title strong {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.update-toast__title span,
+.update-toast__title small {
+  color: var(--color-muted);
+  font-size: var(--text-xs);
 }
 
 .update-toast__changelog {
@@ -3668,6 +3756,15 @@ textarea:hover {
   color: var(--color-muted);
   border-top: 1px solid var(--color-border);
   padding-top: var(--space-2);
+}
+
+.update-toast__changelog ul {
+  margin: var(--space-2) 0 0;
+  padding-left: var(--space-4);
+}
+
+.update-toast__changelog li + li {
+  margin-top: 4px;
 }
 
 /* -- Library Groups ------------------------------------------- */

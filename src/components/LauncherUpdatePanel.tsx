@@ -15,6 +15,21 @@ export function LauncherUpdatePanel({
   }
 
   const isError = progress.status === "error";
+  const isProgressing =
+    progress.status === "checking" ||
+    progress.status === "available" ||
+    progress.status === "downloading" ||
+    progress.status === "installing" ||
+    progress.status === "installed" ||
+    progress.status === "relaunching";
+  const detailKey =
+    progress.status === "desktopOnly"
+      ? "updater.details.desktopOnly"
+      : progress.status === "none"
+        ? "updater.details.none"
+        : progress.status === "restartRequired"
+          ? "updater.details.restartRequired"
+          : null;
 
   return (
     <div
@@ -26,7 +41,8 @@ export function LauncherUpdatePanel({
         <p className="eyebrow">{t("updater.title")}</p>
         <h2>{describeLauncherUpdateProgress(progress, t)}</h2>
       </div>
-      {!isError && <ProgressBar value={progress.progress} />}
+      {detailKey && <p className="install-panel__detail">{t(detailKey)}</p>}
+      {!isError && isProgressing && <ProgressBar value={progress.progress} />}
     </div>
   );
 }

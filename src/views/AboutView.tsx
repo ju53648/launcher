@@ -8,6 +8,7 @@ import { formatDate } from "../domain/format";
 import { localizeReleaseInfo } from "../i18n/content";
 import { useI18n } from "../i18n";
 import { releaseInfo } from "../releaseInfo";
+import { isTauriRuntime } from "../services/tauri";
 import { useLauncher } from "../store/LauncherStore";
 
 export function AboutView({ setRoute }: { setRoute: (route: AppRoute) => void }) {
@@ -21,6 +22,12 @@ export function AboutView({ setRoute }: { setRoute: (route: AppRoute) => void })
     : null;
   const libraryCount = snapshot.items.filter((item) => item.collectionStatus !== "notAdded").length;
   const installedCount = snapshot.items.filter((item) => item.state.installed).length;
+  const runningInTauri = isTauriRuntime();
+  const showInstallAction =
+    runningInTauri &&
+    (updateProgress.status === "available" ||
+      updateProgress.status === "restartRequired" ||
+      snapshot.launcherUpdate.updateAvailable);
 
   return (
     <div className="about-layout">
@@ -52,7 +59,7 @@ export function AboutView({ setRoute }: { setRoute: (route: AppRoute) => void })
             <strong>{libraryCount}</strong>
           </div>
           <div>
-            <span>{t("home.metrics.downloads")}</span>
+            <span>{t("common.labels.installed")}</span>
             <strong>{installedCount}</strong>
           </div>
           <div>
@@ -77,24 +84,26 @@ export function AboutView({ setRoute }: { setRoute: (route: AppRoute) => void })
             }
             onClick={checkLauncherUpdates}
             type="button"
-          >
-            {busyAction === "check-launcher-update"
-              ? t("common.actions.checkingShort")
-              : t("common.actions.checkForUpdates")}
+            >
+              {busyAction === "check-launcher-update"
+                ? t("common.actions.checkingShort")
+                : t("common.actions.checkForUpdates")}
           </button>
-          <button
-            className="button button--primary"
-            disabled={
-              busyAction === "check-launcher-update" || busyAction === "install-launcher-update"
-            }
-            onClick={installLauncherUpdate}
-            type="button"
-          >
-            <Download size={16} />
-            {busyAction === "install-launcher-update"
-              ? t("common.actions.updatingShort")
-              : t("common.actions.downloadAndInstall")}
-          </button>
+          {showInstallAction && (
+            <button
+              className="button button--primary"
+              disabled={
+                busyAction === "check-launcher-update" || busyAction === "install-launcher-update"
+              }
+              onClick={installLauncherUpdate}
+              type="button"
+            >
+              <Download size={16} />
+              {busyAction === "install-launcher-update"
+                ? t("common.actions.updatingShort")
+                : t("common.actions.downloadAndInstall")}
+            </button>
+          )}
         </div>
       </section>
 
