@@ -13,21 +13,25 @@ body,
 body {
   overflow: hidden;
   background:
-    radial-gradient(ellipse 60% 40% at 12% 8%, rgba(0, 223, 160, 0.07) 0%, transparent 60%),
-    radial-gradient(ellipse 50% 35% at 88% 92%, rgba(0, 180, 220, 0.05) 0%, transparent 55%),
-    radial-gradient(ellipse 80% 60% at 50% 50%, rgba(0, 0, 0, 0.3) 0%, transparent 100%),
+    radial-gradient(ellipse 66% 44% at 10% 6%, rgba(0, 223, 160, 0.09) 0%, transparent 62%),
+    radial-gradient(ellipse 54% 36% at 90% 96%, rgba(0, 180, 220, 0.08) 0%, transparent 58%),
+    radial-gradient(ellipse 100% 80% at 50% 50%, rgba(0, 0, 0, 0.34) 0%, transparent 100%),
+    linear-gradient(165deg, rgba(7, 14, 16, 0.95) 0%, rgba(6, 7, 8, 0.94) 100%),
     var(--color-bg);
   color: var(--color-text);
-  font-size: 15px;
+  font-size: var(--font-size-md);
   line-height: 1.5;
   letter-spacing: 0;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
 }
 
 :root[data-color-mode="light"] body {
   background:
-    radial-gradient(ellipse 56% 36% at 10% 8%, rgba(0, 190, 140, 0.09) 0%, transparent 62%),
-    radial-gradient(ellipse 48% 30% at 90% 92%, rgba(0, 154, 214, 0.08) 0%, transparent 55%),
-    radial-gradient(ellipse 80% 60% at 50% 50%, rgba(255, 255, 255, 0.4) 0%, transparent 100%),
+    radial-gradient(ellipse 62% 40% at 10% 6%, rgba(0, 176, 146, 0.14) 0%, transparent 64%),
+    radial-gradient(ellipse 56% 34% at 92% 96%, rgba(41, 157, 226, 0.12) 0%, transparent 60%),
+    radial-gradient(ellipse 100% 80% at 50% 50%, rgba(255, 255, 255, 0.6) 0%, transparent 100%),
+    linear-gradient(150deg, #f5fbfd 0%, #edf7fa 48%, #e6f0f3 100%),
     var(--color-bg);
 }
 
@@ -94,6 +98,10 @@ select {
   color: var(--color-text);
   padding: 11px 12px;
   outline: none;
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    background-color var(--transition-fast);
 }
 
 select {
@@ -111,7 +119,7 @@ select {
 
 :root[data-color-mode="light"] input,
 :root[data-color-mode="light"] select {
-  background: #ffffff;
+  background: #fcfefe;
 }
 
 :root[data-color-mode="light"] select {
@@ -133,7 +141,16 @@ option {
 input:focus,
 select:focus {
   border-color: var(--color-accent);
-  box-shadow: 0 0 0 3px rgba(47, 210, 160, 0.14);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 24%, transparent);
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+a:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 26%, transparent);
 }
 
 label span {

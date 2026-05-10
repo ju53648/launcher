@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900">
+  <rect width="1600" height="900" fill="#0a0d13"/>
+  <rect x="90" y="90" width="1420" height="720" rx="20" fill="none" stroke="#7fd8ff" stroke-opacity=".18"/>
+  <g fill="none" stroke="#7fd8ff" stroke-opacity=".18">
+    <path d="M160 200 H1440"/>
+    <path d="M160 330 H1440"/>
+    <path d="M160 460 H1440"/>
+    <path d="M160 590 H1440"/>
+  </g>
+  <g fill="#ff5278" fill-opacity=".18">
+    <rect x="220" y="240" width="110" height="50"/>
+    <rect x="640" y="500" width="110" height="50"/>
+    <rect x="1120" y="340" width="110" height="50"/>
+  </g>
+  <text x="150" y="165" fill="#ffd47a" font-family="monospace" font-size="34">RELAY MAINTENANCE / PLACEHOLDER</text>
+  <text x="150" y="740" fill="#f4f7fb" font-family="Arial, sans-serif" font-size="72" font-weight="700">Relay Ghost Route</text>
+  <text x="150" y="810" fill="#98a6bd" font-family="Arial, sans-serif" font-size="32">Kann spaeter als Technik-Still oder als kurzer MP4/WebM-Loop ersetzt werden.</text>
+</svg>

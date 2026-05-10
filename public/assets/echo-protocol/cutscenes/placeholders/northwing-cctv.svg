@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900">
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#0b1420"/>
+      <stop offset="100%" stop-color="#05070b"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="900" fill="url(#bg)"/>
+  <path d="M0 640 L620 380 L1600 200" stroke="#7fd8ff" stroke-opacity=".18" stroke-width="2" fill="none"/>
+  <path d="M0 720 L760 500 L1600 320" stroke="#ff5278" stroke-opacity=".12" stroke-width="2" fill="none"/>
+  <rect x="110" y="100" width="1380" height="700" rx="18" fill="none" stroke="#7fd8ff" stroke-opacity=".2"/>
+  <text x="110" y="170" fill="#ffd47a" font-family="monospace" font-size="34">CAM 04 / NORTH WING / PLACEHOLDER</text>
+  <text x="110" y="250" fill="#f4f7fb" font-family="Arial, sans-serif" font-size="74" font-weight="700">Nordfluegel CCTV</text>
+  <text x="110" y="330" fill="#98a6bd" font-family="Arial, sans-serif" font-size="34">Regenlicht, leerer Flur, statische Ueberwachung, dokumentarischer Polizeibau.</text>
+  <text x="110" y="770" fill="#98a6bd" font-family="monospace" font-size="26">Drop-in slot: /assets/echo-protocol/cutscenes/slots/northwing-cctv.(png|jpg|jpeg|mp4|webm)</text>
+</svg>

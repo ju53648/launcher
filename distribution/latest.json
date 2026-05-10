@@ -1,5 +1,5 @@
 {
-  "version": "0.7.2",
+  "version": "0.7.21",
   "title": "Update 4 - Install Flow and Stability",
   "notes": "Update 4 - Install Flow and Stability\n\n- First installs now use the default library directly instead of forcing a location selection.\n- Install behavior preference is now consistently honored in Library and Detail install actions.\n- Stability and release metadata sync improvements for cleaner updater rollout.",
   "notesList": [

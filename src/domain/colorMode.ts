@@ -9,10 +9,10 @@ export function isColorMode(value: string | null | undefined): value is ColorMod
 
 export function loadColorMode(): ColorMode {
   if (typeof window === "undefined") {
-    return "system";
+    return "dark";
   }
   const stored = window.localStorage.getItem(COLOR_MODE_STORAGE_KEY);
-  return isColorMode(stored) ? stored : "system";
+  return isColorMode(stored) ? stored : "dark";
 }
 
 export function saveColorMode(mode: ColorMode): void {

@@ -1,16 +1,19 @@
 import {
   Check,
   Database,
+  Download,
   FolderPlus,
   Languages,
   Monitor,
   Moon,
   Palette,
   RefreshCw,
+  RotateCcw,
   Save,
   ShieldCheck,
   Sun,
   Trash2,
+  Upload,
   UserRound,
   Users
 } from "lucide-react";
@@ -21,7 +24,19 @@ import { LauncherAvatar } from "../components/LauncherAvatar";
 import { StatusBadge } from "../components/StatusBadge";
 import { LauncherUpdatePanel } from "../components/LauncherUpdatePanel";
 import { GameRefreshPanel } from "../components/GameRefreshPanel";
-import { LAUNCHER_AVATAR_IDS, LAUNCHER_THEME_IDS } from "../domain/personalization";
+import {
+  LAUNCHER_AVATAR_IDS,
+  LAUNCHER_DENSITY_IDS,
+  LAUNCHER_FONT_STYLE_IDS,
+  LAUNCHER_MOTION_LEVEL_IDS,
+  LAUNCHER_SURFACE_STYLE_IDS,
+  LAUNCHER_STYLE_PRESET_IDS,
+  LAUNCHER_THEME_IDS,
+  type LauncherStylePreferences,
+  PRESET_DEFAULTS,
+  exportStyleProfile,
+  importStyleProfile
+} from "../domain/personalization";
 import { formatDate } from "../domain/format";
 import { getLibraryItems } from "../domain/selectors";
 import { loadColorMode, saveColorMode, type ColorMode } from "../domain/colorMode";
@@ -53,6 +68,7 @@ export function SettingsView() {
     setLauncherAvatar,
     setFavoriteItem,
     setAccentColor,
+    updateStylePreferences,
     profiles,
     activeProfileId,
     switchProfile,
@@ -67,6 +83,7 @@ export function SettingsView() {
   const [newProfileName, setNewProfileName] = useState("");
   const [creatingProfile, setCreatingProfile] = useState(false);
   const [colorMode, setColorMode] = useState<ColorMode>(() => loadColorMode());
+  const [importError, setImportError] = useState<string | null>(null);
 
   const preferences = useMemo(() => {
     if (!snapshot) return null;
@@ -107,6 +124,19 @@ export function SettingsView() {
     isNovelty: value === "shakespeare"
   }));
 
+  const stylePresetLabels: Record<string, { name: string; description: string }> = {
+    future: { name: "Future Core", description: "Kräftiger Glow, moderne Tiefe." },
+    midnight: { name: "Midnight Ops", description: "Ruhiger, dichter, kontrastreicher." },
+    ice: { name: "Ice Glass", description: "Helleres Neon, klarere Kanten." },
+    retro: { name: "Retro Grid", description: "Wärmere Paneele, softer Vibe." }
+  };
+
+  const fontStyleLabels: Record<string, string> = {
+    jakarta: "Plus Jakarta",
+    rounded: "Rounded",
+    mono: "Tech Mono"
+  };
+
   function applySuggestedLibraryPath(path: string) {
     const trimmedPath = path.trim();
     if (!trimmedPath) {
@@ -132,6 +162,48 @@ export function SettingsView() {
     });
     if (path) {
       applySuggestedLibraryPath(path);
+    }
+  }
+
+  function handleExportStyle() {
+    const json = exportStyleProfile(personalization.style, personalization.displayName || "Lumorix Style");
+    const blob = new Blob([json], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `lumorix-style-${Date.now()}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  function handleImportStyle(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const jsonString = e.target?.result as string;
+        const imported = importStyleProfile(jsonString);
+        void updateStylePreferences(imported);
+        setImportError(null);
+      } catch (error) {
+        setImportError(error instanceof Error ? error.message : "Failed to import style profile");
+        setTimeout(() => setImportError(null), 3000);
+      }
+    };
+    reader.readAsText(file);
+
+    // Reset the input so the same file can be imported again
+    event.target.value = "";
+  }
+
+  function handleResetPreset(presetId: LauncherStylePreferences["presetId"]) {
+    const defaults = PRESET_DEFAULTS[presetId];
+    if (defaults) {
+      void updateStylePreferences(defaults);
     }
   }
 
@@ -315,6 +387,170 @@ export function SettingsView() {
                   {t("settings.personalization.accentColor.reset")}
                 </button>
               )}
+            </div>
+          </div>
+
+          <div className="identity-card identity-card--wide">
+            <div className="identity-card__header">
+              <Palette size={18} />
+              <div>
+                <strong>Future Style Lab</strong>
+                <p className="muted">Mehr Optionen für die Zukunft: Presets, Dichte, Oberfläche, Motion und Feintuning.</p>
+              </div>
+            </div>
+
+            <div className="style-lab-actions">
+              <button
+                className="button button--secondary button--small"
+                type="button"
+                onClick={handleExportStyle}
+                title="Export current style as JSON"
+              >
+                <Download size={16} />
+                Export
+              </button>
+              <label className="button button--secondary button--small" style={{ cursor: "pointer" }}>
+                <Upload size={16} />
+                Import
+                <input
+                  type="file"
+                  accept=".json"
+                  onChange={handleImportStyle}
+                  style={{ display: "none" }}
+                />
+              </label>
+              {importError && (
+                <div className="style-import-error">
+                  {importError}
+                </div>
+              )}
+            </div>
+
+            <div className="style-preset-grid">
+              {LAUNCHER_STYLE_PRESET_IDS.map((presetId) => {
+                const active = personalization.style.presetId === presetId;
+                const preset = stylePresetLabels[presetId] ?? { name: presetId, description: "" };
+                return (
+                  <div key={presetId} className="style-preset-container">
+                    <button
+                      className={`style-preset-option ${active ? "is-active" : ""}`}
+                      type="button"
+                      onClick={() => {
+                        void updateStylePreferences({ presetId });
+                      }}
+                      aria-pressed={active}
+                    >
+                      <strong>{preset.name}</strong>
+                      <small>{preset.description}</small>
+                    </button>
+                    <button
+                      className="style-preset-reset"
+                      type="button"
+                      onClick={() => handleResetPreset(presetId)}
+                      title={`Reset ${preset.name} to defaults`}
+                      aria-label={`Reset ${preset.name}`}
+                    >
+                      <RotateCcw size={14} />
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="style-controls-grid">
+              <label className="identity-field">
+                <span>Font</span>
+                <select
+                  value={personalization.style.fontStyle}
+                  onChange={(event) => {
+                    void updateStylePreferences({ fontStyle: event.target.value as LauncherStylePreferences["fontStyle"] });
+                  }}
+                >
+                  {LAUNCHER_FONT_STYLE_IDS.map((fontStyle) => (
+                    <option key={fontStyle} value={fontStyle}>
+                      {fontStyleLabels[fontStyle] ?? fontStyle}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="identity-field">
+                <span>Density</span>
+                <select
+                  value={personalization.style.density}
+                  onChange={(event) => {
+                    void updateStylePreferences({ density: event.target.value as LauncherStylePreferences["density"] });
+                  }}
+                >
+                  {LAUNCHER_DENSITY_IDS.map((density) => (
+                    <option key={density} value={density}>
+                      {density === "compact" ? "Compact" : "Cozy"}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="identity-field">
+                <span>Surface</span>
+                <select
+                  value={personalization.style.surfaceStyle}
+                  onChange={(event) => {
+                    void updateStylePreferences({ surfaceStyle: event.target.value as LauncherStylePreferences["surfaceStyle"] });
+                  }}
+                >
+                  {LAUNCHER_SURFACE_STYLE_IDS.map((surfaceStyle) => (
+                    <option key={surfaceStyle} value={surfaceStyle}>
+                      {surfaceStyle === "glass" ? "Glass" : surfaceStyle === "solid" ? "Solid" : "Soft"}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="identity-field">
+                <span>Motion</span>
+                <select
+                  value={personalization.style.motionLevel}
+                  onChange={(event) => {
+                    void updateStylePreferences({ motionLevel: event.target.value as LauncherStylePreferences["motionLevel"] });
+                  }}
+                >
+                  {LAUNCHER_MOTION_LEVEL_IDS.map((motionLevel) => (
+                    <option key={motionLevel} value={motionLevel}>
+                      {motionLevel === "calm" ? "Calm" : motionLevel === "expressive" ? "Expressive" : "Normal"}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+
+            <div className="style-slider-grid">
+              <label className="identity-field">
+                <span>Radius: {personalization.style.radiusScale.toFixed(2)}x</span>
+                <input
+                  type="range"
+                  min={0.85}
+                  max={1.45}
+                  step={0.01}
+                  value={personalization.style.radiusScale}
+                  onChange={(event) => {
+                    void updateStylePreferences({ radiusScale: Number(event.target.value) });
+                  }}
+                />
+              </label>
+
+              <label className="identity-field">
+                <span>Contrast: {personalization.style.contrastBoost.toFixed(2)}x</span>
+                <input
+                  type="range"
+                  min={0.9}
+                  max={1.3}
+                  step={0.01}
+                  value={personalization.style.contrastBoost}
+                  onChange={(event) => {
+                    void updateStylePreferences({ contrastBoost: Number(event.target.value) });
+                  }}
+                />
+              </label>
             </div>
           </div>
 

@@ -1,0 +1,145 @@
+:root {
+  --app-max-width: 1880px;
+  --app-content-padding: clamp(16px, 1.4vw, 28px);
+  --card-border: 1px solid color-mix(in srgb, var(--color-line) 78%, transparent);
+  --hairline: 1px solid color-mix(in srgb, var(--color-line) 52%, transparent);
+}
+
+:root[data-launcher-font="rounded"] {
+  font-family: "Nunito Sans", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+}
+
+:root[data-launcher-font="mono"] {
+  font-family: "IBM Plex Mono", "Cascadia Mono", "Consolas", "Segoe UI", monospace;
+}
+
+:root[data-launcher-density="compact"] {
+  --app-content-padding: clamp(12px, 1.1vw, 20px);
+}
+
+:root[data-launcher-surface="glass"] {
+  --card-border: 1px solid color-mix(in srgb, var(--color-line) 64%, transparent);
+}
+
+:root[data-launcher-surface="solid"] {
+  --card-border: 1px solid color-mix(in srgb, var(--color-line-strong) 86%, transparent);
+}
+
+#root {
+  isolation: isolate;
+}
+
+.app-shell {
+  position: relative;
+  filter: contrast(var(--contrast-boost));
+}
+
+.app-shell::before,
+.app-shell::after {
+  content: "";
+  position: fixed;
+  inset: auto;
+  pointer-events: none;
+  z-index: -1;
+  filter: blur(28px);
+  opacity: calc(0.72 * var(--style-glow-scale));
+}
+
+.app-shell::before {
+  width: 38vw;
+  height: 38vw;
+  top: -14vw;
+  right: -12vw;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--color-accent) calc(22% * var(--style-tint-scale)), transparent);
+}
+
+.app-shell::after {
+  width: 32vw;
+  height: 32vw;
+  left: -12vw;
+  bottom: -10vw;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--color-accent-strong) calc(16% * var(--style-tint-scale)), transparent);
+}
+
+.topbar,
+.sidebar,
+.panel,
+.card,
+.dialog,
+.install-dialog,
+.confirm-dialog,
+.move-dialog {
+  backdrop-filter: blur(8px);
+}
+
+:root[data-launcher-surface="solid"] .topbar,
+:root[data-launcher-surface="solid"] .sidebar,
+:root[data-launcher-surface="solid"] .panel,
+:root[data-launcher-surface="solid"] .card,
+:root[data-launcher-surface="solid"] .dialog,
+:root[data-launcher-surface="solid"] .install-dialog,
+:root[data-launcher-surface="solid"] .confirm-dialog,
+:root[data-launcher-surface="solid"] .move-dialog {
+  backdrop-filter: none;
+}
+
+:root[data-launcher-surface="glass"] .topbar,
+:root[data-launcher-surface="glass"] .sidebar,
+:root[data-launcher-surface="glass"] .panel,
+:root[data-launcher-surface="glass"] .card,
+:root[data-launcher-surface="glass"] .dialog,
+:root[data-launcher-surface="glass"] .install-dialog,
+:root[data-launcher-surface="glass"] .confirm-dialog,
+:root[data-launcher-surface="glass"] .move-dialog {
+  backdrop-filter: blur(12px) saturate(118%);
+}
+
+.panel,
+.card,
+.dialog,
+.install-dialog,
+.confirm-dialog,
+.move-dialog {
+  border: var(--card-border);
+  box-shadow: var(--elevation-1);
+}
+
+.card:hover,
+.panel:hover {
+  box-shadow: var(--elevation-2);
+}
+
+@keyframes lumorix-enter-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.main-view,
+.shell-main > * {
+  animation: lumorix-enter-up 340ms var(--transition-smooth) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .main-view,
+  .shell-main > * {
+    animation: none;
+  }
+
+  * {
+    scroll-behavior: auto !important;
+    transition-duration: 0ms !important;
+  }
+}
+
+:root[data-color-mode="light"] {
+  --card-border: 1px solid color-mix(in srgb, #9eb1ba 30%, transparent);
+  --hairline: 1px solid color-mix(in srgb, #8aa4b1 24%, transparent);
+}

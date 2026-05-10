@@ -1,7 +1,7 @@
 :root {
   color-scheme: dark;
   font-family:
-    Inter, "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+    "Plus Jakarta Sans", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, Arial, sans-serif;
 
   /* Surfaces */
   --color-bg: #060708;
@@ -38,26 +38,48 @@
   --glow-accent: 0 0 22px rgba(0, 223, 160, 0.30);
   --glow-accent-strong: 0 0 0 1px rgba(0,223,160,0.55), 0 0 40px rgba(0,223,160,0.26);
 
+  /* Global style controls (runtime overrides from personalization) */
+  --radius-scale: 1;
+  --density-scale: 1;
+  --motion-factor: 1;
+  --contrast-boost: 1;
+  --style-glow-scale: 1;
+  --style-shadow-scale: 1;
+  --style-tint-scale: 1;
+
   /* Spacing */
-  --space-1: 4px;
-  --space-2: 8px;
-  --space-3: 12px;
-  --space-4: 16px;
-  --space-5: 20px;
-  --space-6: 24px;
-  --space-8: 32px;
-  --space-10: 40px;
+  --space-1: calc(4px * var(--density-scale));
+  --space-2: calc(8px * var(--density-scale));
+  --space-3: calc(12px * var(--density-scale));
+  --space-4: calc(16px * var(--density-scale));
+  --space-5: calc(20px * var(--density-scale));
+  --space-6: calc(24px * var(--density-scale));
+  --space-8: calc(32px * var(--density-scale));
+  --space-10: calc(40px * var(--density-scale));
 
   /* Radii */
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  --radius-xl: 18px;
+  --radius-sm: calc(4px * var(--radius-scale));
+  --radius-md: calc(8px * var(--radius-scale));
+  --radius-lg: calc(12px * var(--radius-scale));
+  --radius-xl: calc(18px * var(--radius-scale));
 
   /* Transitions */
-  --transition-fast: 140ms ease;
-  --transition-smooth: 240ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  --transition-slow: 380ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --transition-fast: calc(140ms * var(--motion-factor)) ease;
+  --transition-smooth: calc(240ms * var(--motion-factor)) cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --transition-slow: calc(380ms * var(--motion-factor)) cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+  /* Typography scale */
+  --font-size-xs: 12px;
+  --font-size-sm: 14px;
+  --font-size-md: 15px;
+  --font-size-lg: 18px;
+  --font-size-xl: 24px;
+  --font-size-2xl: 32px;
+
+  /* Elevation */
+  --elevation-1: 0 2px 8px rgba(0, 0, 0, 0.24);
+  --elevation-2: 0 8px 24px rgba(0, 0, 0, 0.32);
+  --elevation-3: 0 16px 44px rgba(0, 0, 0, 0.42);
 }
 
 :root[data-color-mode="dark"] {
@@ -67,25 +89,29 @@
 :root[data-color-mode="light"] {
   color-scheme: light;
 
-  --color-bg: #eef2f3;
-  --color-bg-soft: #f6f8f9;
+  --color-bg: #eaf2f5;
+  --color-bg-soft: #f6fafb;
   --color-surface: #ffffff;
-  --color-surface-2: #f3f6f7;
-  --color-surface-3: #e7ecee;
-  --color-line: #d2dade;
-  --color-line-strong: #bcc8cd;
+  --color-surface-2: #f1f7f9;
+  --color-surface-3: #e4eff2;
+  --color-line: #cad9df;
+  --color-line-strong: #adbec6;
 
-  --color-text: #11171a;
-  --color-muted: #4d5b62;
-  --color-subtle: #6c7b82;
+  --color-text: #0d191f;
+  --color-muted: #3f5560;
+  --color-subtle: #5e7480;
 
-  --color-accent-dim: rgba(0, 164, 122, 0.12);
-  --color-accent-glow: rgba(0, 164, 122, 0.2);
+  --color-accent-dim: rgba(0, 138, 118, 0.12);
+  --color-accent-glow: rgba(0, 138, 118, 0.22);
 
-  --shadow-panel: 0 20px 54px rgba(20, 34, 44, 0.12), inset 0 1px 0 rgba(255,255,255,0.6);
-  --shadow-tight: 0 8px 24px rgba(20, 34, 44, 0.16);
-  --shadow-card: 0 4px 16px rgba(20, 34, 44, 0.12), inset 0 1px 0 rgba(255,255,255,0.5);
-  --shadow-card-hover: 0 0 0 1px rgba(0, 164, 122, 0.24), 0 10px 34px rgba(20, 34, 44, 0.18);
-  --glow-accent: 0 0 16px rgba(0, 164, 122, 0.2);
-  --glow-accent-strong: 0 0 0 1px rgba(0,164,122,0.45), 0 0 30px rgba(0,164,122,0.18);
+  --shadow-panel: 0 20px 56px rgba(16, 42, 54, 0.14), inset 0 1px 0 rgba(255,255,255,0.72);
+  --shadow-tight: 0 10px 26px rgba(16, 42, 54, 0.18);
+  --shadow-card: 0 6px 18px rgba(16, 42, 54, 0.14), inset 0 1px 0 rgba(255,255,255,0.62);
+  --shadow-card-hover: 0 0 0 1px rgba(0, 138, 118, 0.24), 0 12px 36px rgba(16, 42, 54, 0.2);
+  --glow-accent: 0 0 18px rgba(0, 138, 118, 0.22);
+  --glow-accent-strong: 0 0 0 1px rgba(0,138,118,0.45), 0 0 32px rgba(0,138,118,0.2);
+
+  --elevation-1: 0 2px 8px rgba(16, 42, 54, 0.08);
+  --elevation-2: 0 8px 24px rgba(16, 42, 54, 0.14);
+  --elevation-3: 0 16px 40px rgba(16, 42, 54, 0.18);
 }

@@ -1,6 +1,6 @@
 {
     "version":  "1",
-    "timestamp":  "2026-05-06T08:59:50Z",
+    "timestamp":  "2026-05-10T00:00:00Z",
     "manifests":  [
                       {
                           "url":  "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/manifests/games/frostline-courier.json?v=0.1.0"
@@ -27,7 +27,7 @@
                           "url":  "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/manifests/games/word-reactor.json?v=0.1.0"
                       },
                       {
-                          "url":  "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/manifests/games/echo-protocol.json?v=0.4.4"
+                          "url":  "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/manifests/games/echo-protocol.json?v=0.7.0"
                       },
                       {
                           "url":  "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/manifests/games/lumorix-dropdash.json?v=2.0.0"

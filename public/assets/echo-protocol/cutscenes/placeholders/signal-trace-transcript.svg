@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900">
+  <rect width="1600" height="900" fill="#081116"/>
+  <g stroke="#7fd8ff" stroke-opacity=".16">
+    <path d="M0 480 H1600"/>
+    <path d="M0 520 H1600"/>
+    <path d="M0 560 H1600"/>
+  </g>
+  <polyline points="80,520 160,520 180,430 215,610 250,390 300,520 390,520 430,465 470,580 530,300 610,650 670,520 1520,520" fill="none" stroke="#7fd8ff" stroke-width="5"/>
+  <text x="90" y="150" fill="#ffd47a" font-family="monospace" font-size="34">STAIRWELL INTERCEPT / TRANSCRIPT PLACEHOLDER</text>
+  <text x="90" y="245" fill="#f4f7fb" font-family="Arial, sans-serif" font-size="70" font-weight="700">Signal Trace Transcript</text>
+  <text x="90" y="325" fill="#98a6bd" font-family="Arial, sans-serif" font-size="32">Funkspur, Bandprotokoll oder visuelles Abhoerfragment mit Fehlern und Luecken.</text>
+</svg>

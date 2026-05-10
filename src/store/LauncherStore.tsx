@@ -29,10 +29,13 @@ import {
 } from "../services/appUpdater";
 import { launcherApi } from "../services/launcherApi";
 import {
+  DEFAULT_LAUNCHER_STYLE,
   DISPLAY_NAME_COOLDOWN_DAYS,
   isLauncherAvatarId,
   isLauncherThemeId,
+  normalizeLauncherStyle,
   type LauncherAvatarId,
+  type LauncherStylePreferences,
   type LauncherThemeId,
   type Profile,
   type ProfilesState,
@@ -59,6 +62,7 @@ export interface LauncherPersonalization {
   displayName: string;
   themeId: LauncherThemeId;
   avatarId: LauncherAvatarId;
+  style: LauncherStylePreferences;
   favoriteItemId: string | null;
   nameUpdatedAt: string | null;
   canEditDisplayName: boolean;
@@ -83,6 +87,7 @@ interface LauncherContextValue {
   setLauncherAvatar: (avatarId: LauncherAvatarId) => Promise<void>;
   setFavoriteItem: (itemId: string | null) => Promise<void>;
   setAccentColor: (color: string | null) => Promise<void>;
+  updateStylePreferences: (patch: Partial<LauncherStylePreferences>) => Promise<void>;
   createNewProfile: (displayName: string) => Promise<void>;
   switchProfile: (profileId: string) => Promise<void>;
   deleteProfile: (profileId: string) => Promise<void>;
@@ -125,6 +130,7 @@ interface StoredLauncherPersonalization {
   displayName?: string;
   themeId?: LauncherThemeId;
   avatarId?: LauncherAvatarId;
+  style?: Partial<LauncherStylePreferences>;
   favoriteItemId?: string | null;
   nameUpdatedAt?: string | null;
   accentColor?: string | null;
@@ -358,6 +364,7 @@ export function LauncherProvider({ children }: { children: ReactNode }) {
           displayName: trimmedName,
           themeId: personalization.themeId,
           avatarId: personalization.avatarId,
+          style: personalization.style,
           favoriteItemId: personalization.favoriteItemId,
           nameUpdatedAt,
           accentColor: personalization.accentColor
@@ -372,6 +379,7 @@ export function LauncherProvider({ children }: { children: ReactNode }) {
           displayName: personalization.displayName,
           themeId,
           avatarId: personalization.avatarId,
+          style: personalization.style,
           favoriteItemId: personalization.favoriteItemId,
           nameUpdatedAt: personalization.nameUpdatedAt,
           accentColor: personalization.accentColor
@@ -386,6 +394,7 @@ export function LauncherProvider({ children }: { children: ReactNode }) {
           displayName: personalization.displayName,
           themeId: personalization.themeId,
           avatarId,
+          style: personalization.style,
           favoriteItemId: personalization.favoriteItemId,
           nameUpdatedAt: personalization.nameUpdatedAt,
           accentColor: personalization.accentColor
@@ -401,6 +410,7 @@ export function LauncherProvider({ children }: { children: ReactNode }) {
           displayName: personalization.displayName,
           themeId: personalization.themeId,
           avatarId: personalization.avatarId,
+          style: personalization.style,
           favoriteItemId: normalized,
           nameUpdatedAt: personalization.nameUpdatedAt,
           accentColor: personalization.accentColor
@@ -417,23 +427,47 @@ export function LauncherProvider({ children }: { children: ReactNode }) {
           displayName: personalization.displayName,
           themeId: personalization.themeId,
           avatarId: personalization.avatarId,
+          style: personalization.style,
           favoriteItemId: personalization.favoriteItemId,
           nameUpdatedAt: personalization.nameUpdatedAt,
           accentColor: normalized
         });
       },
+      updateStylePreferences: async (patch) => {
+        const mergedStyle = normalizeLauncherStyle({ ...personalization.style, ...patch });
+        persistPersonalization({
+          displayName: personalization.displayName,
+          themeId: personalization.themeId,
+          avatarId: personalization.avatarId,
+          style: mergedStyle,
+          favoriteItemId: personalization.favoriteItemId,
+          nameUpdatedAt: personalization.nameUpdatedAt,
+          accentColor: personalization.accentColor
+        });
+        const updated = profilesState.profiles.map((p) =>
+          p.id === profilesState.activeProfileId ? { ...p, style: mergedStyle } : p
+        );
+        persistProfilesState({ ...profilesState, profiles: updated });
+      },
       createNewProfile: async (displayName) => {
         const trimmed = displayName.trim().slice(0, 32);
         if (!trimmed) throw new Error("Display name cannot be empty");
-        const newProfile = makeProfile(trimmed, personalization.avatarId, personalization.themeId);
+        const newProfile = makeProfile(
+          trimmed,
+          personalization.avatarId,
+          personalization.themeId,
+          personalization.style
+        );
         const nextProfiles = [...profilesState.profiles, newProfile];
         persistProfilesState({ profiles: nextProfiles, activeProfileId: newProfile.id });
         persistPersonalization({
           displayName: newProfile.displayName,
           themeId: newProfile.themeId,
           avatarId: newProfile.avatarId,
+          style: newProfile.style,
           favoriteItemId: newProfile.favoriteItemId,
-          nameUpdatedAt: newProfile.createdAt
+          nameUpdatedAt: newProfile.createdAt,
+          accentColor: personalization.accentColor
         });
       },
       switchProfile: async (profileId) => {
@@ -447,6 +481,7 @@ export function LauncherProvider({ children }: { children: ReactNode }) {
                 displayName: personalization.displayName,
                 avatarId: personalization.avatarId,
                 themeId: personalization.themeId,
+                style: personalization.style,
                 favoriteItemId: personalization.favoriteItemId
               }
             : p
@@ -456,8 +491,10 @@ export function LauncherProvider({ children }: { children: ReactNode }) {
           displayName: target.displayName,
           themeId: target.themeId,
           avatarId: target.avatarId,
+          style: target.style,
           favoriteItemId: target.favoriteItemId,
-          nameUpdatedAt: target.createdAt
+          nameUpdatedAt: target.createdAt,
+          accentColor: personalization.accentColor
         });
       },
       deleteProfile: async (profileId) => {
@@ -474,8 +511,10 @@ export function LauncherProvider({ children }: { children: ReactNode }) {
             displayName: next.displayName,
             themeId: next.themeId,
             avatarId: next.avatarId,
+            style: next.style,
             favoriteItemId: next.favoriteItemId,
-            nameUpdatedAt: next.createdAt
+            nameUpdatedAt: next.createdAt,
+            accentColor: personalization.accentColor
           });
         }
       },
@@ -736,6 +775,7 @@ function loadStoredPersonalization(): StoredLauncherPersonalization {
       displayName: normalizeDisplayName(parsed.displayName ?? ""),
       themeId: isLauncherThemeId(parsed.themeId) ? parsed.themeId : "aurora",
       avatarId: isLauncherAvatarId(parsed.avatarId) ? parsed.avatarId : "signal",
+      style: normalizeLauncherStyle(parsed.style ?? DEFAULT_LAUNCHER_STYLE),
       favoriteItemId: normalizeFavoriteItemId(parsed.favoriteItemId),
       nameUpdatedAt: normalizeIsoDate(parsed.nameUpdatedAt),
       accentColor: normalizeAccentColor(parsed.accentColor)
@@ -755,6 +795,7 @@ function hydratePersonalization(
   const avatarId = isLauncherAvatarId(personalization.avatarId)
     ? personalization.avatarId
     : "signal";
+  const style = normalizeLauncherStyle(personalization.style);
   const favoriteItemId = normalizeFavoriteItemId(personalization.favoriteItemId);
   const nameUpdatedAt = normalizeIsoDate(personalization.nameUpdatedAt);
   const nextDisplayNameChangeAt = nameUpdatedAt
@@ -771,6 +812,7 @@ function hydratePersonalization(
     displayName,
     themeId,
     avatarId,
+    style,
     favoriteItemId,
     nameUpdatedAt,
     canEditDisplayName,
@@ -821,7 +863,8 @@ function initProfilesState(stored: StoredLauncherPersonalization): ProfilesState
   const profile = makeProfile(
     displayName || "Player 1",
     isLauncherAvatarId(stored.avatarId) ? stored.avatarId : "signal",
-    isLauncherThemeId(stored.themeId) ? stored.themeId : "aurora"
+    isLauncherThemeId(stored.themeId) ? stored.themeId : "aurora",
+    normalizeLauncherStyle(stored.style)
   );
   // Carry over createdAt from saved nameUpdatedAt if available
   const rawDate = stored.nameUpdatedAt ? new Date(stored.nameUpdatedAt) : null;

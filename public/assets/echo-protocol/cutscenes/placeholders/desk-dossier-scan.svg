@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900">
+  <rect width="1600" height="900" fill="#120f0d"/>
+  <rect x="90" y="90" width="1420" height="720" rx="18" fill="#2b211b" stroke="#ffd47a" stroke-opacity=".18"/>
+  <rect x="150" y="160" width="540" height="470" fill="#d7cab8" fill-opacity=".92" transform="rotate(-3 420 395)"/>
+  <rect x="760" y="210" width="420" height="300" fill="#1a1411" stroke="#ff5278" stroke-opacity=".22"/>
+  <circle cx="1210" cy="620" r="88" fill="none" stroke="#7fd8ff" stroke-opacity=".16" stroke-width="16"/>
+  <text x="150" y="155" fill="#ffd47a" font-family="monospace" font-size="34">DESK SCAN / CASE SPIRAL / PLACEHOLDER</text>
+  <text x="150" y="735" fill="#f4f7fb" font-family="Arial, sans-serif" font-size="72" font-weight="700">Desk Dossier Scan</text>
+  <text x="150" y="805" fill="#98a6bd" font-family="Arial, sans-serif" font-size="32">Akte, Polaroids, Marker, Kaffeering, gebrauchte Ermittlungsoberflaeche.</text>
+</svg>

@@ -53,6 +53,13 @@ const navItems: Array<{
   { route: "about", icon: Info }
 ];
 
+const STYLE_PRESET_SCALE: Record<string, { glow: number; shadow: number; tint: number }> = {
+  future: { glow: 1.05, shadow: 1, tint: 1 },
+  midnight: { glow: 0.82, shadow: 1.15, tint: 0.78 },
+  ice: { glow: 1.2, shadow: 0.95, tint: 1.18 },
+  retro: { glow: 0.9, shadow: 1.05, tint: 0.92 }
+};
+
 export function AppShell({
   route,
   setRoute,
@@ -96,17 +103,59 @@ export function AppShell({
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [setRoute]);
 
-  // Apply custom accent color override to CSS variable
+  // Apply runtime personalization style (accent + advanced style prefs).
   useEffect(() => {
+    const root = document.documentElement;
+    const preset = STYLE_PRESET_SCALE[personalization.style.presetId] ?? STYLE_PRESET_SCALE.future;
+    const densityScale = personalization.style.density === "compact" ? 0.9 : 1;
+    const motionFactor =
+      personalization.style.motionLevel === "calm"
+        ? 0.82
+        : personalization.style.motionLevel === "expressive"
+          ? 1.22
+          : 1;
+
+    root.style.setProperty("--radius-scale", personalization.style.radiusScale.toFixed(2));
+    root.style.setProperty("--contrast-boost", personalization.style.contrastBoost.toFixed(2));
+    root.style.setProperty("--density-scale", densityScale.toFixed(2));
+    root.style.setProperty("--motion-factor", motionFactor.toFixed(2));
+    root.style.setProperty("--style-glow-scale", String(preset.glow));
+    root.style.setProperty("--style-shadow-scale", String(preset.shadow));
+    root.style.setProperty("--style-tint-scale", String(preset.tint));
+
+    root.dataset.launcherFont = personalization.style.fontStyle;
+    root.dataset.launcherDensity = personalization.style.density;
+    root.dataset.launcherSurface = personalization.style.surfaceStyle;
+
     if (personalization.accentColor) {
-      document.documentElement.style.setProperty("--color-accent", personalization.accentColor);
+      root.style.setProperty("--color-accent", personalization.accentColor);
     } else {
-      document.documentElement.style.removeProperty("--color-accent");
+      root.style.removeProperty("--color-accent");
     }
+
     return () => {
-      document.documentElement.style.removeProperty("--color-accent");
+      root.style.removeProperty("--radius-scale");
+      root.style.removeProperty("--contrast-boost");
+      root.style.removeProperty("--density-scale");
+      root.style.removeProperty("--motion-factor");
+      root.style.removeProperty("--style-glow-scale");
+      root.style.removeProperty("--style-shadow-scale");
+      root.style.removeProperty("--style-tint-scale");
+      root.style.removeProperty("--color-accent");
+      delete root.dataset.launcherFont;
+      delete root.dataset.launcherDensity;
+      delete root.dataset.launcherSurface;
     };
-  }, [personalization.accentColor]);
+  }, [
+    personalization.accentColor,
+    personalization.style.contrastBoost,
+    personalization.style.density,
+    personalization.style.fontStyle,
+    personalization.style.motionLevel,
+    personalization.style.presetId,
+    personalization.style.radiusScale,
+    personalization.style.surfaceStyle
+  ]);
 
   useEffect(() => {
     const applyCurrentMode = () => applyColorMode(loadColorMode());

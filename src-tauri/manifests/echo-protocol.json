@@ -2,10 +2,10 @@
     "id":  "com.lumorix.echo-protocol",
     "itemType":  "game",
     "name":  "Echo Protocol",
-    "version":  "0.4.4",
-    "description":  "You don\u0027t remember this case, but it remembers every loop. A native psychological mystery with shifting evidence, archive dives, and escalating reality drift.",
+    "version":  "0.7.0",
+    "description":  "You don\u0027t remember this case, but it remembers every loop. A native psychological mystery with shifting evidence, archive dives, and escalating reality drift. Enhanced with real-time shifts, achievement tracking, clue combinations, and deep archive exploration.",
     "developer":  "Hinterland Signal",
-    "releaseDate":  "2026-04-28",
+    "releaseDate":  "2026-05-10",
     "categories":  [
                        "Mystery",
                        "Thriller",
@@ -72,6 +72,22 @@
                      "sizeBytes":  58725
                  },
     "changelog":  [
+                      {
+                          "version":  "0.7.0",
+                          "date":  "2026-05-10",
+                          "items":  [
+                                        "Real-time shift clock with countdown and difficulty modes (Normal 720min / Hard 360min / Speedrun).",
+                                        "Clue combination system - discover 20+ combinations to unlock new scenes and story branches.",
+                                        "Consequence preview system - hover over choices to see stat changes before committing.",
+                                        "Rank progression system - 7 tiers from Cadet to Architect with point-based advancement.",
+                                        "Achievement tracking - 40+ badges with auto-unlock system and reward scoring.",
+                                        "Enhanced message system with Radio, SMS, Signals, and System alerts.",
+                                        "Deep Archive mega mode with 16 districts, 384 cases, and 1,536 investigation layers.",
+                                        "Quick-save/load system - F1-F8 for instant slot access, Ctrl+S/L for quick save.",
+                                        "15+ new story branches triggered by clue combinations and decisions.",
+                                        "Improved UI with smooth animations, better colors, and cinematic fullscreen layout."
+                                    ]
+                      },
                       {
                           "version":  "0.4.4",
                           "date":  "2026-04-28",
