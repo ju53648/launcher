@@ -18,17 +18,14 @@ use crate::{
 const EMBEDDED_MANIFESTS: &[&str] = &[
     include_str!("../manifests/lumorix-dropdash.json"),
     include_str!("../manifests/echo-protocol.json"),
-    include_str!("../manifests/neon-circuit.json"),
-    include_str!("../manifests/word-reactor.json"),
-    include_str!("../manifests/graveyard-shift.json"),
-    include_str!("../manifests/pocket-heist.json"),
-    include_str!("../manifests/tempo-trashfire.json"),
-    include_str!("../manifests/frostline-courier.json"),
-    include_str!("../manifests/velvet-rook.json"),
-    include_str!("../manifests/glass-garden.json"),
+    include_str!("../manifests/orbit-salvager.json"),
 ];
 
-const ENABLED_ITEM_IDS: &[&str] = &["com.lumorix.dropdash", "com.lumorix.echo-protocol"];
+const ENABLED_ITEM_IDS: &[&str] = &[
+    "com.lumorix.dropdash",
+    "com.lumorix.echo-protocol",
+    "com.lumorix.orbit-salvager",
+];
 
 #[derive(Debug, Clone)]
 pub struct ManifestCatalog {

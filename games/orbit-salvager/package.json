@@ -1,0 +1,20 @@
+{
+  "name": "@lumorix/orbit-salvager",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "A standalone 3D arcade prototype for the Lumorix launcher workspace.",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "three": "^0.181.1"
+  },
+  "devDependencies": {
+    "@types/three": "^0.181.0",
+    "typescript": "^5.9.3",
+    "vite": "^8.0.9"
+  }
+}

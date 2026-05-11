@@ -4,7 +4,6 @@
   "identifier": "com.lumorix.launcher.android",
   "bundle": {
     "active": true,
-    "targets": ["apk"],
     "category": "Game"
   },
   "plugins": {

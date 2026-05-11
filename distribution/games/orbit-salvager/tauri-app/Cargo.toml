@@ -1,0 +1,15 @@
+[package]
+name = "orbit-salvager-app"
+version = "0.2.0"
+edition = "2021"
+rust-version = "1.77"
+
+[lib]
+name = "orbit_salvager_app"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2.5.6", features = [] }
+
+[dependencies]
+tauri = { version = "2.10.1", features = [] }

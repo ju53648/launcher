@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Orbit Salvager</title>
+    <script type="module" crossorigin src="./assets/index-z-EkEKgT.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-D6JF6QWn.css">
+  </head>
+  <body>
+    <div id="app">
+      <canvas id="game"></canvas>
+      <div class="hud">
+        <div class="brand-panel">
+          <p class="eyebrow">Desktop Salvage Build</p>
+          <h1>Orbit Salvager</h1>
+          <p class="objective">
+            Ein schneller Bergungs-Runner ueber zerissene Orbitalspuren: Kerne sichern,
+            Pulse timen, Sektoren ueberleben.
+          </p>
+          <div class="brand-meta">
+            <span id="active-loadout">Rig // Pulse Striker</span>
+            <span id="salvage-bank">Salvage // 0</span>
+          </div>
+        </div>
+        <div class="stat-row">
+          <div class="stat-card">
+            <span>Score</span>
+            <strong id="score">0</strong>
+          </div>
+          <div class="stat-card">
+            <span>Integrity</span>
+            <strong id="integrity">3</strong>
+          </div>
+          <div class="stat-card">
+            <span>Pulse</span>
+            <strong id="pulse">Ready</strong>
+          </div>
+          <div class="stat-card">
+            <span>Best</span>
+            <strong id="best">0</strong>
+          </div>
+        </div>
+        <button class="briefing-toggle" id="briefing-toggle" type="button">
+          Briefing einblenden
+        </button>
+        <button class="briefing-toggle sound-toggle" id="sound-toggle" type="button">
+          Audio // aus
+        </button>
+      </div>
+      <section class="cinematic-banner is-hidden" id="cinematic-banner">
+        <p class="eyebrow" id="cinematic-chip">Sector Online</p>
+        <h2 id="cinematic-title">Relay Harvest</h2>
+        <p id="cinematic-body">Ein neuer Run-Abschnitt beginnt.</p>
+      </section>
+      <aside class="mission-card">
+        <p class="eyebrow" id="sector-chip">Sector 01</p>
+        <h3 id="sector-name">Relay Harvest</h3>
+        <p class="mission-copy" id="sector-objective">
+          Sammle Signal-Kerne, um den ersten Salvage-Zyklus zu sichern.
+        </p>
+        <div class="mission-meta">
+          <strong id="sector-progress">0 / 5</strong>
+          <span id="combo">Combo x0</span>
+        </div>
+        <div class="mission-meta mission-meta--secondary">
+          <strong id="boost">Boost idle</strong>
+          <span id="shield">Shield x0</span>
+        </div>
+      </aside>
+      <aside class="briefing-panel" id="briefing-panel">
+        <p class="eyebrow">Run Briefing</p>
+        <h3>Desktop-Loop</h3>
+        <p class="briefing-copy" id="briefing-sector">
+          Die aktive Bergungsroute wird hier zusammengefasst.
+        </p>
+        <div class="briefing-grid">
+          <div class="briefing-block">
+            <span>Naechster Reward</span>
+            <strong id="briefing-reward">Magnetfenster</strong>
+          </div>
+          <div class="briefing-block">
+            <span>Run Mods</span>
+            <strong id="briefing-augments">Noch keine Draft-Upgrades aktiv.</strong>
+          </div>
+          <div class="briefing-block">
+            <span>Asset Hooks</span>
+            <strong id="briefing-assets">
+              Platzhalter: Hangar-Intro-Video, Hero-GLB und Sektor-FX spaeter einsetzen.
+            </strong>
+          </div>
+        </div>
+      </aside>
+      <div class="toast is-hidden" id="toast"></div>
+      <div class="hint" id="hint">
+        A / D oder Pfeile bewegen, Leertaste aktiviert den Signal-Pulse, B zeigt das Briefing, Esc pausiert.
+      </div>
+      <section class="overlay" id="overlay">
+        <div class="overlay-card">
+          <p class="eyebrow">Orbital Recovery</p>
+          <h2 id="overlay-title">Salvage Run Initialisieren</h2>
+          <p id="overlay-body">
+            Dieses neue Spiel bleibt komplett getrennt von den anderen beiden Titeln.
+            In dieser ersten Version testen wir das Kern-Looping mit 3D-Szene und
+            Platzhaltern fur spatere Video- und Asset-Flachen.
+          </p>
+          <p class="overlay-meta" id="overlay-meta">
+            Desktop-first Build mit klaren Hooks fuer spaetere GLB-, Video- und FX-Upgrades.
+          </p>
+          <section class="draft-panel is-hidden" id="draft-panel">
+            <div class="hangar-header">
+              <div>
+                <p class="eyebrow">Mid-Run Draft</p>
+                <h3>Waehle deinen naechsten Boost</h3>
+              </div>
+              <p class="hangar-copy" id="draft-copy">
+                Zwei Upgrades stehen bereit. Eins mitnehmen, dann startet direkt der naechste Sektor.
+              </p>
+            </div>
+            <div class="draft-toolbar">
+              <div class="hangar-stat">
+                <span>Reroll Tokens</span>
+                <strong id="draft-rerolls">0</strong>
+              </div>
+              <button class="loadout-action is-secondary" id="draft-reroll" type="button">
+                Draft neu rollen
+              </button>
+            </div>
+            <div class="draft-list" id="draft-list"></div>
+          </section>
+          <section class="hangar-panel" id="hangar-panel">
+            <div class="hangar-header">
+              <div>
+                <p class="eyebrow">Hangar Deck</p>
+                <h3>Loadout-Auswahl</h3>
+              </div>
+              <p class="hangar-copy">
+                Waehl ein Rig fuer den naechsten Run oder schalte bessere Frames mit
+                geborgenen Salvage-Credits frei.
+              </p>
+            </div>
+            <div class="hangar-summary">
+              <div class="hangar-stat">
+                <span>Salvage Bank</span>
+                <strong id="hangar-salvage">0</strong>
+              </div>
+              <div class="hangar-stat">
+                <span>Letzter Run</span>
+                <strong id="hangar-last-run">Noch keine Bergung.</strong>
+              </div>
+            </div>
+            <div class="loadout-list" id="loadout-list"></div>
+          </section>
+          <button id="overlay-button" type="button">Run starten</button>
+        </div>
+      </section>
+    </div>
+  </body>
+</html>

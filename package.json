@@ -1,6 +1,6 @@
 {
   "name": "lumorix-launcher",
-  "version": "0.7.21",
+  "version": "0.7.22",
   "private": true,
   "type": "module",
   "description": "Local-first Windows desktop game launcher built with Tauri, Rust, React and TypeScript.",
@@ -12,7 +12,8 @@
     "build": "tsc && vite build",
     "tauri:build": "npm run sync-release-info && tauri build",
     "tauri:android:dev": "npm run sync-release-info && tauri android dev",
-    "tauri:android:build": "npm run sync-release-info && tauri android build --config src-tauri/tauri.android.conf.json",
+    "tauri:android:init": "tauri android init --config src-tauri/tauri.android.conf.json",
+    "tauri:android:build": "npm run sync-release-info && npm run tauri:android:init && tauri android build --config src-tauri/tauri.android.conf.json",
     "release:dropdash:android": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/release-dropdash-android.ps1",
     "release:launcher:android": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/release-launcher-android.ps1",
     "clean:project": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/clean-project.ps1",

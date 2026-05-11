@@ -1,0 +1,22 @@
+<svg width="1600" height="900" viewBox="0 0 1600 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1600" height="900" fill="#03060B"/>
+  <rect width="1600" height="900" fill="url(#bg)"/>
+  <ellipse cx="1224" cy="204" rx="265" ry="265" fill="#76F1FF" fill-opacity="0.14"/>
+  <ellipse cx="325" cy="713" rx="321" ry="179" fill="#FF965F" fill-opacity="0.11"/>
+  <path d="M0 710C230 575 463 525 723 541C976 556 1265 670 1600 600V900H0V710Z" fill="#081322"/>
+  <path d="M237 655L411 602L721 423L905 447L1100 362L1322 412" stroke="#7BE4FF" stroke-width="12" stroke-linecap="round"/>
+  <path d="M729 470L810 400L865 414L801 501L729 470Z" fill="#F4F8FF"/>
+  <path d="M670 494L801 501L755 552L644 537L670 494Z" fill="#FF965F"/>
+  <path d="M865 414L963 429L909 483L801 501L865 414Z" fill="#ACA3FF"/>
+  <text x="115" y="146" fill="#7BE4FF" font-family="Arial, sans-serif" font-size="34" letter-spacing="10">NATIVE TAURI ARCADE</text>
+  <text x="115" y="265" fill="#F4F8FF" font-family="Arial, sans-serif" font-size="126" font-weight="700">ORBIT SALVAGER</text>
+  <text x="115" y="347" fill="#D6E6F4" font-family="Arial, sans-serif" font-size="42">Thread a rescue craft through debris lanes, complete shifting sector goals, and charge pulse clears for high-risk combos.</text>
+  <text x="115" y="733" fill="#FFB089" font-family="Arial, sans-serif" font-size="30">Native desktop app now mirrors the standalone Tauri delivery used by the other Lumorix releases.</text>
+  <defs>
+    <linearGradient id="bg" x1="154" y1="73" x2="1374" y2="778" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#13263B"/>
+      <stop offset="0.55" stop-color="#07111B"/>
+      <stop offset="1" stop-color="#02050A"/>
+    </linearGradient>
+  </defs>
+</svg>

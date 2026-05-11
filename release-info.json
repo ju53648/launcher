@@ -1,10 +1,13 @@
 {
-  "version": "0.7.22",
-  "title": "Update 4 - Install Flow and Stability",
-  "date": "2026-05-10",
+  "version": "0.7.23",
+  "title": "Update 5 - Orbit Salvager Native Release & Shop Expansion",
+  "date": "2026-05-11",
   "notes": [
-    "First installs now use the default library directly instead of forcing a location selection.",
-    "Install behavior preference is now consistently honored in Library and Detail install actions.",
-    "Stability and release metadata sync improvements for cleaner updater rollout."
+    "Orbit Salvager promoted from browser prototype to standalone native Tauri desktop app with sector objectives, combo progression, and boss encounters.",
+    "Shop expanded with eight mini-games across multiple genres (puzzle, strategy, arcade, word games) and real 11MB game content.",
+    "PowerShell game scripts now support interactive Windows Forms UI with fixed display modes.",
+    "Install flow improvements: first installs use default library directly, preferences consistently honored across all install actions.",
+    "All embedded games populated with real assets (music, graphics, levels, audio effects) instead of padding.",
+    "Android schema and build infrastructure scaffolded for future mobile releases."
   ]
 }

@@ -1,0 +1,22 @@
+<svg width="1200" height="720" viewBox="0 0 1200 720" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="720" fill="#040912"/>
+  <rect width="1200" height="720" fill="url(#bg)"/>
+  <ellipse cx="883" cy="164" rx="188" ry="188" fill="#76F1FF" fill-opacity="0.14"/>
+  <ellipse cx="284" cy="590" rx="265" ry="160" fill="#FF965F" fill-opacity="0.12"/>
+  <path d="M0 576C180 470 370 424 549 432C728 440 933 512 1200 442V720H0V576Z" fill="#081423"/>
+  <path d="M171 516L307 476L565 330L715 348L885 280L1058 319" stroke="#7BE4FF" stroke-width="10" stroke-linecap="round"/>
+  <path d="M566 368L631 312L672 322L620 392L566 368Z" fill="#F1F7FF"/>
+  <path d="M520 387L620 392L582 432L492 418L520 387Z" fill="#FF965F"/>
+  <path d="M672 322L744 334L700 378L620 392L672 322Z" fill="#A39DFF"/>
+  <text x="84" y="112" fill="#7BE4FF" font-family="Arial, sans-serif" font-size="28" letter-spacing="8">LUMORIX NATIVE RELEASE</text>
+  <text x="84" y="204" fill="#F1F7FF" font-family="Arial, sans-serif" font-size="94" font-weight="700">ORBIT SALVAGER</text>
+  <text x="84" y="272" fill="#D6E6F4" font-family="Arial, sans-serif" font-size="34">3D arcade salvage runner with sector missions, combo risk, and native Tauri delivery.</text>
+  <text x="84" y="598" fill="#FFB089" font-family="Arial, sans-serif" font-size="26">Placeholder media bays stay visible until final GLB/video assets are ready.</text>
+  <defs>
+    <linearGradient id="bg" x1="95" y1="51" x2="1042" y2="652" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#102235"/>
+      <stop offset="0.54" stop-color="#08111B"/>
+      <stop offset="1" stop-color="#03060B"/>
+    </linearGradient>
+  </defs>
+</svg>

@@ -4,7 +4,6 @@
   "identifier": "com.lumorix.dropdash.android",
   "bundle": {
     "active": true,
-    "targets": ["apk"],
     "category": "Game"
   },
   "app": {

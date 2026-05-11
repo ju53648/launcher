@@ -172,6 +172,35 @@ const catalog: ContentManifest[] = [
     ]
   },
   buildMockManifest({
+    id: "com.lumorix.orbit-salvager",
+    slug: "orbit-salvager",
+    name: "Orbit Salvager",
+    version: "0.2.0",
+    description:
+      "A native-first 3D arcade salvage runner with sector goals, pulse clears, combo scoring, visible media placeholders, and temporary boost modes that reshape each run.",
+    releaseDate: "2026-05-11",
+    categories: ["Arcade", "Sci-Fi", "Offline"],
+    tags: [
+      { id: "arcade", weight: 3 },
+      { id: "offline", weight: 3 },
+      { id: "native", weight: 2 },
+      { id: "desktop", weight: 2 }
+    ],
+    executable: "runtime\\OrbitSalvager.exe",
+    installSizeBytes: 8_548_864,
+    defaultInstallFolder: "Orbit Salvager",
+    changelog: [
+      {
+        version: "0.2.0",
+        date: "2026-05-11",
+        items: [
+          "Adds the standalone native Orbit Salvager lane to the mock catalog.",
+          "Mirrors the current sector objectives, Sweepers, boost modifiers, and Tauri packaging milestone."
+        ]
+      }
+    ]
+  }),
+  buildMockManifest({
     id: "com.lumorix.frostline-courier",
     slug: "frostline-courier",
     name: "Frostline Courier",
