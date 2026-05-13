@@ -1,0 +1,19 @@
+{
+    "version":  "0.2.1",
+    "releaseDate":  "2026-05-13",
+    "description":  "A native 3D arcade salvage runner with smoother draft flow, cleaner reroll messaging, and improved overlay usability.",
+    "manifestPath":  "distribution/manifests/games/orbit-salvager.json",
+    "archivePath":  "distribution/games/orbit-salvager/release/orbit-salvager-win64.zip",
+    "archiveUrl":  "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/games/orbit-salvager/release/orbit-salvager-win64.zip",
+    "installSizePath":  "distribution/games/orbit-salvager/release/archive-stage/OrbitSalvager.exe",
+    "catalogPath":  "distribution/manifests/catalog.json",
+    "catalogManifestUrl":  "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/manifests/games/orbit-salvager.json",
+    "setZipInstallStrategy":  true,
+    "zipRootFolder":  ".",
+    "ensureUpdateAction":  true,
+    "changelogItems":  [
+                           "Improved draft choice UX with cleaner reroll and token messaging.",
+                           "Adjusted Enter key handling so overlay actions and pause resume behave more predictably.",
+                           "Improved overlay scrolling behavior for smaller displays and constrained viewports."
+                       ]
+}

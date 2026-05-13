@@ -1,65 +1,93 @@
 {
-  "id": "com.lumorix.orbit-salvager",
-  "itemType": "game",
-  "platform": "desktop",
-  "name": "Orbit Salvager",
-  "version": "0.2.0",
-  "description": "A native 3D arcade salvage runner built as a standalone Tauri desktop app, with sector objectives, pulse clears, combo scoring, visible media placeholders, and temporary boost modes that change how each run plays.",
-  "developer": "Lumorix",
-  "releaseDate": "2026-05-11",
-  "categories": ["Arcade", "Sci-Fi", "Offline"],
-  "tags": [
-    { "id": "arcade", "weight": 3 },
-    { "id": "sci-fi", "weight": 3 },
-    { "id": "native", "weight": 2 },
-    { "id": "desktop", "weight": 2 },
-    { "id": "offline", "weight": 3 }
-  ],
-  "coverImage": "/assets/games/orbit-salvager-cover.svg",
-  "bannerImage": "/assets/games/orbit-salvager-banner.svg",
-  "iconImage": "/assets/games/orbit-salvager-icon.svg",
-  "executable": "OrbitSalvager.exe",
-  "installSizeBytes": 8558592,
-  "defaultInstallFolder": "Orbit Salvager",
-  "distribution": {
-    "channel": "direct",
-    "packageType": "zip"
-  },
-  "supportedActions": [
-    "install",
-    "launch",
-    "update",
-    "repair",
-    "uninstall",
-    "openFolder",
-    "moveInstall"
-  ],
-  "installStrategy": {
-    "kind": "zipArchive",
-    "rootFolder": "."
-  },
-  "download": {
-    "kind": "httpArchive",
-    "url": "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/games/orbit-salvager/release/orbit-salvager-win64.zip",
-    "sha256": "c98a91ad789078501fb27208a868de360f606b5f631f8ed660a265dbc3546af7",
-    "sizeBytes": 2543541
-  },
-  "changelog": [
-    {
-      "version": "0.2.0",
-      "date": "2026-05-11",
-      "items": [
-        "Promoted Orbit Salvager from a browser prototype to a standalone native Tauri desktop app.",
-        "Added sector objectives, combo progression, Sweeper hazard variants, and temporary boost modes.",
-        "Shipped launcher-ready archive packaging, public manifest metadata, and placeholder media bays for future GLB and video content.",
-        "Refined the desktop HUD with a cinematic briefing drawer, pause flow, and stronger Tauri-ready presentation.",
-        "Introduced the Rift Leviathan boss sector with telegraphed lane strikes, pulse-hit windows, and a real signature encounter.",
-        "Added a persistent Hangar Deck with salvage credits, unlockable rigs, and loadout-based run identities.",
-        "Introduced the Signal Eclipse event sector with blackout waves, safe-lane reads, and Anchor-Shard recovery.",
-        "Added a procedural audio director and cinematic sector stingers so encounters feel distinctly different even without final media assets.",
-        "Introduced mid-run draft choices between sectors, turning Orbit Salvager runs into real build-making decisions instead of flat repeats.",
-        "Expanded drafts with rare prototypes, legendary overclocks, and reroll tokens so high-roll runs can branch into much stronger identities."
-      ]
-    }
-  ]
+    "id":  "com.lumorix.orbit-salvager",
+    "itemType":  "game",
+    "platform":  "desktop",
+    "name":  "Orbit Salvager",
+    "version":  "0.2.1",
+    "description":  "A native 3D arcade salvage runner with smoother draft flow, cleaner reroll messaging, and improved overlay usability.",
+    "developer":  "Lumorix",
+    "releaseDate":  "2026-05-13",
+    "categories":  [
+                       "Arcade",
+                       "Sci-Fi",
+                       "Offline"
+                   ],
+    "tags":  [
+                 {
+                     "id":  "arcade",
+                     "weight":  3
+                 },
+                 {
+                     "id":  "sci-fi",
+                     "weight":  3
+                 },
+                 {
+                     "id":  "native",
+                     "weight":  2
+                 },
+                 {
+                     "id":  "desktop",
+                     "weight":  2
+                 },
+                 {
+                     "id":  "offline",
+                     "weight":  3
+                 }
+             ],
+    "coverImage":  "/assets/games/orbit-salvager-cover.svg",
+    "bannerImage":  "/assets/games/orbit-salvager-banner.svg",
+    "iconImage":  "/assets/games/orbit-salvager-icon.svg",
+    "executable":  "OrbitSalvager.exe",
+    "installSizeBytes":  8559104,
+    "defaultInstallFolder":  "Orbit Salvager",
+    "distribution":  {
+                         "channel":  "direct",
+                         "packageType":  "zip"
+                     },
+    "supportedActions":  [
+                             "install",
+                             "launch",
+                             "update",
+                             "repair",
+                             "uninstall",
+                             "openFolder",
+                             "moveInstall"
+                         ],
+    "installStrategy":  {
+                            "kind":  "zipArchive",
+                            "rootFolder":  "."
+                        },
+    "download":  {
+                     "kind":  "httpArchive",
+                     "url":  "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/games/orbit-salvager/release/orbit-salvager-win64.zip",
+                     "sha256":  "2c9466f6d7903847c9f7f586cb0e7c71530f9d8725eedbd446303cee6bc6b50c",
+                     "sizeBytes":  2543486
+                 },
+    "changelog":  [
+                      {
+                          "version":  "0.2.1",
+                          "date":  "2026-05-13",
+                          "items":  [
+                                        "Improved draft choice UX with cleaner reroll and token messaging.",
+                                        "Adjusted Enter key handling so overlay actions and pause resume behave more predictably.",
+                                        "Improved overlay scrolling behavior for smaller displays and constrained viewports."
+                                    ]
+                      },
+                      {
+                          "version":  "0.2.0",
+                          "date":  "2026-05-11",
+                          "items":  [
+                                        "Promoted Orbit Salvager from a browser prototype to a standalone native Tauri desktop app.",
+                                        "Added sector objectives, combo progression, Sweeper hazard variants, and temporary boost modes.",
+                                        "Shipped launcher-ready archive packaging, public manifest metadata, and placeholder media bays for future GLB and video content.",
+                                        "Refined the desktop HUD with a cinematic briefing drawer, pause flow, and stronger Tauri-ready presentation.",
+                                        "Introduced the Rift Leviathan boss sector with telegraphed lane strikes, pulse-hit windows, and a real signature encounter.",
+                                        "Added a persistent Hangar Deck with salvage credits, unlockable rigs, and loadout-based run identities.",
+                                        "Introduced the Signal Eclipse event sector with blackout waves, safe-lane reads, and Anchor-Shard recovery.",
+                                        "Added a procedural audio director and cinematic sector stingers so encounters feel distinctly different even without final media assets.",
+                                        "Introduced mid-run draft choices between sectors, turning Orbit Salvager runs into real build-making decisions instead of flat repeats.",
+                                        "Expanded drafts with rare prototypes, legendary overclocks, and reroll tokens so high-roll runs can branch into much stronger identities."
+                                    ]
+                      }
+                  ]
 }
