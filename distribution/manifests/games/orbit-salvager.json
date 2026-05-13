@@ -3,8 +3,8 @@
     "itemType":  "game",
     "platform":  "desktop",
     "name":  "Orbit Salvager",
-    "version":  "0.2.1",
-    "description":  "A native 3D arcade salvage runner with smoother draft flow, cleaner reroll messaging, and improved overlay usability.",
+    "version":  "0.2.2",
+    "description":  "add tutorial onboarding flow and progress guidance. improved draft and reroll copy clarity. overlay and Enter-key interaction polish for pause/idle/over states",
     "developer":  "Lumorix",
     "releaseDate":  "2026-05-13",
     "categories":  [
@@ -38,7 +38,7 @@
     "bannerImage":  "/assets/games/orbit-salvager-banner.svg",
     "iconImage":  "/assets/games/orbit-salvager-icon.svg",
     "executable":  "OrbitSalvager.exe",
-    "installSizeBytes":  8559104,
+    "installSizeBytes":  8560640,
     "defaultInstallFolder":  "Orbit Salvager",
     "distribution":  {
                          "channel":  "direct",
@@ -60,10 +60,19 @@
     "download":  {
                      "kind":  "httpArchive",
                      "url":  "https://raw.githubusercontent.com/ju53648/launcher/main/distribution/games/orbit-salvager/release/orbit-salvager-win64.zip",
-                     "sha256":  "2c9466f6d7903847c9f7f586cb0e7c71530f9d8725eedbd446303cee6bc6b50c",
-                     "sizeBytes":  2543486
+                     "sha256":  "6b298965af804746012bcc7068200580240f0d428c92dacf304204c9bac103c8",
+                     "sizeBytes":  2544454
                  },
     "changelog":  [
+                      {
+                          "version":  "0.2.2",
+                          "date":  "2026-05-13",
+                          "items":  [
+                                        "add tutorial onboarding flow and progress guidance",
+                                        "improved draft and reroll copy clarity",
+                                        "overlay and Enter-key interaction polish for pause/idle/over states"
+                                    ]
+                      },
                       {
                           "version":  "0.2.1",
                           "date":  "2026-05-13",

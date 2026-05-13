@@ -100,6 +100,7 @@ interface PlayerProfile {
   unlockedLoadoutIds: string[];
   selectedLoadoutId: string;
   lastRunReport: string;
+  tutorialCompleted: boolean;
 }
 
 interface GameState {
@@ -140,6 +141,12 @@ interface GameState {
   bonusMagnetDuration: number;
   bonusOverdriveDuration: number;
   draftRerolls: number;
+  tutorialActive: boolean;
+  tutorialDismissed: boolean;
+  tutorialMoved: boolean;
+  tutorialCollected: boolean;
+  tutorialPulsed: boolean;
+  tutorialCompletionTimer: number;
 }
 
 const sectors: SectorConfig[] = [
@@ -371,6 +378,13 @@ const hangarLastRunEl = document.getElementById("hangar-last-run") as HTMLElemen
 const loadoutListEl = document.getElementById("loadout-list") as HTMLElement;
 const draftListEl = document.getElementById("draft-list") as HTMLElement;
 const draftRerollButton = document.getElementById("draft-reroll") as HTMLButtonElement;
+const tutorialPanelEl = document.getElementById("tutorial-panel") as HTMLElement;
+const tutorialTitleEl = document.getElementById("tutorial-title") as HTMLElement;
+const tutorialBodyEl = document.getElementById("tutorial-body") as HTMLElement;
+const tutorialButtonEl = document.getElementById("tutorial-button") as HTMLButtonElement;
+const tutorialStepMoveEl = document.getElementById("tutorial-step-move") as HTMLElement;
+const tutorialStepCollectEl = document.getElementById("tutorial-step-collect") as HTMLElement;
+const tutorialStepPulseEl = document.getElementById("tutorial-step-pulse") as HTMLElement;
 
 const lanePositions = [-4.4, 0, 4.4];
 const playerZ = 3.2;
@@ -454,7 +468,13 @@ const state: GameState = {
   bonusScoreMultiplier: 1,
   bonusMagnetDuration: 0,
   bonusOverdriveDuration: 0,
-  draftRerolls: 1
+  draftRerolls: 1,
+  tutorialActive: !profile.tutorialCompleted,
+  tutorialDismissed: false,
+  tutorialMoved: false,
+  tutorialCollected: false,
+  tutorialPulsed: false,
+  tutorialCompletionTimer: 0
 };
 
 bestEl.textContent = String(state.best);
@@ -474,6 +494,7 @@ loadoutListEl.addEventListener("click", onLoadoutListClick);
 draftListEl.addEventListener("click", onDraftListClick);
 draftRerollButton.addEventListener("click", () => rerollDraftChoices());
 soundToggleEl.addEventListener("click", () => toggleAudioMute());
+tutorialButtonEl.addEventListener("click", () => dismissTutorial());
 
 renderLoadoutDock();
 syncProfileHud();
@@ -567,12 +588,6 @@ function buildPlayer() {
     playerGroup.add(wing);
   }
 
-  const placeholderPlate = createTextPlate("3D HERO ASSET SLOT", "Later: detailed ship GLB");
-  placeholderPlate.scale.setScalar(0.72);
-  placeholderPlate.position.set(0, 2.1, -1.4);
-  placeholderPlate.lookAt(new THREE.Vector3(0, 1.7, 8));
-  playerGroup.add(placeholderPlate);
-
   playerGroup.position.set(0, 0.45, playerZ);
   scene.add(playerGroup);
 }
@@ -596,13 +611,21 @@ function addBackgroundStars() {
 
 function addPlaceholderBillboards() {
   const leftVideo = createTextPlate("VIDEO PLACEHOLDER", "Later: intro loop / trailer wall");
-  leftVideo.position.set(-10.4, 4.2, -20);
-  leftVideo.rotation.y = 0.48;
+  leftVideo.position.set(-14.2, 5.8, -38);
+  leftVideo.rotation.y = 0.34;
+  leftVideo.scale.setScalar(0.74);
+  if (leftVideo.material instanceof THREE.MeshBasicMaterial) {
+    leftVideo.material.opacity = 0.42;
+  }
   scene.add(leftVideo);
 
   const rightEvent = createTextPlate("FX PLACEHOLDER", "Later: beacon burst or cutscene cue");
-  rightEvent.position.set(10.6, 3.4, -34);
-  rightEvent.rotation.y = -0.5;
+  rightEvent.position.set(14.6, 4.8, -46);
+  rightEvent.rotation.y = -0.38;
+  rightEvent.scale.setScalar(0.66);
+  if (rightEvent.material instanceof THREE.MeshBasicMaterial) {
+    rightEvent.material.opacity = 0.34;
+  }
   scene.add(rightEvent);
 }
 
@@ -779,6 +802,100 @@ function renderDraftChoices() {
     .join("");
 }
 
+function isTutorialComplete() {
+  return state.tutorialMoved && state.tutorialCollected && state.tutorialPulsed;
+}
+
+function syncTutorialHud() {
+  const visible =
+    state.tutorialActive &&
+    !state.tutorialDismissed &&
+    (state.mode === "running" || state.mode === "paused");
+  tutorialPanelEl.classList.toggle("is-hidden", !visible);
+  appShell.dataset.tutorial = visible ? "visible" : "hidden";
+
+  tutorialStepMoveEl.classList.toggle("is-done", state.tutorialMoved);
+  tutorialStepCollectEl.classList.toggle("is-done", state.tutorialCollected);
+  tutorialStepPulseEl.classList.toggle("is-done", state.tutorialPulsed);
+
+  if (!visible) {
+    return;
+  }
+
+  if (isTutorialComplete()) {
+    tutorialTitleEl.textContent = "Flight Check komplett";
+    tutorialBodyEl.textContent =
+      "Spurwechsel, Bergung und Pulse sitzen. Ab hier kannst du den Run ganz normal spielen.";
+    tutorialButtonEl.textContent = "Verstanden";
+    return;
+  }
+
+  tutorialButtonEl.textContent = "Spaeter";
+
+  if (!state.tutorialMoved) {
+    tutorialTitleEl.textContent = "Wechsle einmal die Spur";
+    tutorialBodyEl.textContent =
+      "Tippe A / D oder die Pfeiltasten, damit dein Rig einmal sauber die Lane wechselt.";
+    return;
+  }
+
+  if (!state.tutorialCollected) {
+    tutorialTitleEl.textContent = "Berg den ersten Signal-Kern";
+    tutorialBodyEl.textContent =
+      "Fliege in einen blauen Kern, um Score, Pulse-Ladung und Flow aufzubauen.";
+    return;
+  }
+
+  tutorialTitleEl.textContent = "Nutze jetzt deinen Pulse";
+  tutorialBodyEl.textContent =
+    "Druecke Leertaste, wenn ein Hindernis vor dir liegt. Der Pulse ghostet nahe Gefahren kurz aus.";
+}
+
+function markTutorialProgress(step: "move" | "collect" | "pulse") {
+  if (!state.tutorialActive) {
+    return;
+  }
+
+  if (step === "move") {
+    state.tutorialMoved = true;
+  } else if (step === "collect") {
+    state.tutorialCollected = true;
+  } else {
+    state.tutorialPulsed = true;
+  }
+
+  if (isTutorialComplete() && !profile.tutorialCompleted) {
+    profile.tutorialCompleted = true;
+    saveProfile(profile);
+    state.tutorialCompletionTimer = 4.2;
+    hintEl.textContent = "Flight Check abgeschlossen. Du bist frei fuer den vollen Salvage-Run.";
+    showToast("Flight Check abgeschlossen.");
+  }
+
+  syncTutorialHud();
+}
+
+function dismissTutorial() {
+  if (isTutorialComplete()) {
+    state.tutorialActive = false;
+  }
+  state.tutorialDismissed = true;
+  syncTutorialHud();
+}
+
+function syncDraftCopy(mode: "default" | "rerolled") {
+  if (mode === "rerolled") {
+    draftCopyEl.textContent =
+      "Reroll eingeloest. Diese Auswahl ist auf seltene oder legendaere Overclocks zugespitzt.";
+    return;
+  }
+
+  draftCopyEl.textContent =
+    state.draftRerolls > 0
+      ? `Zwei Upgrades stehen bereit. Du hast noch ${state.draftRerolls} Reroll-Token fuer seltene oder legendaere Overclocks.`
+      : "Zwei Upgrades stehen bereit. Eins mitnehmen, dann startet direkt der naechste Sektor.";
+}
+
 function buildDraftChoices(forceHighRoll = false) {
   const available = augments.filter((augment) => !state.activeAugmentIds.includes(augment.id));
   const choices: string[] = [];
@@ -865,10 +982,7 @@ function openDraftChoice() {
     resumeRun();
     return;
   }
-  draftCopyEl.textContent =
-    state.draftRerolls > 0
-      ? `Zwei Upgrades stehen bereit. Du hast noch ${state.draftRerolls} Reroll-Token fuer seltene oder legendäre Overclocks.`
-      : "Zwei Upgrades stehen bereit. Eins mitnehmen, dann startet direkt der naechste Sektor.";
+  syncDraftCopy("default");
   renderDraftChoices();
   showCinematicBanner("Salvage Draft", "Upgrade waehlen", "Dieser Run bekommt jetzt einen klaren Build-Pfad.", 4.4);
   playAudioCue("sector");
@@ -944,8 +1058,7 @@ function rerollDraftChoices() {
 
   state.draftRerolls -= 1;
   state.draftChoices = buildDraftChoices(true);
-  draftCopyEl.textContent =
-    "Reroll eingeloest. Diese Auswahl ist auf seltene oder legendäre Overclocks zugespitzt.";
+  syncDraftCopy("rerolled");
   renderDraftChoices();
   showToast("Draft neu gerollt.");
   playAudioCue("sector");
@@ -1705,6 +1818,12 @@ function resetGame(startImmediately: boolean) {
   state.bonusMagnetDuration = 0;
   state.bonusOverdriveDuration = 0;
   state.draftRerolls = 1;
+  state.tutorialActive = !profile.tutorialCompleted;
+  state.tutorialDismissed = false;
+  state.tutorialMoved = false;
+  state.tutorialCollected = false;
+  state.tutorialPulsed = false;
+  state.tutorialCompletionTimer = 0;
   toastTimer = 0;
   cinematicTimer = 0;
   toastEl.classList.add("is-hidden");
@@ -1717,11 +1836,14 @@ function resetGame(startImmediately: boolean) {
   setSector(0, startImmediately);
   syncHud();
   syncSectorHud();
+  syncTutorialHud();
 
   if (startImmediately) {
     unlockAudio();
     hintEl.textContent =
-      "Halte die Linie sauber. B oeffnet das Briefing, Esc pausiert den Run.";
+      state.tutorialActive
+        ? "Flight Check live: erst Spur wechseln, dann einen Kern bergen und danach den Pulse testen."
+        : "Halte die Linie sauber. B oeffnet das Briefing, Esc pausiert den Run.";
     resumeRun();
     return;
   }
@@ -1729,10 +1851,14 @@ function resetGame(startImmediately: boolean) {
   hintEl.textContent =
     "A / D oder Pfeile bewegen, Leertaste aktiviert den Signal-Pulse, B zeigt das Briefing, Esc pausiert.";
   showOverlay(
-    "Salvage Run Initialisieren",
-    `Orbit Salvager ist jetzt klar als Desktop-Arcade-App mit persistentem Hangar-Deck aufgezogen. Aktives Rig: ${activeLoadout.title}.`,
-    "Run starten",
-    "Waehle unten dein Loadout, investiere Salvage in neue Frames und nimm das beste Rig in den naechsten Run mit.",
+    profile.tutorialCompleted ? "Salvage Run Initialisieren" : "Flight Check vorbereiten",
+    profile.tutorialCompleted
+      ? `Orbit Salvager ist jetzt klar als Desktop-Arcade-App mit persistentem Hangar-Deck aufgezogen. Aktives Rig: ${activeLoadout.title}.`
+      : `Aktives Rig: ${activeLoadout.title}. Wir gehen im ersten Run nur drei Dinge sauber durch: Spurwechsel, Bergung und Pulse.`,
+    profile.tutorialCompleted ? "Run starten" : "Tutorial-Run starten",
+    profile.tutorialCompleted
+      ? "Waehle unten dein Loadout, investiere Salvage in neue Frames und nimm das beste Rig in den naechsten Run mit."
+      : "Der Flight Check bleibt waehrend des ersten Runs als kleine Guide-Karte sichtbar und verschwindet nach den ersten Kernaktionen wieder.",
     () => resetGame(true),
     "hangar"
   );
@@ -1837,6 +1963,7 @@ function resumeRun() {
   keys.clear();
   state.mode = "running";
   syncHud();
+  syncTutorialHud();
   hideOverlay();
   clock.getDelta();
 }
@@ -1872,6 +1999,7 @@ function animate() {
 
 function updateGame(delta: number) {
   const activeLoadout = getActiveLoadout();
+  const previousLaneIndex = state.laneIndex;
   if (keys.has("arrowleft") || keys.has("a")) {
     state.laneIndex = Math.max(0, state.laneIndex - 1);
     keys.delete("arrowleft");
@@ -1881,6 +2009,9 @@ function updateGame(delta: number) {
     state.laneIndex = Math.min(lanePositions.length - 1, state.laneIndex + 1);
     keys.delete("arrowright");
     keys.delete("d");
+  }
+  if (state.laneIndex !== previousLaneIndex) {
+    markTutorialProgress("move");
   }
 
   const sector = getCurrentSector();
@@ -1930,9 +2061,16 @@ function updateGame(delta: number) {
   state.comboTimer = Math.max(0, state.comboTimer - delta);
   state.sectorTimer -= delta;
   toastTimer = Math.max(0, toastTimer - delta);
+  state.tutorialCompletionTimer = Math.max(0, state.tutorialCompletionTimer - delta);
 
   if (toastTimer === 0) {
     toastEl.classList.add("is-hidden");
+  }
+
+  if (state.tutorialActive && isTutorialComplete() && state.tutorialCompletionTimer === 0) {
+    state.tutorialActive = false;
+    state.tutorialDismissed = true;
+    syncTutorialHud();
   }
 
   if (state.comboTimer <= 0 && state.combo > 0) {
@@ -2070,6 +2208,7 @@ function updateEntities(collection: Entity[], delta: number, travelSpeed: number
 
 function handlePickupCollision(entity: Entity) {
   const scoreMultiplier = getActiveLoadout().scoreMultiplier;
+  markTutorialProgress("collect");
   state.combo = state.comboTimer > 0 ? state.combo + 1 : 1;
   state.comboTimer = 4;
   state.maxCombo = Math.max(state.maxCombo, state.combo);
@@ -2209,6 +2348,7 @@ function triggerPulse() {
     return;
   }
 
+  markTutorialProgress("pulse");
   state.pulseCharge = 0;
   state.pulseCooldown =
     4 * getActiveLoadout().pulseCooldownMultiplier * state.bonusPulseCooldownMultiplier;
@@ -2247,6 +2387,7 @@ function syncHud() {
   appShell.dataset.threat =
     state.integrity <= 1 ? "critical" : state.integrity === 2 ? "warning" : "stable";
   appShell.dataset.mode = state.mode;
+  syncTutorialHud();
 }
 
 function syncSectorHud() {
@@ -2407,8 +2548,17 @@ function onKeyDown(event: KeyboardEvent) {
 
   if (key === "enter") {
     event.preventDefault();
-    if (state.mode !== "running") {
-      resetGame(true);
+    if (state.mode === "paused") {
+      resumeRun();
+      return;
+    }
+
+    if (state.mode === "idle" || state.mode === "over") {
+      if (overlayAction && !overlayButton.disabled) {
+        overlayAction();
+      } else {
+        resetGame(true);
+      }
     }
     return;
   }
@@ -2428,7 +2578,8 @@ function readProfile(): PlayerProfile {
         salvage: 0,
         unlockedLoadoutIds: [loadouts[0].id],
         selectedLoadoutId: loadouts[0].id,
-        lastRunReport: "Noch keine Bergung."
+        lastRunReport: "Noch keine Bergung.",
+        tutorialCompleted: false
       };
     }
 
@@ -2449,14 +2600,16 @@ function readProfile(): PlayerProfile {
       lastRunReport:
         typeof parsed.lastRunReport === "string" && parsed.lastRunReport.length > 0
           ? parsed.lastRunReport
-          : "Noch keine Bergung."
+          : "Noch keine Bergung.",
+      tutorialCompleted: parsed.tutorialCompleted === true
     };
   } catch {
     return {
       salvage: 0,
       unlockedLoadoutIds: [loadouts[0].id],
       selectedLoadoutId: loadouts[0].id,
-      lastRunReport: "Noch keine Bergung."
+      lastRunReport: "Noch keine Bergung.",
+      tutorialCompleted: false
     };
   }
 }
